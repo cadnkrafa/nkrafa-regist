@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Registration</title>
+  <style>
+    .qr-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .qr-code {
+      width: 250px;
+      height: 250px;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">ลงทะเบียนข้าราชการ</h1>
+  <div class="qr-container">
+    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code">
+  </div>
+
+  <script>
+    // ฟังก์ชันเพื่อดึงข้อมูลและแสดง QR Code ใหม่ทุก 10 วินาที
+    function fetchQRCode() {
+      // URL สำหรับ Apps Script ที่จะสร้าง QR Code
+      const scriptUrl = "https://script.google.com/macros/s/AKfycbxe1283Nvfe3HeRzriXbySX5WfcnA4uf-fY_o_8NcnrLNXMQPaushL9SkMtywk-fOCn4g/exec"; // เปลี่ยนเป็น URL ของ Apps Script
+
+      fetch(scriptUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.qrCodeUrl) {
+            document.getElementById("qrCodeImage").src = data.qrCodeUrl;
+          }
+        })
+        .catch(error => console.error("Error fetching QR Code: ", error));
+    }
+
+    // เรียกใช้งาน fetchQRCode ทุก 10 วินาที
+    setInterval(fetchQRCode, 10000);  // 10000ms = 10 วินาที
+
+    // เรียกใช้งานครั้งแรกเมื่อโหลดหน้า
+    fetchQRCode();
+  </script>
+</body>
+</html>
