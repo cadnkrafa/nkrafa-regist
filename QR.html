@@ -7,7 +7,6 @@
    <style>
      .qr-container {
        text-align: center;
-       margin-top: 20px;
        margin-top: 30px;
      }
      .qr-code {
@@ -22,7 +21,6 @@
    </style>
  </head>
  <body>
-   <h1 style="text-align: center;">QR Code สำหรับลงทะเบียน</h1>
    <h1 style="text-align: center;">ลงทะเบียนข้าราชการ</h1>
    <div class="qr-container">
      <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
@@ -31,10 +29,6 @@
  
    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
    <script>
-     function getQueryParam(param) {
-       const urlParams = new URLSearchParams(window.location.search);
-       return urlParams.get(param);
-     }
      const liffId = "2007226288-k77xbmX7"; // 👈 ใส่ LIFF ID ที่คุณสร้างไว้
  
      liff.init({ liffId }).then(() => {
@@ -43,7 +37,6 @@
          return;
        }
  
-     const userId = getQueryParam("userId");
        return liff.getProfile();
      }).then(profile => {
        const userId = profile.userId;
@@ -52,34 +45,46 @@
      }).catch(err => {
        console.error("❌ LIFF error:", err);
        document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้";
-     });
+     });.
+  // ฟังก์ชันดึงค่าจาก query string
+   function getQueryParam(param) {
+     const urlParams = new URLSearchParams(window.location.search);
+     return urlParams.get(param);
+   }
+ const userId = getQueryParam("userId");
  
-     function fetchQRCode(userId) {
-       const scriptUrl = `https://script.google.com/macros/s/AKfycbxT4YBr2MBhoTZc0ogk1FCmnHy2HGkDuyw-fTv7roVQrD1zlDNAU0nhNtbwBdMPrG4Ckg/exec?userId=${encodeURIComponent(userId)}`; // 👈 เปลี่ยนเป็น URL Google Apps Script ของคุณ
- 
+   // ฟังก์ชันที่จะรีเฟรช QR Code ทุก 10 วินาที
+   function refreshQRCode() {
      if (userId) {
-       const scriptUrl = `https://script.google.com/macros/s/AKfycbxT4YBr2MBhoTZc0ogk1FCmnHy2HGkDuyw-fTv7roVQrD1zlDNAU0nhNtbwBdMPrG4Ckg/exec?userId=${encodeURIComponent(userId)}`;
-       
-       fetch(scriptUrl)
-         .then(response => response.json())
-         .then(res => res.json())
-         .then(data => {
-           if (data.qrCodeUrl) {
-             document.getElementById("qrCodeImage").src = data.qrCodeUrl;
-           } else {
-             document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
-           }
-         })
-         .catch(error => {
-           console.error("Error fetching QR Code: ", error);
-           document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-         .catch(err => {
-           console.error("❌ Fetch error:", err);
-           document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์";
-         });
+       fetchQRCode(userId);
      } else {
        document.getElementById("errorMessage").innerText = "ไม่พบ userId ใน URL";
      }
+   }
+ 
+   function fetchQRCode(userId) {
+     const scriptUrl = `https://script.google.com/macros/s/AKfycbxT4YBr2MBhoTZc0ogk1FCmnHy2HGkDuyw-fTv7roVQrD1zlDNAU0nhNtbwBdMPrG4Ckg/exec?userId=${encodeURIComponent(userId)}`;
+ 
+     fetch(scriptUrl)
+       .then(response => response.json())
+       .then(data => {
+         if (data.qrCodeUrl) {
+           document.getElementById("qrCodeImage").src = data.qrCodeUrl;
+         } else {
+           document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
+         }
+       })
+       .catch(error => {
+         console.error("Error fetching QR Code: ", error);
+         document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+       });
+   }
+ 
+   // รีเฟรช QR Code ทุก 10 วินาที
+   setInterval(refreshQRCode, 10000); // 10,000 ms = 10 วินาที
+ 
+   // เรียกใช้ครั้งแรก
+   refreshQRCode();
    </script>
  </body>
  </html>
