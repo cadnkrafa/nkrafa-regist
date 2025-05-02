@@ -24,8 +24,8 @@
   <script>
     // ฟังก์ชันเพื่อดึงข้อมูลและแสดง QR Code ใหม่ทุก 10 วินาที
     function fetchQRCode() {
-      // URL สำหรับ Apps Script ที่จะสร้าง QR Code
-      const scriptUrl = "https://script.google.com/macros/s/AKfycbxpEQFYUjMfftvx2ShtQZ4YVsyvWmXh_WElityNOMyXdwpaofn8ArLFcSXodYRCyr4qUA/exec"; // เปลี่ยนเป็น URL ของ Apps Script
+      const userId = "LINE_USER_ID"; // แทนที่ด้วย LINE User ID ที่ต้องการ
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbx8dKUhl150Fkk25htNlKLppQvThnudUjmk8sZZUlQ3S-WNlOTI2FddpWGrsbdDvx5KwA/exec?userId=${userId}`; // ส่ง userId ไปที่ Apps Script
 
       fetch(scriptUrl)
         .then(response => response.json())
@@ -45,3 +45,4 @@
   </script>
 </body>
 </html>
+
