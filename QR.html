@@ -13,55 +13,51 @@
       width: 250px;
       height: 250px;
     }
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h1 style="text-align: center;">ลงทะเบียนข้าราชการ</h1>
   <div class="qr-container">
-    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code">
+    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
+    <div id="errorMessage" class="error"></div>
   </div>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // เริ่มต้น LIFF
-    liff.init({ liffId: "2007226288-k77xbmX7" })
-      .then(() => {
-        // ตรวจสอบสถานะการล็อกอิน
-        if (liff.isLoggedIn()) {
-          // ดึง LINE userId
-          liff.getUserProfile().then(profile => {
-            const userId = profile.userId;
-            console.log('User ID:', userId); // ตรวจสอบว่าได้ userId หรือไม่
-            // ส่ง userId ไปยัง Apps Script เพื่อดึงข้อมูล QR Code
-            fetchQRCode(userId);
-          }).catch(err => console.error("Error getting user profile: ", err));
-        } else {
-          liff.login();
-        }
-      })
-      .catch((err) => console.error("LIFF Initialization failed: ", err));
+    // ฟังก์ชันดึงค่าจาก query string
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
-    // ฟังก์ชันเพื่อดึง QR Code จาก Apps Script
+    const userId = getQueryParam("userId");
+
+    if (userId) {
+      fetchQRCode(userId);
+    } else {
+      document.getElementById("errorMessage").innerText = "ไม่พบ userId ใน URL";
+    }
+
     function fetchQRCode(userId) {
-      if (!userId) {
-        console.error("User ID is missing");
-        return;
-      }
-
-      // URL ของ Apps Script ที่จะดึงข้อมูล
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbzGu6nS8Iq5VgV_9QGUA-_wS5qTu8BVNG5BEgccpik2cFqJBLSR4_YApb7hyi7QPkBx0Q/exec?userId=${userId}`;
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbyJMbURpBIIew7gWjf5HNa-IckPFwDcCIaEQhYJv5142eAG-lMXxTeGFQIKT1cLLboMmg/exec?userId=${encodeURIComponent(userId)}`;
 
       fetch(scriptUrl)
         .then(response => response.json())
         .then(data => {
           if (data.qrCodeUrl) {
-            console.log('QR Code URL:', data.qrCodeUrl); // ตรวจสอบว่าได้ URL หรือไม่
-            document.getElementById("qrCodeImage").src = data.qrCodeUrl; // ใส่ URL ลงใน src ของ <img>
+            document.getElementById("qrCodeImage").src = data.qrCodeUrl;
           } else {
-            console.error("No qrCodeUrl returned or invalid response");
+            document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
           }
         })
-        .catch(error => console.error("Error fetching QR Code: ", error));
+        .catch(error => {
+          console.error("Error fetching QR Code: ", error);
+          document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+        });
     }
   </script>
 </body>
