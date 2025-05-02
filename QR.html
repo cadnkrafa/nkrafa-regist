@@ -41,7 +41,7 @@
 
     // ฟังก์ชันเพื่อดึง QR Code จาก Apps Script
     function fetchQRCode(userId) {
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbx8dKUhl150Fkk25htNlKLppQvThnudUjmk8sZZUlQ3S-WNlOTI2FddpWGrsbdDvx5KwA/exec?userId=${userId}`;
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbwjIxOu-Rzf5BdopgL6zL1fOeBqhp70uT17eVuOJYWp2M1_Vo6Wf23PFVoNx0gsDrcoGw/exec?userId=${userId}`;
 
       fetch(scriptUrl)
         .then(response => response.json())
@@ -57,3 +57,4 @@
   </script>
 </body>
 </html>
+
