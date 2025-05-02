@@ -1,105 +1,161 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Registration</title>
-  <style>
-    .qr-container {
-      text-align: center;
-      margin-top: 30px;
-    }
-    .qr-code {
-      width: 250px;
-      height: 250px;
-    }
-    .countdown {
-      font-size: 1.2em;
-      color: #333;
-      margin-top: 10px;
-    }
-    .error {
-      color: red;
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <h1 style="text-align: center;">ลงทะเบียนข้าราชการ</h1>
-  <div class="qr-container">
-    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
-    <div id="countdown" class="countdown"></div>
-    <div id="errorMessage" class="error"></div>
-  </div>
-
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="config.js"></script>
-  <script>
-    const liffId = "2007226288-k77xbmX7"; // 👈 เปลี่ยนเป็น LIFF ID ของคุณ
-    let userId = null;
-    let countdownSeconds = 15;
-    let countdownInterval;
-
-    liff.init({ liffId }).then(() => {
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-      return liff.getProfile();
-    }).then(profile => {
-      userId = profile.userId;
-      console.log("✅ LINE userId:", userId);
-      fetchQRCode(userId);
-      startCountdown();
-
-      // รีเฟรช QR และรีเซ็ต countdown ทุก 15 วินาที
-      setInterval(() => {
-        fetchQRCode(userId);
-        resetCountdown();
-      }, 15000);
-    }).catch(err => {
-      console.error("❌ LIFF error:", err);
-      document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้";
-    });
-
-function fetchQRCode(userId) {
-  fetch(SCRIPT_URL + `?userId=${encodeURIComponent(userId)}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.qrCodeUrl) {
-        document.getElementById("qrCodeImage").src = data.qrCodeUrl;
-        document.getElementById("errorMessage").innerText = "";
-      } else {
-        document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
-      }
-    })
-    .catch(error => {
-      console.error("Error fetching QR Code: ", error);
-      document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-    });
-}
-
-    function startCountdown() {
-      countdownSeconds = 15;
-      updateCountdown();
-      countdownInterval = setInterval(() => {
-        countdownSeconds--;
-        updateCountdown();
-        if (countdownSeconds <= 0) {
-          countdownSeconds = 0;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
         }
-      }, 1000);
-    }
 
-    function resetCountdown() {
-      clearInterval(countdownInterval);
-      startCountdown();
-    }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
 
-    function updateCountdown() {
-      document.getElementById("countdown").innerText = `QR นี้จะหมดอายุใน ${countdownSeconds} วินาที`;
-    }
-  </script>
+        .qr-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .qr-code {
+            width: 100%;
+            max-width: 250px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .countdown {
+            font-size: 1.2em;
+            color: #333;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .error {
+            color: red;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .qr-container .loading {
+            font-size: 1.2em;
+            color: #ff6600;
+            font-weight: bold;
+        }
+
+        .qr-container .title {
+            color: #0073e6;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="qr-container">
+        <h1>ลงทะเบียนเข้าร่วมงาน</h1>
+        <div class="title">กรุณาสแกน QR Code ด้านล่างเพื่อทำการลงทะเบียน</div>
+        <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
+        <div id="countdown" class="countdown"></div>
+        <div id="errorMessage" class="error"></div>
+        <div id="loadingMessage" class="loading">กำลังโหลด...</div>
+    </div>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="config.js"></script>
+    <script>
+        const liffId = "2007226288-k77xbmX7"; // 👈 เปลี่ยนเป็น LIFF ID ของคุณ
+        let userId = null;
+        let countdownSeconds = 20;
+        let countdownInterval;
+
+        liff.init({ liffId }).then(() => {
+            if (!liff.isLoggedIn()) {
+                liff.login();
+                return;
+            }
+            return liff.getProfile();
+        }).then(profile => {
+            userId = profile.userId;
+            console.log("✅ LINE userId:", userId);
+            fetchQRCode(userId);
+            startCountdown();
+
+            // รีเฟรช QR และรีเซ็ต countdown ทุก 20 วินาที
+            setInterval(() => {
+                fetchQRCode(userId);
+                resetCountdown();
+            }, 20000);
+        }).catch(err => {
+            console.error("❌ LIFF error:", err);
+            document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้";
+        });
+
+        function fetchQRCode(userId) {
+            document.getElementById("loadingMessage").style.display = "block"; // Show loading message
+            fetch(SCRIPT_URL + `?userId=${encodeURIComponent(userId)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("loadingMessage").style.display = "none"; // Hide loading message
+                    if (data.qrCodeUrl) {
+                        document.getElementById("qrCodeImage").src = data.qrCodeUrl;
+                        document.getElementById("errorMessage").innerText = "";
+                    } else {
+                        document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching QR Code: ", error);
+                    document.getElementById("loadingMessage").style.display = "none"; // Hide loading message
+                    document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+                });
+        }
+
+        function startCountdown() {
+            countdownSeconds = 20;
+            updateCountdown();
+            countdownInterval = setInterval(() => {
+                countdownSeconds--;
+                updateCountdown();
+                if (countdownSeconds <= 0) {
+                    countdownSeconds = 0;
+                }
+            }, 1000);
+        }
+
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            startCountdown();
+        }
+
+        function updateCountdown() {
+            document.getElementById("countdown").innerText = `QR นี้จะหมดอายุใน ${countdownSeconds} วินาที`;
+        }
+    </script>
 </body>
+
 </html>
+
