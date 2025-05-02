@@ -63,7 +63,7 @@
     });
 
     function fetchQRCode(userId) {
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbytZ8er_rqoyAABn8Q4PmCt2OScoJUCRBDuXQlw1KSXCUa5DkAaNdLCFbmKYDKTrXTWIw/exec?userId=${encodeURIComponent(userId)}`;
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbzalGvFEc7mIi3TlVCpvE9evGnCrBcfB5Vp5EcBoxXU1xLm4f27joxtfeTaPwVBsowS_w/exec?userId=${encodeURIComponent(userId)}`;
 
       fetch(scriptUrl)
         .then(response => response.json())
