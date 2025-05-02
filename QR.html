@@ -55,10 +55,10 @@
      });
  
      function fetchQRCode(userId) {
-       const scriptUrl = `https://script.google.com/macros/s/AKfycbynHlkywX1mfmrbVd9VHjTeBHWCVTlJjdrXPLJF7XMfNgel4W5_r55vLICzA5H1NUMXnA/exec?userId=${encodeURIComponent(userId)}`; // 👈 เปลี่ยนเป็น URL Google Apps Script ของคุณ
+       const scriptUrl = `https://script.google.com/macros/s/AKfycbxT4YBr2MBhoTZc0ogk1FCmnHy2HGkDuyw-fTv7roVQrD1zlDNAU0nhNtbwBdMPrG4Ckg/exec?userId=${encodeURIComponent(userId)}`; // 👈 เปลี่ยนเป็น URL Google Apps Script ของคุณ
  
      if (userId) {
-       const scriptUrl = `https://script.google.com/macros/s/AKfycbyJMbURpBIIew7gWjf5HNa-IckPFwDcCIaEQhYJv5142eAG-lMXxTeGFQIKT1cLLboMmg/exec?userId=${encodeURIComponent(userId)}`;
+       const scriptUrl = `https://script.google.com/macros/s/AKfycbxT4YBr2MBhoTZc0ogk1FCmnHy2HGkDuyw-fTv7roVQrD1zlDNAU0nhNtbwBdMPrG4Ckg/exec?userId=${encodeURIComponent(userId)}`;
        
        fetch(scriptUrl)
          .then(response => response.json())
