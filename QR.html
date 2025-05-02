@@ -21,14 +21,13 @@
   </style>
 </head>
 <body>
-  <h1 style="text-align: center;">ลงทะเบียนข้าราชการ</h1>
+  <h1 style="text-align: center;">QR Code สำหรับลงทะเบียน</h1>
   <div class="qr-container">
     <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
     <div id="errorMessage" class="error"></div>
   </div>
 
   <script>
-    // ฟังก์ชันดึงค่าจาก query string
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -37,14 +36,8 @@
     const userId = getQueryParam("userId");
 
     if (userId) {
-      fetchQRCode(userId);
-    } else {
-      document.getElementById("errorMessage").innerText = "ไม่พบ userId ใน URL";
-    }
-
-    function fetchQRCode(userId) {
       const scriptUrl = `https://script.google.com/macros/s/AKfycbyJMbURpBIIew7gWjf5HNa-IckPFwDcCIaEQhYJv5142eAG-lMXxTeGFQIKT1cLLboMmg/exec?userId=${encodeURIComponent(userId)}`;
-
+      
       fetch(scriptUrl)
         .then(response => response.json())
         .then(data => {
@@ -58,9 +51,12 @@
           console.error("Error fetching QR Code: ", error);
           document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
         });
+    } else {
+      document.getElementById("errorMessage").innerText = "ไม่พบ userId ใน URL";
     }
   </script>
 </body>
 </html>
+
 
 
