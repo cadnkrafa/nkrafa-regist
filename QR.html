@@ -34,6 +34,7 @@
   </div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="config.js"></script>
   <script>
     const liffId = "2007226288-k77xbmX7"; // 👈 เปลี่ยนเป็น LIFF ID ของคุณ
     let userId = null;
@@ -62,24 +63,22 @@
       document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้";
     });
 
-    function fetchQRCode(userId) {
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbzalGvFEc7mIi3TlVCpvE9evGnCrBcfB5Vp5EcBoxXU1xLm4f27joxtfeTaPwVBsowS_w/exec?userId=${encodeURIComponent(userId)}`;
-
-      fetch(scriptUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (data.qrCodeUrl) {
-            document.getElementById("qrCodeImage").src = data.qrCodeUrl;
-            document.getElementById("errorMessage").innerText = "";
-          } else {
-            document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching QR Code: ", error);
-          document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-        });
-    }
+function fetchQRCode(userId) {
+  fetch(SCRIPT_URL + `?userId=${encodeURIComponent(userId)}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.qrCodeUrl) {
+        document.getElementById("qrCodeImage").src = data.qrCodeUrl;
+        document.getElementById("errorMessage").innerText = "";
+      } else {
+        document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching QR Code: ", error);
+      document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+    });
+}
 
     function startCountdown() {
       countdownSeconds = 15;
