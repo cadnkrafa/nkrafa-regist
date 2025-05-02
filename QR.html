@@ -14,7 +14,7 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             height: 100vh;
             text-align: center;
         }
@@ -22,7 +22,8 @@
         h1 {
             color: #333;
             font-size: 24px;
-            margin-bottom: 20px;
+            margin-top: 0;
+            padding-top: 30px; /* เพิ่มระยะจากขอบบน */
         }
 
         .qr-container {
@@ -76,8 +77,8 @@
 
 <body>
     <div class="qr-container">
-        <h1>ลงทะเบียนเข้าร่วมงาน</h1>
-        <div class="title">กรุณาสแกน QR Code ด้านล่างเพื่อทำการลงทะเบียน</div>
+        <h1>ลงทะเบียนข้าราชการ</h1>
+        <div class="title">กรุณาสแกน QR Code ด้านล่าง<bR>เพื่อทำการลงทะเบียน</div>
         <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
         <div id="countdown" class="countdown"></div>
         <div id="errorMessage" class="error"></div>
@@ -89,7 +90,7 @@
     <script>
         const liffId = "2007226288-k77xbmX7"; // 👈 เปลี่ยนเป็น LIFF ID ของคุณ
         let userId = null;
-        let countdownSeconds = 20;
+        let countdownSeconds = 20;  // ปรับให้เริ่มจาก 20 วินาที
         let countdownInterval;
 
         liff.init({ liffId }).then(() => {
@@ -135,7 +136,7 @@
         }
 
         function startCountdown() {
-            countdownSeconds = 20;
+            countdownSeconds = 20;  // เริ่มนับจาก 20 วินาที
             updateCountdown();
             countdownInterval = setInterval(() => {
                 countdownSeconds--;
@@ -158,4 +159,5 @@
 </body>
 
 </html>
+
 
