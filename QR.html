@@ -21,28 +21,39 @@
     <img id="qrCodeImage" class="qr-code" src="" alt="QR Code">
   </div>
 
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // ฟังก์ชันเพื่อดึงข้อมูลและแสดง QR Code ใหม่ทุก 10 วินาที
-    function fetchQRCode() {
-      const userId = "LINE_USER_ID"; // แทนที่ด้วย LINE User ID ที่ต้องการ
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbx8dKUhl150Fkk25htNlKLppQvThnudUjmk8sZZUlQ3S-WNlOTI2FddpWGrsbdDvx5KwA/exec?userId=${userId}`; // ส่ง userId ไปที่ Apps Script
+    // เริ่มต้น LIFF
+    liff.init({ liffId: "YOUR_LIFF_ID" })
+      .then(() => {
+        // ตรวจสอบสถานะการล็อกอิน
+        if (liff.isLoggedIn()) {
+          // ดึง LINE userId
+          const userId = liff.getUserProfile().userId;
+
+          // ส่ง userId ไปยัง Apps Script เพื่อดึงข้อมูล QR Code
+          fetchQRCode(userId);
+        } else {
+          liff.login();
+        }
+      })
+      .catch((err) => console.error("LIFF Initialization failed: ", err));
+
+    // ฟังก์ชันเพื่อดึง QR Code จาก Apps Script
+    function fetchQRCode(userId) {
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbx8dKUhl150Fkk25htNlKLppQvThnudUjmk8sZZUlQ3S-WNlOTI2FddpWGrsbdDvx5KwA/exec?userId=${userId}`;
 
       fetch(scriptUrl)
         .then(response => response.json())
         .then(data => {
           if (data.qrCodeUrl) {
             document.getElementById("qrCodeImage").src = data.qrCodeUrl;
+          } else {
+            console.log("No QR Code URL returned");
           }
         })
         .catch(error => console.error("Error fetching QR Code: ", error));
     }
-
-    // เรียกใช้งาน fetchQRCode ทุก 10 วินาที
-    setInterval(fetchQRCode, 10000);  // 10000ms = 10 วินาที
-
-    // เรียกใช้งานครั้งแรกเมื่อโหลดหน้า
-    fetchQRCode();
   </script>
 </body>
 </html>
-
