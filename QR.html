@@ -41,15 +41,15 @@
 
     // ฟังก์ชันเพื่อดึง QR Code จาก Apps Script
     function fetchQRCode(userId) {
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbwjIxOu-Rzf5BdopgL6zL1fOeBqhp70uT17eVuOJYWp2M1_Vo6Wf23PFVoNx0gsDrcoGw/exec?userId=${userId}`;
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbwaF_9rYdt4f-I6Sd6rVeQtj0rakLGLJkPRgIoJRr53O0aGjyX_GxzH8LXzfoNxOhDfJw/exec?userId=${userId}`;
 
       fetch(scriptUrl)
         .then(response => response.json())
         .then(data => {
-          if (data.qrCodeUrl) {
+          if (data && data.qrCodeUrl) {
             document.getElementById("qrCodeImage").src = data.qrCodeUrl;
           } else {
-            console.log("No QR Code URL returned");
+            console.log("No QR Code URL returned or invalid response");
           }
         })
         .catch(error => console.error("Error fetching QR Code: ", error));
@@ -57,4 +57,5 @@
   </script>
 </body>
 </html>
+
 
