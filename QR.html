@@ -113,10 +113,12 @@
             fetchQRCode(userId);
             startCountdown();
 
-            // รีเฟรช QR และรีเซ็ต countdown ทุก 20 วินาที
+            // รีเฟรช QR และรีเซ็ต countdown ทุก 20 วินาที (ถ้ายังไม่ได้ลงทะเบียน)
             setInterval(() => {
-                fetchQRCode(userId);
-                resetCountdown();
+                if (!isRegistered) {  // เช็คว่าไม่ได้ลงทะเบียนแล้วหรือยัง
+                    fetchQRCode(userId);
+                    resetCountdown();
+                }
             }, 20000);
         }).catch(err => {
             console.error("❌ LIFF error:", err);
