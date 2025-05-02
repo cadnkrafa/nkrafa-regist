@@ -72,24 +72,17 @@
         .countdown {
             color: #ff4d4d;
         }
-
-        .registered {
-            color: green;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
     </style>
 </head>
 
 <body>
     <div class="qr-container">
-        <h1>ลงทะเบียนข้าราชการ</h1>
-        <div class="title">กรุณาสแกน QR Code ด้านล่างเพื่อทำการลงทะเบียน</div>
+        <h1>ลงทะเบียนเข้าร่วมงาน</h1>
+        <div class="title">กรุณาสแกน QR Code ด้านล่าง<br>เพื่อทำการลงทะเบียน</div>
         <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
         <div id="countdown" class="countdown"></div>
         <div id="errorMessage" class="error"></div>
         <div id="loadingMessage" class="loading">กำลังโหลด...</div>
-        <div id="registeredMessage" class="registered" style="display: none;">ท่านได้ลงทะเบียนแล้ว</div>
     </div>
 
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -99,7 +92,6 @@
         let userId = null;
         let countdownSeconds = 20;  // ปรับให้เริ่มจาก 20 วินาที
         let countdownInterval;
-        let isRegistered = false; // ตัวแปรเช็คสถานะการลงทะเบียน
 
         liff.init({ liffId }).then(() => {
             if (!liff.isLoggedIn()) {
@@ -113,12 +105,10 @@
             fetchQRCode(userId);
             startCountdown();
 
-            // รีเฟรช QR และรีเซ็ต countdown ทุก 20 วินาที (ถ้ายังไม่ได้ลงทะเบียน)
+            // รีเฟรช QR และรีเซ็ต countdown ทุก 20 วินาที
             setInterval(() => {
-                if (!isRegistered) {  // เช็คว่าไม่ได้ลงทะเบียนแล้วหรือยัง
-                    fetchQRCode(userId);
-                    resetCountdown();
-                }
+                fetchQRCode(userId);
+                resetCountdown();
             }, 20000);
         }).catch(err => {
             console.error("❌ LIFF error:", err);
@@ -126,12 +116,6 @@
         });
 
         function fetchQRCode(userId) {
-            if (isRegistered) {
-                document.getElementById("qrCodeImage").style.display = "none";
-                document.getElementById("registeredMessage").style.display = "block"; // แสดงข้อความ "ท่านได้ลงทะเบียนแล้ว"
-                return;
-            }
-
             document.getElementById("loadingMessage").style.display = "block"; // Show loading message
             fetch(SCRIPT_URL + `?userId=${encodeURIComponent(userId)}`)
                 .then(response => response.json())
@@ -171,16 +155,7 @@
         function updateCountdown() {
             document.getElementById("countdown").innerText = `QR นี้จะหมดอายุใน ${countdownSeconds} วินาที`;
         }
-
-        // ฟังก์ชั่นที่เรียกเมื่อทำการลงทะเบียนสำเร็จ
-        function markAsRegistered() {
-            isRegistered = true;
-            document.getElementById("qrCodeImage").style.display = "none"; // ซ่อน QR Code
-            document.getElementById("registeredMessage").style.display = "block"; // แสดงข้อความ "ท่านได้ลงทะเบียนแล้ว"
-        }
     </script>
 </body>
 
 </html>
-
-
