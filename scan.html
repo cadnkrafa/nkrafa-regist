@@ -7,31 +7,30 @@
   <script src="./config.js"></script>
   <style>
     body { font-family: sans-serif; padding: 2rem; text-align: center; }
-    button { padding: 1rem 2rem; font-size: 1.2rem; }
-    #result { margin-top: 2rem; font-size: 1.1rem; color: green; }
+    #result, #error { margin-top: 2rem; font-size: 1.2rem; }
     #error { color: red; }
   </style>
 </head>
 <body>
-  <h1>สแกน QR Code</h1>
-  <button onclick="startScan()">📷 สแกน QR</button>
+  <h1>กำลังสแกน QR Code...</h1>
   <div id="result"></div>
   <div id="error"></div>
 
   <script>
-    const LIFF_ID = '2007226288-Qj0NDKY0'; // กรอกตรงนี้ด้วยตัวเอง
+    const LIFF_ID = '2007226288-Qj0NDKY0'; // ใส่ LIFF ID ของคุณ
+    const SCAN_INTERVAL = 3000; // 3 วินาที
 
     async function startScan() {
       try {
-        if (!liff.isLoggedIn()) liff.login();
-
+        if (!liff.isLoggedIn()) await liff.login();
         const profile = await liff.getProfile();
         const adminId = profile.userId;
 
         const scanResult = await liff.scanCode();
         const token = scanResult.value;
 
-        document.getElementById('result').textContent = 'กำลังตรวจสอบ...';
+        document.getElementById('result').textContent = '✅ ตรวจสอบข้อมูล...';
+        document.getElementById('error').textContent = '';
 
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
@@ -49,13 +48,21 @@
         }
 
       } catch (err) {
-        document.getElementById('error').textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+        document.getElementById('error').textContent = '❌ ' + err.message;
         document.getElementById('result').textContent = '';
       }
+
+      // รอ 3 วินาที แล้วเริ่มสแกนใหม่
+      setTimeout(() => {
+        document.getElementById('result').textContent = '';
+        document.getElementById('error').textContent = '';
+        startScan();
+      }, SCAN_INTERVAL);
     }
 
     window.onload = () => {
       liff.init({ liffId: LIFF_ID })
+        .then(() => startScan())
         .catch(err => {
           document.getElementById('error').textContent = 'LIFF Init Error: ' + err.message;
         });
