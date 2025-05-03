@@ -20,31 +20,35 @@
     const LIFF_ID = '2007226288-Qj0NDKY0'; // ใส่ LIFF ID ของคุณ
     const SCAN_INTERVAL = 3000; // 3 วินาที
 
+    let isScanning = true; // ตัวแปรเพื่อควบคุมการสแกน
+
     async function startScan() {
       try {
         if (!liff.isLoggedIn()) await liff.login();
         const profile = await liff.getProfile();
         const adminId = profile.userId;
 
-        const scanResult = await liff.scanCode();
-        const token = scanResult.value;
+        if (isScanning) {
+          const scanResult = await liff.scanCode();
+          const token = scanResult.value;
 
-        document.getElementById('result').textContent = '✅ ตรวจสอบข้อมูล...';
-        document.getElementById('error').textContent = '';
-
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ mode: 'scan', adminId, token }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        const data = await res.json();
-        if (data.status === 'success') {
-          document.getElementById('result').textContent = `✅ ${data.message}`;
+          document.getElementById('result').textContent = '✅ ตรวจสอบข้อมูล...';
           document.getElementById('error').textContent = '';
-        } else {
-          document.getElementById('result').textContent = '';
-          document.getElementById('error').textContent = `❌ ${data.message}`;
+
+          const res = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ mode: 'scan', adminId, token }),
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          const data = await res.json();
+          if (data.status === 'success') {
+            document.getElementById('result').textContent = `✅ ${data.message}`;
+            document.getElementById('error').textContent = '';
+          } else {
+            document.getElementById('result').textContent = '';
+            document.getElementById('error').textContent = `❌ ${data.message}`;
+          }
         }
 
       } catch (err) {
@@ -56,6 +60,7 @@
       setTimeout(() => {
         document.getElementById('result').textContent = '';
         document.getElementById('error').textContent = '';
+        isScanning = true; // เปิดให้สามารถสแกนใหม่ได้
         startScan();
       }, SCAN_INTERVAL);
     }
