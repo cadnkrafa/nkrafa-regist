@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scan QR (Admin)</title>
+  <meta charset="UTF-8" />
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="./config.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; text-align: center; }
+    button { padding: 1rem 2rem; font-size: 1.2rem; }
+    #result { margin-top: 2rem; font-size: 1.1rem; color: green; }
+    #error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>สแกน QR Code</h1>
+  <button onclick="startScan()">📷 สแกน QR</button>
+  <div id="result"></div>
+  <div id="error"></div>
+
+  <script>
+    const LIFF_ID = '2007226288-Qj0NDKY0'; // กรอกตรงนี้ด้วยตัวเอง
+
+    async function startScan() {
+      try {
+        if (!liff.isLoggedIn()) liff.login();
+
+        const profile = await liff.getProfile();
+        const adminId = profile.userId;
+
+        const scanResult = await liff.scanCode();
+        const token = scanResult.value;
+
+        document.getElementById('result').textContent = 'กำลังตรวจสอบ...';
+
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ mode: 'scan', adminId, token }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const data = await res.json();
+        if (data.status === 'success') {
+          document.getElementById('result').textContent = `✅ ${data.message}`;
+          document.getElementById('error').textContent = '';
+        } else {
+          document.getElementById('result').textContent = '';
+          document.getElementById('error').textContent = `❌ ${data.message}`;
+        }
+
+      } catch (err) {
+        document.getElementById('error').textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+        document.getElementById('result').textContent = '';
+      }
+    }
+
+    window.onload = () => {
+      liff.init({ liffId: LIFF_ID })
+        .catch(err => {
+          document.getElementById('error').textContent = 'LIFF Init Error: ' + err.message;
+        });
+    };
+  </script>
+</body>
+</html>
