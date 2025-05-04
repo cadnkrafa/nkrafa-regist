@@ -57,14 +57,9 @@
             const html = await res.text();
             resultBox.innerHTML = html;
 
-            console.log("HTML จาก server:", html);
-
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const statusEl = doc.querySelector('[data-status]');
-            console.log("status element:", statusEl);
-            const status = statusEl?.getAttribute("data-status") || "error";
-            console.log("parsed status:", status);
+            const status = doc.querySelector('[data-status]')?.getAttribute("data-status") || "error";
 
             if (status === "success") soundSuccess.play();
             else soundError.play();
