@@ -16,48 +16,55 @@
       align-items: center;
       height: 100vh;
     }
-    #qrBox {
-      text-align: center;
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <div id="qrBox">⏳ กำลังโหลด...</div>
+  <iframe id="qrFrame" src=""></iframe>
 
-  <script>
-    async function main() {
-      await liff.init({ liffId: LIFF_ID_QR });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-
-      const userId = (await liff.getProfile()).userId;
-      const qrBox = document.getElementById("qrBox");
-
-      async function loadQR() {
-        try {
-          const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
-          const html = await res.text();
-          qrBox.innerHTML = html;
-
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, "text/html");
-          const status = doc.body.querySelector("div")?.getAttribute("data-status");
-
-          if (status === "active") {
-            setTimeout(loadQR, 20000);
-          }
-        } catch (err) {
-          console.error("โหลด QR ล้มเหลว:", err);
-          qrBox.innerText = "❌ โหลด QR ไม่สำเร็จ";
-        }
-      }
-
-      loadQR(); // เริ่มครั้งแรก
+<script>
+  async function main() {
+    await liff.init({ liffId: LIFF_ID_QR });
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
     }
 
-    main();
-  </script>
+    const userId = (await liff.getProfile()).userId;
+    const qrFrame = document.getElementById("qrFrame");
+
+    async function loadQR() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
+        const html = await res.text();
+
+        // วิเคราะห์ว่า QR ยัง active อยู่หรือไม่
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const status = doc.querySelector("div")?.getAttribute("data-status");
+
+        const blob = new Blob([html], { type: "text/html" });
+        qrFrame.src = URL.createObjectURL(blob);
+
+        if (status === "active") {
+          setTimeout(loadQR, 20000); // โหลด QR ใหม่ทุก 20 วินาที
+        }
+        // ถ้า status == done จะไม่โหลดใหม่
+      } catch (err) {
+        console.error("โหลด QR ล้มเหลว:", err);
+        qrFrame.srcdoc = `<div style="text-align:center;padding:20px;font-family:sans-serif;">❌ โหลด QR ไม่สำเร็จ</div>`;
+      }
+    }
+
+    loadQR(); // เริ่มต้น
+  }
+
+  main();
+</script>
+
 </body>
 </html>
