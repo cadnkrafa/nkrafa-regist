@@ -16,10 +16,15 @@
       align-items: center;
       padding: 20px;
     }
-    #reader { width: 320px; max-width: 90vw; }
-    #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
-
-    /* ✅ ปรับ iframe ให้โหลดได้ */
+    #reader {
+      width: 320px;
+      max-width: 90vw;
+    }
+    #resultBox {
+      margin-top: 20px;
+      font-size: 1.5em;
+      text-align: center;
+    }
     iframe {
       width: 1px;
       height: 1px;
@@ -51,27 +56,28 @@
 
       const profile = await liff.getProfile();
       const userId = profile.userId;
+
+      // ตรวจสอบสิทธิ์ admin
       const checkRes = await fetch(`${SCRIPT_URL}?checkAdmin=1&userId=${userId}`);
       const isAdmin = await checkRes.text();
-
       if (isAdmin !== 'true') {
         resultBox.innerHTML = "❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้";
         return;
       }
 
-      // ✅ เริ่มเปิดกล้อง
+      // เริ่มกล้อง
       reader.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
           resultBox.innerText = "⏳ ตรวจสอบ QR...";
-          await reader.stop();  // ✅ รอกล้องหยุดก่อน
+          await reader.stop();
           qrFrame.src = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
         }
       );
     }
 
-    // ✅ รับผลลัพธ์จาก iframe
+    // รับ postMessage จาก iframe
     window.addEventListener("message", (event) => {
       const status = event.data.status;
       const message = event.data.message || "❌ โหลดผลลัพธ์ไม่สำเร็จ";
