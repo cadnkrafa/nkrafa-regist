@@ -1,2 +1,2 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXOMg0mqGjtAZpizQyD8f54aSYW4xF3C6CSNQ1mQJm1ZP4zMfAWKN-fZhzmRT_7-vstA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywK-FDcjYNIX3YF057FQz-uw0h7ZjTm9candDSxgpNLnJtcRRV4IZDwNn5Yusyw9_lIw/exec';
 const LIFF_ID_QR = '2007226288-k77xbmX7';
