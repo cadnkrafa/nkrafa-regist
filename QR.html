@@ -1,175 +1,29 @@
+<!-- QR.html -->
 <!DOCTYPE html>
-<html lang="th">
-
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Registration</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Noto Sans Thai', sans-serif;
-      background-color: #f4f7fc;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-      text-align: center;
-    }
-
-    h1 {
-      color: #0073e6;
-      font-size: 24px;
-      margin-top: 0;
-      padding-top: 30px;
-    }
-
-    .qr-container {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 350px;
-      display: none; /* ✅ ซ่อนไว้ก่อนจนกว่าจะตรวจสอบว่า linked แล้ว */
-    }
-
-    .qr-code {
-      width: 100%;
-      max-width: 250px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .countdown {
-      font-size: 1.2em;
-      color: #ff4d4d;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-
-    .error {
-      color: red;
-      margin-top: 100px;
-      margin-left: 20px;
-      margin-right: 20px;
-      font-size: 28px;
-      font-weight: 1000;
-    }
-
-    .loading {
-      font-size: 1.2em;
-      color: #ff6600;
-      font-weight: bold;
-    }
-
-    .title {
-      color: #0073e6;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-  </style>
-</head>
-
-<body>
-  <!-- ส่วนแสดง QR และ Countdown -->
-  <div class="qr-container" id="qrSection">
-    <h1>กรุณาสแกน QR Code<br>เพื่อทำการลงทะเบียน</h1>
-    <img id="qrCodeImage" class="qr-code" src="" alt="QR Code จะปรากฏที่นี่">
-    <div id="countdown" class="countdown"></div>
-    <div id="loadingMessage" class="loading">กำลังโหลด...</div>
-    <div id="errorMessage" class="error"></div>
-  </div>
-
-  <!-- ข้อความหากยังไม่ได้ผูก -->
-  <div class="error" id="linkError" style="display: none;">
-    กรุณาผูกเลขบัตรข้าราชการกับบัญชีไลน์ของคุณก่อน
-  </div>
-
+  <title>QR Auth</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="config.js"></script>
-  <script>
-    const liffId = "2007226288-k77xbmX7"; // 👉 เปลี่ยนเป็น LIFF ID ของคุณ
-    let userId = null;
-    let countdownSeconds = 20;
-    let countdownInterval;
+  <script src="./config.js"></script>
+</head>
+<body style="margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#f9f9f9;">
+  <iframe id="qrFrame" width="100%" height="100%" frameborder="0"></iframe>
 
-    liff.init({ liffId }).then(() => {
+  <script>
+    async function main() {
+      await liff.init({ liffId: LIFF_ID_QR });
       if (!liff.isLoggedIn()) {
         liff.login();
         return;
       }
-      return liff.getProfile();
-    }).then(profile => {
-      userId = profile.userId;
-      console.log("✅ LINE userId:", userId);
-      fetchQRCode(userId);
-      startCountdown();
 
-      setInterval(() => {
-        fetchQRCode(userId);
-        resetCountdown();
-      }, 20000);
-    }).catch(err => {
-      console.error("❌ LIFF error:", err);
-      document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้";
-    });
-
-    function fetchQRCode(userId) {
-      document.getElementById("loadingMessage").style.display = "block";
-      fetch(SCRIPT_URL + `?userId=${encodeURIComponent(userId)}`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById("loadingMessage").style.display = "none";
-
-          if (!data.linked) {
-            document.getElementById("qrSection").style.display = "none";
-            document.getElementById("linkError").style.display = "block";
-            clearInterval(countdownInterval);
-            return;
-          }
-
-          document.getElementById("qrSection").style.display = "block";
-          document.getElementById("linkError").style.display = "none";
-
-          if (data.qrCodeUrl) {
-            document.getElementById("qrCodeImage").src = data.qrCodeUrl;
-            document.getElementById("errorMessage").innerText = "";
-          } else {
-            document.getElementById("errorMessage").innerText = "ไม่สามารถดึง QR Code ได้";
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching QR Code: ", error);
-          document.getElementById("loadingMessage").style.display = "none";
-          document.getElementById("errorMessage").innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
-        });
+      const userId = (await liff.getProfile()).userId;
+      const frameUrl = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`;
+      document.getElementById('qrFrame').src = frameUrl;
     }
 
-    function startCountdown() {
-      countdownSeconds = 20;
-      updateCountdown();
-      countdownInterval = setInterval(() => {
-        countdownSeconds--;
-        updateCountdown();
-        if (countdownSeconds <= 0) {
-          countdownSeconds = 0;
-        }
-      }, 1000);
-    }
-
-    function resetCountdown() {
-      clearInterval(countdownInterval);
-      startCountdown();
-    }
-
-    function updateCountdown() {
-      document.getElementById("countdown").innerText = `QR นี้จะหมดอายุใน ${countdownSeconds} วินาที`;
-    }
+    main();
   </script>
 </body>
 </html>
