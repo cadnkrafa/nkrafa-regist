@@ -37,7 +37,7 @@
       const userId = (await liff.getProfile()).userId;
       const frame = document.getElementById("qrFrame");
 
-      // โหลด Web App URL เข้า iframe โดยตรง
+      // โหลด Web App URL ที่ฝั่ง Apps Script จะแสดง QR หรือข้อความให้
       frame.src = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`;
     }
 
