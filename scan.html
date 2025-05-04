@@ -17,19 +17,19 @@
       padding: 20px;
     }
     #reader { width: 320px; max-width: 90vw; }
-    #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
+    iframe { width: 100%; height: 300px; border: none; margin-top: 20px; }
   </style>
 </head>
 <body>
   <div id="reader"></div>
-  <div id="resultBox">📷 กำลังเปิดกล้อง...</div>
+  <iframe id="resultFrame"></iframe>
 
   <audio id="soundSuccess" src="https://cdn.pixabay.com/audio/2022/03/15/audio_6f0b1cb59d.mp3"></audio>
   <audio id="soundError" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c23c3bbec6.mp3"></audio>
 
   <script>
     const reader = new Html5Qrcode("reader");
-    const resultBox = document.getElementById("resultBox");
+    const resultFrame = document.getElementById("resultFrame");
     const soundSuccess = document.getElementById("soundSuccess");
     const soundError = document.getElementById("soundError");
 
@@ -43,7 +43,7 @@
       const isAdmin = await checkRes.text();
 
       if (isAdmin !== 'true') {
-        resultBox.innerHTML = "❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้";
+        resultFrame.srcdoc = `<div style="font-size:1.5em;color:red;">❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้</div>`;
         return;
       }
 
@@ -52,27 +52,17 @@
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
           reader.stop();
-          resultBox.innerText = "⏳ ตรวจสอบ QR...";
+          const url = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
+          resultFrame.src = url;
 
-          try {
-            const res = await fetch(`${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`);
-            const html = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-            const statusEl = doc.querySelector('[data-status]');
-            const status = statusEl?.getAttribute("data-status") || "error";
-
-            resultBox.innerHTML = html;
-            if (status === "success") soundSuccess.play();
+          // เล่นเสียงเมื่อโหลด iframe เสร็จ
+          resultFrame.onload = () => {
+            const statusAttr = resultFrame.contentDocument?.querySelector('[data-status]')?.getAttribute("data-status");
+            if (statusAttr === 'success') soundSuccess.play();
             else soundError.play();
 
             setTimeout(() => location.reload(), 5000);
-          } catch (err) {
-            console.error("โหลดผลลัพธ์ล้มเหลว:", err);
-            resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
-            soundError.play();
-            setTimeout(() => location.reload(), 5000);
-          }
+          };
         }
       );
     }
