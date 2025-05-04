@@ -16,36 +16,28 @@
       align-items: center;
       height: 100vh;
     }
-    #qrBox {
+    iframe {
       width: 100%;
-      max-width: 400px;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <div id="qrBox">⏳ กำลังโหลด...</div>
+  <iframe id="qrFrame" src=""></iframe>
 
   <script>
     async function main() {
-  await liff.init({ liffId: LIFF_ID_QR });
-  if (!liff.isLoggedIn()) {
-    liff.login();
-    return;
-  }
+      await liff.init({ liffId: LIFF_ID_QR });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
 
-  const profile = await liff.getProfile();
-  const userId = profile.userId;
-  console.log("LINE userId:", userId);  // เพิ่มบรรทัดนี้
-
-  try {
-    const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
-    const html = await res.text();
-    document.getElementById('qrBox').innerHTML = html;
-  } catch (err) {
-    console.error("Fetch failed:", err);  // เพิ่มบรรทัดนี้
-    document.getElementById('qrBox').innerText = "❌ โหลด QR ไม่สำเร็จ";
-  }
-}
+      const userId = (await liff.getProfile()).userId;
+      const frameUrl = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`;
+      document.getElementById("qrFrame").src = frameUrl;
+    }
 
     main();
   </script>
