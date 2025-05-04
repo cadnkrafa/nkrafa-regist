@@ -59,7 +59,8 @@
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
-          reader.stop();
+          resultBox.innerText = "⏳ ตรวจสอบ QR...";
+          await reader.stop();  // ✅ รอให้กล้องปิด
           qrFrame.src = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
         }
       );
