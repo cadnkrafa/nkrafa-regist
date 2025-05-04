@@ -1,3 +1,3 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3o-1VizEJC5VTnB8sgfaCVi_4qoiSV-U2d3ngFqUG3UBZEZ8YnS4cVDhJGz5-wYBJEA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxf3JiLfS1o9Sp5gXchDTGCLJV8EO7t5G45pEJh1HSxU9WbNwR1YQwH-RIbcY7lcw3VLg/exec';
 const LIFF_ID_QR = '2007226288-k77xbmX7';
 const LIFF_ID_SCAN = '2007226288-Qj0NDKY0';
