@@ -10,29 +10,20 @@
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
-      margin: 0;
       background: #f0f4f8;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 20px;
     }
-    #reader {
-      width: 320px;
-      max-width: 90vw;
-    }
-    #resultBox {
-      margin-top: 20px;
-      font-size: 1.4em;
-      text-align: center;
-    }
+    #reader { width: 320px; max-width: 90vw; }
+    #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
   </style>
 </head>
 <body>
   <div id="reader"></div>
   <div id="resultBox">📷 กำลังเปิดกล้อง...</div>
 
-  <!-- เสียง -->
   <audio id="soundSuccess" src="https://cdn.pixabay.com/audio/2022/03/15/audio_6f0b1cb59d.mp3"></audio>
   <audio id="soundError" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c23c3bbec6.mp3"></audio>
 
@@ -42,25 +33,17 @@
     const soundSuccess = document.getElementById("soundSuccess");
     const soundError = document.getElementById("soundError");
 
-    async function checkAdmin(userId) {
-      const res = await fetch(`${SCRIPT_URL}?checkAdmin=1&userId=${encodeURIComponent(userId)}`);
-      const text = await res.text();
-      return text === 'true';
-    }
-
-    async function scanQR() {
+    async function main() {
       await liff.init({ liffId: LIFF_ID_SCAN });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
+      if (!liff.isLoggedIn()) return liff.login();
 
       const profile = await liff.getProfile();
       const userId = profile.userId;
+      const checkRes = await fetch(`${SCRIPT_URL}?checkAdmin=1&userId=${userId}`);
+      const isAdmin = await checkRes.text();
 
-      const isAdmin = await checkAdmin(userId);
-      if (!isAdmin) {
-        resultBox.innerHTML = "<div style='color:red'>❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้</div>";
+      if (isAdmin !== 'true') {
+        resultBox.innerHTML = "❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้";
         return;
       }
 
@@ -72,28 +55,26 @@
           try {
             const res = await fetch(`${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`);
             const html = await res.text();
-            const div = document.createElement('div');
-            div.innerHTML = html;
-            const status = div.querySelector('[data-status]')?.getAttribute('data-status') || 'error';
-
             resultBox.innerHTML = html;
-            if (status === 'success') soundSuccess.play();
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            const status = doc.querySelector('[data-status]')?.getAttribute("data-status") || "error";
+
+            if (status === "success") soundSuccess.play();
             else soundError.play();
 
             setTimeout(() => location.reload(), 5000);
-          } catch (err) {
+          } catch {
             resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
             soundError.play();
             setTimeout(() => location.reload(), 5000);
           }
-        },
-        (errorMessage) => {
-          // ไม่ต้องแจ้ง error นี้บน UI
         }
       );
     }
 
-    scanQR();
+    main();
   </script>
 </body>
 </html>
