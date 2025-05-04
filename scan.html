@@ -17,7 +17,7 @@
       padding: 20px;
     }
     #reader { width: 320px; max-width: 90vw; }
-    #resultBox { margin-top: 20px; font-size: 1.6em; text-align: center; }
+    #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
   </style>
 </head>
 <body>
@@ -52,22 +52,23 @@
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
           reader.stop();
+          resultBox.innerText = "⏳ ตรวจสอบ QR...";
+
           try {
             const res = await fetch(`${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`);
             const html = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const resultEl = doc.body.querySelector("div");
+            const statusEl = doc.querySelector('[data-status]');
+            const status = statusEl?.getAttribute("data-status") || "error";
 
-            const status = resultEl?.getAttribute("data-status") || "error";
-            resultBox.innerHTML = resultEl?.outerHTML || "❌ โหลดผลลัพธ์ไม่สำเร็จ";
-
+            resultBox.innerHTML = html;
             if (status === "success") soundSuccess.play();
             else soundError.play();
 
             setTimeout(() => location.reload(), 5000);
           } catch (err) {
-            console.error("❌ Fetch error:", err);
+            console.error("โหลดผลลัพธ์ล้มเหลว:", err);
             resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
             soundError.play();
             setTimeout(() => location.reload(), 5000);
