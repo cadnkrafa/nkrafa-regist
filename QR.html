@@ -27,17 +27,25 @@
 
   <script>
     async function main() {
-      await liff.init({ liffId: LIFF_ID_QR });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
+  await liff.init({ liffId: LIFF_ID_QR });
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
 
-      const userId = (await liff.getProfile()).userId;
-      const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
-      const html = await res.text();
-      document.getElementById('qrBox').innerHTML = html;
-    }
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  console.log("LINE userId:", userId);  // เพิ่มบรรทัดนี้
+
+  try {
+    const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
+    const html = await res.text();
+    document.getElementById('qrBox').innerHTML = html;
+  } catch (err) {
+    console.error("Fetch failed:", err);  // เพิ่มบรรทัดนี้
+    document.getElementById('qrBox').innerText = "❌ โหลด QR ไม่สำเร็จ";
+  }
+}
 
     main();
   </script>
