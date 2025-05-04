@@ -57,15 +57,21 @@
             const html = await res.text();
             resultBox.innerHTML = html;
 
+            console.log("HTML จาก server:", html);
+
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const status = doc.querySelector('[data-status]')?.getAttribute("data-status") || "error";
+            const statusEl = doc.querySelector('[data-status]');
+            console.log("status element:", statusEl);
+            const status = statusEl?.getAttribute("data-status") || "error";
+            console.log("parsed status:", status);
 
             if (status === "success") soundSuccess.play();
             else soundError.play();
 
             setTimeout(() => location.reload(), 5000);
-          } catch {
+          } catch (err) {
+            console.error("โหลดผลลัพธ์ล้มเหลว:", err);
             resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
             soundError.play();
             setTimeout(() => location.reload(), 5000);
