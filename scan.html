@@ -16,29 +16,13 @@
       align-items: center;
       padding: 20px;
     }
-    #reader {
-      width: 320px;
-      max-width: 90vw;
-    }
-    #resultBox {
-      margin-top: 20px;
-      font-size: 1.5em;
-      text-align: center;
-    }
-    iframe {
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      position: absolute;
-      left: -9999px;
-      border: none;
-    }
+    #reader { width: 320px; max-width: 90vw; }
+    #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
   </style>
 </head>
 <body>
   <div id="reader"></div>
   <div id="resultBox">📷 กำลังเปิดกล้อง...</div>
-  <iframe id="qrFrame"></iframe>
 
   <audio id="soundSuccess" src="https://cdn.pixabay.com/audio/2022/03/15/audio_6f0b1cb59d.mp3"></audio>
   <audio id="soundError" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c23c3bbec6.mp3"></audio>
@@ -48,7 +32,6 @@
     const resultBox = document.getElementById("resultBox");
     const soundSuccess = document.getElementById("soundSuccess");
     const soundError = document.getElementById("soundError");
-    const qrFrame = document.getElementById("qrFrame");
 
     async function main() {
       await liff.init({ liffId: LIFF_ID_SCAN });
@@ -56,38 +39,40 @@
 
       const profile = await liff.getProfile();
       const userId = profile.userId;
-
-      // ตรวจสอบสิทธิ์ admin
-      const checkRes = await fetch(`${SCRIPT_URL}?checkAdmin=1&userId=${userId}`);
+      const checkRes = await fetch(${SCRIPT_URL}?checkAdmin=1&userId=${userId});
       const isAdmin = await checkRes.text();
+
       if (isAdmin !== 'true') {
         resultBox.innerHTML = "❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้";
         return;
       }
 
-      // เริ่มกล้อง
       reader.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
-          resultBox.innerText = "⏳ ตรวจสอบ QR...";
-          await reader.stop();
-          qrFrame.src = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
+          reader.stop();
+          try {
+            const res = await fetch(${SCRIPT_URL}?token=${encodeURIComponent(decodedText)});
+            const html = await res.text();
+            resultBox.innerHTML = html;
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            const status = doc.querySelector('[data-status]')?.getAttribute("data-status") || "error";
+
+            if (status === "success") soundSuccess.play();
+            else soundError.play();
+
+            setTimeout(() => location.reload(), 5000);
+          } catch {
+            resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
+            soundError.play();
+            setTimeout(() => location.reload(), 5000);
+          }
         }
       );
     }
-
-    // รับ postMessage จาก iframe
-    window.addEventListener("message", (event) => {
-      const status = event.data.status;
-      const message = event.data.message || "❌ โหลดผลลัพธ์ไม่สำเร็จ";
-      resultBox.innerHTML = message;
-
-      if (status === "success") soundSuccess.play();
-      else soundError.play();
-
-      setTimeout(() => location.reload(), 5000);
-    });
 
     main();
   </script>
