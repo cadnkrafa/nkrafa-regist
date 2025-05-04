@@ -52,7 +52,7 @@
         { fps: 10, qrbox: 250 },
         async (decodedText) => {
           reader.stop();
-          const url = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
+          const url = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}&t=${Date.now()}`;
           resultFrame.src = url;
 
           // เล่นเสียงเมื่อโหลด iframe เสร็จ
