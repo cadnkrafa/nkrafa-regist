@@ -17,9 +17,9 @@
       padding: 20px;
     }
     #reader {
-      width: 600px;
-      max-width: 95vw;
-      height: 600px;
+      max-width: 700px;
+      width: 100%;
+      height: 700px;
       border: 2px solid #ccc;
       border-radius: 16px;
     }
@@ -58,9 +58,12 @@
         return;
       }
 
+      const screenWidth = window.innerWidth;
+      const qrBoxSize = Math.min(600, screenWidth * 0.9);
+
       reader.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: 600 },
+        { fps: 10, qrbox: qrBoxSize },
         async (decodedText) => {
           reader.stop();
           const url = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
@@ -71,7 +74,7 @@
             if (statusAttr === 'success') soundSuccess.play();
             else soundError.play();
 
-            setTimeout(() => location.reload(), 5000);
+            setTimeout(() => location.reload(), 1000);
           };
         }
       );
