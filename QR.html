@@ -41,6 +41,7 @@
       try {
         const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
         const html = await res.text();
+        const frameUrl = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`;
 
         // วิเคราะห์ว่า QR ยัง active อยู่หรือไม่
         const parser = new DOMParser();
@@ -48,7 +49,7 @@
         const status = doc.querySelector("div")?.getAttribute("data-status");
 
         const blob = new Blob([html], { type: "text/html" });
-        qrFrame.src = res;
+        qrFrame.src = frameUrl;
 
         if (status === "active") {
           setTimeout(loadQR, 20000); // โหลด QR ใหม่ทุก 20 วินาที
