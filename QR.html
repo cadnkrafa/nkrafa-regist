@@ -26,20 +26,39 @@
 <body>
   <iframe id="qrFrame" src=""></iframe>
 
-  <script>
-    async function main() {
-      await liff.init({ liffId: LIFF_ID_QR });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-
-      const userId = (await liff.getProfile()).userId;
-      const frameUrl = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`;
-      document.getElementById("qrFrame").src = frameUrl;
+<script>
+  async function main() {
+    await liff.init({ liffId: LIFF_ID_QR });
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
     }
 
-    main();
-  </script>
+    const userId = (await liff.getProfile()).userId;
+    const qrBox = document.getElementById("qrBox");
+
+    async function loadQR() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
+        const html = await res.text();
+        qrBox.innerHTML = html;
+
+        // ถ้า QR ยังไม่หมดอายุ (มี countdown)
+        if (html.includes("หมดอายุใน")) {
+          // เรียก QR ใหม่หลัง 20 วินาที
+          setTimeout(loadQR, 20000);
+        }
+      } catch (err) {
+        console.error("โหลด QR ล้มเหลว:", err);
+        qrBox.innerText = "❌ โหลด QR ไม่สำเร็จ";
+      }
+    }
+
+    loadQR(); // เรียกครั้งแรก
+  }
+
+  main();
+</script>
+  
 </body>
 </html>
