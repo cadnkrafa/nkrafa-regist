@@ -7,24 +7,21 @@
   <script src="./config.js"></script>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
       font-family: sans-serif;
+      background: #f9f9f9;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    #qrBox {
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <iframe id="qrFrame" src=""></iframe>
+  <div id="qrBox">⏳ กำลังโหลด...</div>
 
   <script>
     async function main() {
@@ -35,10 +32,25 @@
       }
 
       const userId = (await liff.getProfile()).userId;
-      const frame = document.getElementById("qrFrame");
+      const qrBox = document.getElementById("qrBox");
 
-      // โหลด Web App URL ที่ฝั่ง Apps Script จะแสดง QR หรือข้อความให้
-      frame.src = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`;
+      async function loadQR() {
+        try {
+          const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
+          const html = await res.text();
+          qrBox.innerHTML = html;
+
+          const done = html.includes("✅ คุณได้ลงทะเบียนเรียบร้อยแล้ว");
+          if (!done) {
+            setTimeout(loadQR, 20000);
+          }
+        } catch (err) {
+          console.error("QR load failed:", err);
+          qrBox.innerHTML = "❌ โหลด QR ไม่สำเร็จ";
+        }
+      }
+
+      loadQR();
     }
 
     main();
