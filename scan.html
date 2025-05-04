@@ -16,8 +16,15 @@
       align-items: center;
       padding: 20px;
     }
-    #reader { width: 320px; max-width: 90vw; }
-    #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
+    #reader {
+      width: 320px;
+      max-width: 90vw;
+    }
+    #resultBox {
+      margin-top: 20px;
+      font-size: 1.5em;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -57,21 +64,15 @@
             const html = await res.text();
             resultBox.innerHTML = html;
 
-            console.log("HTML จาก server:", html);
-
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const statusEl = doc.querySelector('[data-status]');
-            console.log("status element:", statusEl);
-            const status = statusEl?.getAttribute("data-status") || "error";
-            console.log("parsed status:", status);
+            const status = doc.querySelector('meta[name="scan-status"]')?.content || "error";
 
             if (status === "success") soundSuccess.play();
             else soundError.play();
 
             setTimeout(() => location.reload(), 5000);
           } catch (err) {
-            console.error("โหลดผลลัพธ์ล้มเหลว:", err);
             resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
             soundError.play();
             setTimeout(() => location.reload(), 5000);
