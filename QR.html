@@ -43,22 +43,26 @@
         const html = await res.text();
         qrBox.innerHTML = html;
 
-        // ถ้า QR ยังไม่หมดอายุ (มี countdown)
-        if (html.includes("หมดอายุใน")) {
-          // เรียก QR ใหม่หลัง 20 วินาที
-          setTimeout(loadQR, 20000);
+        // ตรวจสอบว่าไม่ต้องโหลด QR ซ้ำอีก
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const status = doc.body.querySelector("div")?.getAttribute("data-status");
+
+        if (status === "active") {
+          setTimeout(loadQR, 20000); // QR ยังไม่หมดอายุ → โหลดใหม่
         }
+        // ถ้า status === "done" หรือไม่มี QR → หยุดการวนซ้ำ
       } catch (err) {
         console.error("โหลด QR ล้มเหลว:", err);
         qrBox.innerText = "❌ โหลด QR ไม่สำเร็จ";
       }
     }
 
-    loadQR(); // เรียกครั้งแรก
+    loadQR(); // เริ่มครั้งแรก
   }
 
   main();
 </script>
-  
+
 </body>
 </html>
