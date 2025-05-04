@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <title>QR Auth</title>
@@ -17,15 +17,16 @@
       align-items: center;
       height: 100vh;
     }
-    iframe {
+    #qrBox {
       width: 100%;
-      height: 100%;
-      border: none;
+      max-width: 700px;
+      padding: 20px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <iframe id="qrFrame"></iframe>
+  <div id="qrBox">⏳ กำลังโหลด...</div>
 
   <script>
     async function main() {
@@ -36,14 +37,27 @@
       }
 
       const userId = (await liff.getProfile()).userId;
-      const frame = document.getElementById("qrFrame");
+      const qrBox = document.getElementById("qrBox");
 
-      function loadQR() {
-        frame.src = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
+      async function loadQR() {
+        try {
+          const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
+          const html = await res.text();
+          qrBox.innerHTML = html;
+
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          const status = tempDiv.querySelector('[data-status]')?.getAttribute('data-status');
+
+          if (status === 'active') {
+            setTimeout(loadQR, 20000); // reload ทุก 20 วิ
+          }
+        } catch (err) {
+          qrBox.innerHTML = "❌ โหลด QR ไม่สำเร็จ";
+        }
       }
 
-      loadQR(); // โหลดครั้งแรก
-      setInterval(loadQR, 20000); // โหลดใหม่ทุก 20 วิ
+      loadQR(); // เริ่มแสดง QR
     }
 
     main();
