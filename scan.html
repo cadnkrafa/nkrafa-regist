@@ -18,11 +18,14 @@
     }
     #reader { width: 320px; max-width: 90vw; }
     #resultBox { margin-top: 20px; font-size: 1.5em; text-align: center; }
+    iframe { display: none; }
   </style>
 </head>
 <body>
   <div id="reader"></div>
   <div id="resultBox">📷 กำลังเปิดกล้อง...</div>
+
+  <iframe id="scanFrame"></iframe>
 
   <audio id="soundSuccess" src="https://cdn.pixabay.com/audio/2022/03/15/audio_6f0b1cb59d.mp3"></audio>
   <audio id="soundError" src="https://cdn.pixabay.com/audio/2022/03/15/audio_c23c3bbec6.mp3"></audio>
@@ -30,6 +33,7 @@
   <script>
     const reader = new Html5Qrcode("reader");
     const resultBox = document.getElementById("resultBox");
+    const scanFrame = document.getElementById("scanFrame");
     const soundSuccess = document.getElementById("soundSuccess");
     const soundError = document.getElementById("soundError");
 
@@ -47,29 +51,23 @@
         return;
       }
 
+      window.addEventListener("message", (event) => {
+        const { message, color, status } = event.data || {};
+        if (!message) return;
+
+        resultBox.innerHTML = `<span style="color:${color};font-weight:bold;">${message}</span>`;
+        if (status === "success") soundSuccess.play();
+        else soundError.play();
+
+        setTimeout(() => location.reload(), 5000);
+      });
+
       reader.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
-        async (decodedText) => {
+        (decodedText) => {
           reader.stop();
-          try {
-            const res = await fetch(`${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`);
-            const html = await res.text();
-            resultBox.innerHTML = html;
-
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-            const status = doc.querySelector('meta[name="scan-status"]')?.content || "error";
-
-            if (status === "success") soundSuccess.play();
-            else soundError.play();
-
-            setTimeout(() => location.reload(), 5000);
-          } catch (err) {
-            resultBox.innerText = "❌ โหลดผลลัพธ์ไม่สำเร็จ";
-            soundError.play();
-            setTimeout(() => location.reload(), 5000);
-          }
+          scanFrame.src = `${SCRIPT_URL}?token=${encodeURIComponent(decodedText)}`;
         }
       );
     }
