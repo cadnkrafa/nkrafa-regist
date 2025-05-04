@@ -41,7 +41,8 @@
         frame.src = `${SCRIPT_URL}?userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
       }
 
-      loadQR();
+      loadQR(); // โหลดครั้งแรก
+      setInterval(loadQR, 20000); // โหลดใหม่ทุก 20 วิ
     }
 
     main();
