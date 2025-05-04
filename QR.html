@@ -24,8 +24,7 @@
   </style>
 </head>
 <body>
-  <iframe id="qrFrame" src=""></iframe>
-
+  <div id="qrBox">⏳ กำลังโหลด...</div>
   <script>
     async function main() {
       await liff.init({ liffId: LIFF_ID_QR });
@@ -35,28 +34,21 @@
       }
 
       const userId = (await liff.getProfile()).userId;
-      const qrFrame = document.getElementById("qrFrame");
+      const qrBox = document.getElementById("qrBox");
 
       async function loadQR() {
         try {
           const res = await fetch(`${SCRIPT_URL}?userId=${encodeURIComponent(userId)}`);
           const html = await res.text();
+          qrBox.innerHTML = html;
 
-          const doc = new DOMParser().parseFromString(html, "text/html");
-          const content = doc.body.textContent || "";
-
-          const hasRegisted = content.includes("ลงทะเบียนเรียบร้อยแล้ว");
-
-          const blob = new Blob([html], { type: "text/html" });
-          qrFrame.src = URL.createObjectURL(blob);
-
-          if (!hasRegisted) {
-            setTimeout(loadQR, 20000); // QR ใหม่ทุก 20 วินาที
+          const hasRegistered = html.includes("ลงทะเบียนเรียบร้อยแล้ว");
+          if (!hasRegistered) {
+            setTimeout(loadQR, 20000);
           }
-
         } catch (err) {
           console.error("โหลด QR ล้มเหลว:", err);
-          qrFrame.srcdoc = `<div style="text-align:center;padding:20px;font-family:sans-serif;">❌ โหลด QR ไม่สำเร็จ</div>`;
+          qrBox.innerHTML = "❌ โหลด QR ไม่สำเร็จ";
         }
       }
 
