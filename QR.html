@@ -48,7 +48,7 @@
         const status = doc.querySelector("div")?.getAttribute("data-status");
 
         const blob = new Blob([html], { type: "text/html" });
-        qrFrame.src = URL.createObjectURL(blob);
+        qrFrame.src = res;
 
         if (status === "active") {
           setTimeout(loadQR, 20000); // โหลด QR ใหม่ทุก 20 วินาที
