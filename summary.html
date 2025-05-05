@@ -13,7 +13,6 @@
       margin: 0;
       color: #1a237e;
     }
-
     header {
       display: flex;
       justify-content: space-between;
@@ -21,27 +20,22 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-
     .logo-title {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .logo-title img {
       height: 50px;
     }
-
     .logo-title div {
       font-size: 28px;
       font-weight: bold;
     }
-
     .summary {
       display: flex;
       gap: 20px;
     }
-
     .summary div {
       background: white;
       padding: 10px 20px;
@@ -50,13 +44,11 @@
       font-size: 16px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     .bar-wrapper {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 15px 40px;
     }
-
     .bar-container {
       background: #fff;
       border-radius: 10px;
@@ -64,7 +56,6 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
       cursor: pointer;
     }
-
     .bar-label {
       display: flex;
       justify-content: space-between;
@@ -72,7 +63,6 @@
       font-weight: bold;
       margin-bottom: 6px;
     }
-
     .progress-wrapper {
       background: #e0e0e0;
       height: 26px;
@@ -80,16 +70,11 @@
       position: relative;
       overflow: hidden;
     }
-
     .progress-fill {
       height: 100%;
       border-radius: 13px 0 0 13px;
-      background-size: 40px 40px;
-      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.15), rgba(255,255,255,.15) 10px, transparent 10px, transparent 20px);
-      animation: progress-stripes 1s linear infinite;
       transition: width 1s ease-in-out;
     }
-
     .progress-percent {
       position: absolute;
       right: 10px;
@@ -100,38 +85,6 @@
       font-weight: bold;
       z-index: 1;
     }
-
-    @keyframes progress-stripes {
-      0% { background-position: 0 0; }
-      100% { background-position: 40px 0; }
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6); }
-      70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-    }
-
-    .progress-fill.full {
-      animation: pulse 2s infinite;
-    }
-
-    .progress-fill::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
-      animation: shimmer 2s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
     .overlay {
       position: fixed;
       top: 0;
@@ -144,7 +97,6 @@
       justify-content: center;
       z-index: 9999;
     }
-
     .popup {
       background: linear-gradient(to bottom, #ffffff, #f4f8fb);
       padding: 30px;
@@ -157,20 +109,17 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
       color: #1a237e;
     }
-
     .popup h3 {
       margin-top: 0;
       font-size: 26px;
       font-weight: bold;
-      color: #0d47a1;
+      color: #1976d2;
     }
-
     .popup p {
       color: #2c3e50;
       font-size: 16px;
       margin-bottom: 20px;
     }
-
     .popup .close-btn {
       position: absolute;
       top: 10px;
@@ -179,13 +128,11 @@
       font-size: 26px;
       color: #333;
     }
-
     .list-columns {
       display: flex;
       gap: 30px;
       margin-top: 10px;
     }
-
     .list-columns div {
       flex: 1;
       background: white;
@@ -193,32 +140,26 @@
       padding: 15px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
     .list-columns div:first-child h4 {
       color: #2ecc71;
     }
-
     .list-columns div:last-child h4 {
       color: #e74c3c;
     }
-
     .list-columns div:first-child li,
     .list-columns div:last-child li {
       color: #000;
     }
-
     .list-columns h4 {
       margin-top: 0;
       margin-bottom: 10px;
       font-size: 16px;
     }
-
     ul {
       list-style: none;
       padding-left: 0;
       margin: 0;
     }
-
     li {
       padding: 4px 0;
       font-size: 14px;
