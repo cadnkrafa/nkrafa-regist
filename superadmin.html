@@ -22,11 +22,11 @@
       vertical-align: middle;
       font-size: 0.95em;
     }
-    th:nth-child(1) { width: 110px; }  /* RTAF_ID */
-    th:nth-child(2) { width: 80px; }   /* Rank */
-    th:nth-child(3) { width: 160px; }  /* Name */
-    th:nth-child(4) { width: 160px; }  /* Unit */
-    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; } /* Admin, SuperAdmin */
+    th:nth-child(1) { width: 110px; }
+    th:nth-child(2) { width: 80px; }
+    th:nth-child(3) { width: 160px; }
+    th:nth-child(4) { width: 160px; }
+    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; }
   </style>
 </head>
 <body>
@@ -61,9 +61,15 @@
         <tbody id="adminTable"></tbody>
       </table>
     </div>
+
+    <div class="text-end mt-2">
+      <button class="btn btn-warning btn-sm" onclick="resetRoles()">🔁 รีเซ็ตสิทธิ์ทั้งหมด</button>
+    </div>
   </div>
 
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5BYyhXBvT02ZcQgu4eRqwBd1-aB4ep91RVYmS0EWnIvaukIQSkVLhLyGCJNibruUdNA/exec";
+
     async function getUserId() {
       await liff.init({ liffId: LIFF_ID_SUPERADMIN });
       if (!liff.isLoggedIn()) {
@@ -126,6 +132,30 @@
       document.getElementById('searchInput').oninput = filterAndRender;
       document.getElementById('unitFilter').onchange = filterAndRender;
       filterAndRender();
+
+      // Add sorting
+      const headers = document.querySelectorAll("th");
+      headers.forEach((th, index) => {
+        th.style.cursor = "pointer";
+        th.onclick = () => {
+          const rows = Array.from(table.querySelectorAll("tr"));
+          const getCellText = row => row.children[index].textContent.trim().toLowerCase();
+          const isBooleanCol = index >= 4;
+          const sorted = rows.sort((a, b) => {
+            let valA = getCellText(a);
+            let valB = getCellText(b);
+            if (isBooleanCol) {
+              valA = valA === "true";
+              valB = valB === "true";
+            }
+            return (valA > valB ? 1 : valA < valB ? -1 : 0) * (sortState.asc ? 1 : -1);
+          });
+          sortState.asc = sortState.column === index ? !sortState.asc : true;
+          sortState.column = index;
+          table.innerHTML = "";
+          sorted.forEach(row => table.appendChild(row));
+        };
+      });
     }
 
     function updateRole(rtafId, field, value) {
@@ -135,11 +165,26 @@
         .catch(err => console.error('Error:', err));
     }
 
+    async function resetRoles() {
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
+      try {
+        const res = await fetch(`${SCRIPT_URL}?resetRoles=1`);
+        const msg = await res.text();
+        console.log("🔁 resetRoles:", msg);
+        alert("✅ รีเซ็ตสำเร็จ");
+        loadAdminList();
+      } catch (err) {
+        console.error("❌ resetRoles error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการรีเซ็ต");
+      }
+    }
+
     function logout() {
       if (liff.isLoggedIn()) liff.logout();
       location.reload();
     }
 
+    let sortState = { column: null, asc: true };
     main();
   </script>
 </body>
