@@ -18,6 +18,11 @@
       top: 20px;
       right: 20px;
     }
+    .reset-btn {
+      position: absolute;
+      top: 20px;
+      right: 110px;
+    }
     table td, table th {
       vertical-align: middle;
       font-size: 0.95em;
@@ -30,6 +35,7 @@
   </style>
 </head>
 <body>
+  <button class="btn btn-warning reset-btn" onclick="resetRoles()">Reset สิทธิ์</button>
   <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
 
   <div class="container">
@@ -61,15 +67,9 @@
         <tbody id="adminTable"></tbody>
       </table>
     </div>
-
-    <div class="text-end mt-2">
-      <button class="btn btn-warning btn-sm" onclick="resetRoles()">🔁 รีเซ็ตสิทธิ์ทั้งหมด</button>
-    </div>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5BYyhXBvT02ZcQgu4eRqwBd1-aB4ep91RVYmS0EWnIvaukIQSkVLhLyGCJNibruUdNA/exec";
-
     async function getUserId() {
       await liff.init({ liffId: LIFF_ID_SUPERADMIN });
       if (!liff.isLoggedIn()) {
@@ -133,27 +133,25 @@
       document.getElementById('unitFilter').onchange = filterAndRender;
       filterAndRender();
 
-      // Add sorting
+      // Enable sorting
       const headers = document.querySelectorAll("th");
       headers.forEach((th, index) => {
         th.style.cursor = "pointer";
         th.onclick = () => {
           const rows = Array.from(table.querySelectorAll("tr"));
-          const getCellText = row => row.children[index].textContent.trim().toLowerCase();
-          const isBooleanCol = index >= 4;
-          const sorted = rows.sort((a, b) => {
-            let valA = getCellText(a);
-            let valB = getCellText(b);
-            if (isBooleanCol) {
-              valA = valA === "true";
-              valB = valB === "true";
+          const getText = row => row.children[index].textContent.trim().toLowerCase();
+          const isBool = index >= 4;
+          rows.sort((a, b) => {
+            let valA = getText(a), valB = getText(b);
+            if (isBool) {
+              valA = valA === 'true';
+              valB = valB === 'true';
             }
             return (valA > valB ? 1 : valA < valB ? -1 : 0) * (sortState.asc ? 1 : -1);
           });
           sortState.asc = sortState.column === index ? !sortState.asc : true;
           sortState.column = index;
-          table.innerHTML = "";
-          sorted.forEach(row => table.appendChild(row));
+          rows.forEach(row => table.appendChild(row));
         };
       });
     }
