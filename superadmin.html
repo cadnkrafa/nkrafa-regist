@@ -158,10 +158,13 @@
     function updateRole(rtafId, field, value) {
       fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
         .then(res => res.text())
-        .then(msg => console.log(msg))
-        .catch(err => console.error('Error:', err));
+        .then(msg => {
+          console.log("📝 updated:", msg);
+          loadAdminList(); // 🔁 โหลดข้อมูลใหม่
+        })
+      .catch(err => console.error('Error:', err));
     }
-
+    
     async function resetRoles() {
       if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
       try {
