@@ -2,48 +2,93 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>สรุปการเข้าร่วมงาน</title>
+  <title>ระบบแสดงจำนวนผู้เข้าร่วมงาน</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="./config.js"></script>
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
-      background: #eef3f8;
-      margin: 0;
+      background: #e9f4fb;
       padding: 20px;
+      margin: 0;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 30px;
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
+
+    .logo-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-title img {
+      height: 50px;
+    }
+
+    .summary {
+      display: flex;
+      gap: 40px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .bar-wrapper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px 40px;
+    }
+
     .bar-container {
-      margin-bottom: 15px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
       cursor: pointer;
     }
+
     .bar-label {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 5px;
+      font-size: 16px;
       font-weight: bold;
+      margin-bottom: 6px;
     }
-    .bar {
-      height: 30px;
-      background: #cfe2ff;
-      border-radius: 5px;
+
+    .progress-wrapper {
+      background: #d7e7f4;
+      height: 26px;
+      border-radius: 13px;
       position: relative;
       overflow: hidden;
     }
-    .bar-fill {
+
+    .progress-fill {
+      background: #2196f3;
       height: 100%;
-      background: #0d6efd;
-      width: 0%;
-      color: white;
-      text-align: right;
-      padding-right: 8px;
-      box-sizing: border-box;
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      color: #fff;
+      padding-right: 10px;
+      font-size: 13px;
+      border-radius: 13px 0 0 13px;
     }
+
+    .progress-fill span {
+      background: #fff;
+      color: #2196f3;
+      border-radius: 50%;
+      padding: 3px 7px;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+
     .overlay {
       position: fixed;
       top: 0;
@@ -95,8 +140,16 @@
   </style>
 </head>
 <body>
-  <h2>สรุปการเข้าร่วมงาน</h2>
-  <div id="summary"></div>
+  <header>
+    <div class="logo-title">
+      <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be.jpeg" alt="logo">
+      <div>ระบบแสดงจำนวนผู้เข้าร่วมงาน</div>
+    </div>
+    <div class="summary" id="totals">กำลังโหลด...</div>
+  </header>
+
+  <div class="bar-wrapper" id="summary"></div>
+
   <div class="overlay" id="overlay">
     <div class="popup" id="popup">
       <span class="close-btn" onclick="hidePopup()">&times;</span>
@@ -104,44 +157,58 @@
     </div>
   </div>
 
-  <script src="./config.js"></script>
-<script>
-    // ใช้ SCRIPT_URL จาก config.js
-    const callbackName = "loadSummary";
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?summary=1&callback=${callbackName}`;
-    document.head.appendChild(script);
+  <script>
+    const SCRIPT = document.createElement('script');
+    SCRIPT.src = `${SCRIPT_URL}?summary=1&callback=loadSummary`;
+    document.head.appendChild(SCRIPT);
 
     window.loadSummary = function(data) {
       const container = document.getElementById('summary');
+      const totals = document.getElementById('totals');
       const registMap = new Map(data.regist.map(row => [row.RTAF_ID, true]));
 
       const grouped = {};
       data.data.forEach(row => {
-        if (!row.List) return; // ✅ ข้ามหน่วยที่ไม่ได้ส่งชื่อ
+        if (!row.List) return;
         const unit = row.Unit;
         if (!grouped[unit]) grouped[unit] = [];
         grouped[unit].push(row);
       });
+
+      let grandTotal = 0, grandJoin = 0;
 
       Object.entries(grouped).forEach(([unit, people]) => {
         const total = people.length;
         const joined = people.filter(p => registMap.has(p.RTAF_ID)).length;
         const percent = ((joined / total) * 100).toFixed(1);
 
-        const bar = document.createElement('div');
-        bar.className = 'bar-container';
-        bar.innerHTML = `
+        grandTotal += total;
+        grandJoin += joined;
+
+        const div = document.createElement('div');
+        div.className = 'bar-container';
+        div.innerHTML = `
           <div class="bar-label">
             <span>${unit}</span>
-            <span>${joined} / ${total} คน (${percent}%)</span>
+            <span>เข้าร่วม ${joined} คน จาก ${total}</span>
           </div>
-          <div class="bar"><div class="bar-fill" style="width:${percent}%">${percent}%</div></div>
+          <div class="progress-wrapper">
+            <div class="progress-fill" style="width:${percent}%">
+              ${percent}% ${percent !== '100.0' ? `<span>${joined}</span>` : ''}
+            </div>
+          </div>
         `;
-        bar.onclick = () => showPopup(unit, people, registMap);
-        container.appendChild(bar);
+        div.onclick = () => showPopup(unit, people, registMap);
+        container.appendChild(div);
       });
-    }
+
+      const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
+      totals.innerHTML = `
+        <div>ยอดเต็ม: ${grandTotal} คน</div>
+        <div>มาจริง: ${grandJoin} คน</div>
+        <div>คิดเป็น: ${grandPercent}%</div>
+      `;
+    };
 
     function showPopup(unit, people, registMap) {
       const total = people.length;
