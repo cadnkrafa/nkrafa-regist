@@ -35,8 +35,6 @@
       font-size: 28px;
       font-weight: bold;
       color: #1a237e;
-      border-bottom: 3px solid #90caf9;
-      padding-bottom: 5px;
     }
 
     .summary {
@@ -88,7 +86,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      padding-right: 10px;
+      padding-right: 12px;
       font-size: 13px;
       border-radius: 13px 0 0 13px;
       color: white;
@@ -116,40 +114,60 @@
       z-index: 9999;
     }
     .popup {
-      background: white;
+      background: linear-gradient(to bottom, #ffffff, #f4f8fb);
       padding: 30px;
-      border-radius: 10px;
+      border-radius: 12px;
       width: 90%;
       max-width: 1000px;
       max-height: 90vh;
       overflow-y: auto;
       position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
     .popup h3 {
       margin-top: 0;
+      font-size: 24px;
+      color: #0d47a1;
+    }
+    .popup p {
+      font-size: 16px;
+      margin-bottom: 20px;
     }
     .popup .close-btn {
       position: absolute;
       top: 10px;
       right: 15px;
       cursor: pointer;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
+      color: #333;
     }
     .list-columns {
       display: flex;
       gap: 30px;
-      margin-top: 20px;
+      margin-top: 10px;
     }
     .list-columns div {
       flex: 1;
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .list-columns h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #1976d2;
     }
     ul {
       list-style: none;
       padding-left: 0;
+      margin: 0;
     }
     li {
-      padding: 2px 0;
+      padding: 4px 0;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -217,7 +235,7 @@
             <span>${joined} จาก ${total}</span>
           </div>
           <div class="progress-wrapper">
-            <div class="progress-fill" style="width:${percent}%; background:${getBarColor(percent)}"></div>
+            <div class="progress-fill" style="width:${percent}%; background:${getBarColor(percent)}">${percent}%</div>
           </div>
         `;
         div.onclick = () => showPopup(unit, people, registMap);
