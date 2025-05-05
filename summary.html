@@ -31,6 +31,14 @@
       height: 50px;
     }
 
+    .logo-title div {
+      font-size: 28px;
+      font-weight: bold;
+      color: #1a237e;
+      border-bottom: 3px solid #90caf9;
+      padding-bottom: 5px;
+    }
+
     .summary {
       display: flex;
       gap: 20px;
@@ -68,7 +76,7 @@
     }
 
     .progress-wrapper {
-      background: #d7e7f4;
+      background: #e0e0e0;
       height: 26px;
       border-radius: 13px;
       position: relative;
@@ -84,6 +92,15 @@
       font-size: 13px;
       border-radius: 13px 0 0 13px;
       color: white;
+      background-size: 40px 40px;
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.15), rgba(255,255,255,.15) 10px, transparent 10px, transparent 20px);
+      animation: progress-stripes 1s linear infinite;
+      transition: width 1s ease-in-out;
+    }
+
+    @keyframes progress-stripes {
+      0% { background-position: 0 0; }
+      100% { background-position: 40px 0; }
     }
 
     .overlay {
@@ -159,25 +176,22 @@
   </div>
 
   <script>
-    const SCRIPT = document.createElement('script');
-    SCRIPT.src = `${SCRIPT_URL}?summary=1&callback=loadSummary`;
-    document.head.appendChild(SCRIPT);
-
-    setInterval(() => location.reload(), 15000);
-
     function getBarColor(percent) {
+      if (percent == 100) return '#2ecc71';
       if (percent < 25) return '#e74c3c';
       if (percent < 50) return '#f39c12';
       if (percent < 75) return '#f1c40f';
       return '#3498db';
     }
 
-    window.loadSummary = function(data) {
+    function updateDashboard(data) {
       const container = document.getElementById('summary');
       const totals = document.getElementById('totals');
-      const registMap = new Map(data.regist.map(row => [row.RTAF_ID, true]));
+      container.innerHTML = '';
 
+      const registMap = new Map(data.regist.map(row => [row.RTAF_ID, true]));
       const grouped = {};
+
       data.data.forEach(row => {
         if (!row.List) return;
         const unit = row.Unit;
@@ -216,7 +230,20 @@
         <div>เข้าร่วม: ${grandJoin} คน</div>
         <div>คิดเป็น: ${grandPercent}%</div>
       `;
+    }
+
+    function fetchData() {
+      const SCRIPT = document.createElement('script');
+      SCRIPT.src = `${SCRIPT_URL}?summary=1&callback=loadSummary&_t=${Date.now()}`;
+      document.head.appendChild(SCRIPT);
+    }
+
+    window.loadSummary = function(data) {
+      updateDashboard(data);
     };
+
+    fetchData();
+    setInterval(fetchData, 15000);
 
     function showPopup(unit, people, registMap) {
       const total = people.length;
