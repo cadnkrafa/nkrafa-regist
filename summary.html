@@ -108,7 +108,7 @@
 <script>
     const callbackName = "loadSummary";
     const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?callback=${callbackName}`;
+    script.src = `${SCRIPT_URL}?summary=1&callback=${callbackName}`;
     document.head.appendChild(script);
 
     window.loadSummary = function(data) {
