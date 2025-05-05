@@ -18,18 +18,24 @@
       top: 20px;
       right: 20px;
     }
+    .reset-btn {
+      position: absolute;
+      top: 20px;
+      right: 110px;
+    }
     table td, table th {
       vertical-align: middle;
       font-size: 0.95em;
     }
-    th:nth-child(1) { width: 110px; }  /* RTAF_ID */
-    th:nth-child(2) { width: 80px; }   /* Rank */
-    th:nth-child(3) { width: 160px; }  /* Name */
-    th:nth-child(4) { width: 160px; }  /* Unit */
-    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; } /* Admin, SuperAdmin */
+    th:nth-child(1) { width: 110px; }
+    th:nth-child(2) { width: 80px; }
+    th:nth-child(3) { width: 160px; }
+    th:nth-child(4) { width: 160px; }
+    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; }
   </style>
 </head>
 <body>
+  <button class="btn btn-warning reset-btn" onclick="resetRoles()">Reset สิทธิ์</button>
   <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
 
   <div class="container">
@@ -126,6 +132,27 @@
       document.getElementById('searchInput').oninput = filterAndRender;
       document.getElementById('unitFilter').onchange = filterAndRender;
       filterAndRender();
+
+      const headers = document.querySelectorAll("th");
+      headers.forEach((th, index) => {
+        th.style.cursor = "pointer";
+        th.onclick = () => {
+          const rows = Array.from(table.querySelectorAll("tr"));
+          const getText = row => row.children[index].textContent.trim().toLowerCase();
+          const isBool = index >= 4;
+          rows.sort((a, b) => {
+            let valA = getText(a), valB = getText(b);
+            if (isBool) {
+              valA = valA === 'true';
+              valB = valB === 'true';
+            }
+            return (valA > valB ? 1 : valA < valB ? -1 : 0) * (sortState.asc ? 1 : -1);
+          });
+          sortState.asc = sortState.column === index ? !sortState.asc : true;
+          sortState.column = index;
+          rows.forEach(row => table.appendChild(row));
+        };
+      });
     }
 
     function updateRole(rtafId, field, value) {
@@ -135,11 +162,27 @@
         .catch(err => console.error('Error:', err));
     }
 
+    async function resetRoles() {
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
+      try {
+        const res = await fetch(`${SCRIPT_URL}?resetRoles=1`);
+        const msg = await res.text();
+        console.log("🔁 resetRoles:", msg);
+        alert("✅ รีเซ็ตสำเร็จ");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        loadAdminList();
+      } catch (err) {
+        console.error("❌ resetRoles error:", err);
+        alert("❌ เกิดข้อผิดพลาดในการรีเซ็ต");
+      }
+    }
+
     function logout() {
       if (liff.isLoggedIn()) liff.logout();
       location.reload();
     }
 
+    let sortState = { column: null, asc: true };
     main();
   </script>
 </body>
