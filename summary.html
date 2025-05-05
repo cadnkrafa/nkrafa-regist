@@ -111,7 +111,7 @@
     script.src = `${SCRIPT_URL}?callback=${callbackName}`;
     document.head.appendChild(script);
 
-    function loadSummary(data) {
+    window.loadSummary = function(data) {
       const container = document.getElementById('summary');
       const registMap = new Map(data.regist.map(row => row.RTAF_ID));
 
