@@ -104,8 +104,8 @@
     </div>
   </div>
 
-  <script src="./config.js"></script>
-<script>
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLCLZ6paMQlWgpccekANhBBOICv-nFDkUmckx1SmvAk3WlnDAn2NoK2sy2Q9NnBL1PDQ/exec";
     const callbackName = "loadSummary";
     const script = document.createElement('script');
     script.src = `${SCRIPT_URL}?summary=1&callback=${callbackName}`;
@@ -113,7 +113,7 @@
 
     window.loadSummary = function(data) {
       const container = document.getElementById('summary');
-      const registMap = new Map(data.regist.map(row => row.RTAF_ID));
+      const registMap = new Map(data.regist.map(row => [row.RTAF_ID, true]));
 
       const grouped = {};
       data.data.forEach(row => {
@@ -169,9 +169,6 @@
     function hidePopup() {
       document.getElementById('overlay').style.display = 'none';
     }
-  setInterval(() => {
-  location.reload();
-}, 15000); // รีเฟรชทุก 15 วินาที
-</script>
+  </script>
 </body>
 </html>
