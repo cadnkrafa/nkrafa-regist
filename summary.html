@@ -104,8 +104,9 @@
     </div>
   </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLCLZ6paMQlWgpccekANhBBOICv-nFDkUmckx1SmvAk3WlnDAn2NoK2sy2Q9NnBL1PDQ/exec";
+  <script src="./config.js"></script>
+<script>
+    // ใช้ SCRIPT_URL จาก config.js
     const callbackName = "loadSummary";
     const script = document.createElement('script');
     script.src = `${SCRIPT_URL}?summary=1&callback=${callbackName}`;
