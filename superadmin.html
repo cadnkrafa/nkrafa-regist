@@ -22,11 +22,11 @@
       vertical-align: middle;
       font-size: 0.95em;
     }
-    th:nth-child(1) { width: 110px; }  /* RTAF_ID */
-    th:nth-child(2) { width: 80px; }   /* Rank */
-    th:nth-child(3) { width: 160px; }  /* Name */
-    th:nth-child(4) { width: 160px; }  /* Unit */
-    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; } /* Admin, SuperAdmin */
+    th:nth-child(1) { width: 110px; }
+    th:nth-child(2) { width: 80px; }
+    th:nth-child(3) { width: 160px; }
+    th:nth-child(4) { width: 160px; }
+    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; }
   </style>
 </head>
 <body>
@@ -64,6 +64,8 @@
   </div>
 
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5BYyhXBvT02ZcQgu4eRqwBd1-aB4ep91RVYmS0EWnIvaukIQSkVLhLyGCJNibruUdNA/exec";
+
     async function getUserId() {
       await liff.init({ liffId: LIFF_ID_SUPERADMIN });
       if (!liff.isLoggedIn()) {
@@ -78,6 +80,7 @@
       const userId = await getUserId();
       const check = await fetch(`${SCRIPT_URL}?checkSuperAdmin=1&userId=${encodeURIComponent(userId)}`);
       const isSuper = await check.text();
+      console.log("✅ สิทธิ์ SuperAdmin:", isSuper);
       if (isSuper !== 'true') {
         alert('❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
         document.body.innerHTML = '<h3 class="text-center text-danger mt-5">❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้</h3>';
@@ -87,12 +90,21 @@
     }
 
     async function loadAdminList() {
-      const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
-      const list = await res.json();
-      renderTable(list);
+      try {
+        const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
+        const text = await res.text();
+        console.log("📦 raw response:", text);
+        const list = JSON.parse(text);
+        console.log("✅ parsed list:", list);
+        renderTable(list);
+      } catch (error) {
+        console.error("❌ โหลดข้อมูลล้มเหลว:", error);
+        alert("เกิดข้อผิดพลาดในการโหลดข้อมูล admin\n\nดู console (F12) เพื่อรายละเอียดเพิ่มเติม");
+      }
     }
 
     function renderTable(data) {
+      console.log("📋 แสดงตาราง:", data);
       const table = document.getElementById('adminTable');
       table.innerHTML = '';
 
@@ -131,8 +143,8 @@
     function updateRole(rtafId, field, value) {
       fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
         .then(res => res.text())
-        .then(msg => console.log(msg))
-        .catch(err => console.error('Error:', err));
+        .then(msg => console.log("📝 อัปเดต:", msg))
+        .catch(err => console.error('❌ Error updateRole:', err));
     }
 
     function logout() {
@@ -144,4 +156,3 @@
   </script>
 </body>
 </html>
-
