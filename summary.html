@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ระบบแสดงจำนวนผู้เข้าร่วมงาน</title>
+  <title>DASHBOARD การเข้าร่วมงาน</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="./config.js"></script>
   <style>
@@ -33,9 +33,16 @@
 
     .summary {
       display: flex;
-      gap: 40px;
+      gap: 20px;
+    }
+
+    .summary div {
+      background: white;
+      padding: 10px 20px;
+      border-radius: 15px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .bar-wrapper {
@@ -69,24 +76,14 @@
     }
 
     .progress-fill {
-      background: #2196f3;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      color: #fff;
       padding-right: 10px;
       font-size: 13px;
       border-radius: 13px 0 0 13px;
-    }
-
-    .progress-fill span {
-      background: #fff;
-      color: #2196f3;
-      border-radius: 50%;
-      padding: 3px 7px;
-      margin-left: 10px;
-      font-weight: bold;
+      color: white;
     }
 
     .overlay {
@@ -142,10 +139,14 @@
 <body>
   <header>
     <div class="logo-title">
-      <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be.jpeg" alt="logo">
-      <div>ระบบแสดงจำนวนผู้เข้าร่วมงาน</div>
+      <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="logo">
+      <div>DASHBOARD การเข้าร่วมงาน</div>
     </div>
-    <div class="summary" id="totals">กำลังโหลด...</div>
+    <div class="summary" id="totals">
+      <div>ยอดรวม: -</div>
+      <div>เข้าร่วม: -</div>
+      <div>คิดเป็น: -%</div>
+    </div>
   </header>
 
   <div class="bar-wrapper" id="summary"></div>
@@ -161,6 +162,15 @@
     const SCRIPT = document.createElement('script');
     SCRIPT.src = `${SCRIPT_URL}?summary=1&callback=loadSummary`;
     document.head.appendChild(SCRIPT);
+
+    setInterval(() => location.reload(), 15000);
+
+    function getBarColor(percent) {
+      if (percent < 25) return '#e74c3c';
+      if (percent < 50) return '#f39c12';
+      if (percent < 75) return '#f1c40f';
+      return '#3498db';
+    }
 
     window.loadSummary = function(data) {
       const container = document.getElementById('summary');
@@ -190,12 +200,10 @@
         div.innerHTML = `
           <div class="bar-label">
             <span>${unit}</span>
-            <span>เข้าร่วม ${joined} คน จาก ${total}</span>
+            <span>${joined} จาก ${total}</span>
           </div>
           <div class="progress-wrapper">
-            <div class="progress-fill" style="width:${percent}%">
-              ${percent}% ${percent !== '100.0' ? `<span>${joined}</span>` : ''}
-            </div>
+            <div class="progress-fill" style="width:${percent}%; background:${getBarColor(percent)}"></div>
           </div>
         `;
         div.onclick = () => showPopup(unit, people, registMap);
@@ -204,8 +212,8 @@
 
       const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
       totals.innerHTML = `
-        <div>ยอดเต็ม: ${grandTotal} คน</div>
-        <div>มาจริง: ${grandJoin} คน</div>
+        <div>ยอดรวม: ${grandTotal} คน</div>
+        <div>เข้าร่วม: ${grandJoin} คน</div>
         <div>คิดเป็น: ${grandPercent}%</div>
       `;
     };
@@ -218,7 +226,7 @@
 
       const html = `
         <h3>${unit}</h3>
-        <p><strong>ยอดเต็ม:</strong> ${total} คน | <strong>มาจริง:</strong> ${joinedList.length} คน | <strong>คิดเป็น:</strong> ${percent}%</p>
+        <p><strong>ยอดรวม:</strong> ${total} คน | <strong>เข้าร่วม:</strong> ${joinedList.length} คน | <strong>คิดเป็น:</strong> ${percent}%</p>
         <div class="list-columns">
           <div>
             <h4>✅ มาร่วมงาน</h4>
