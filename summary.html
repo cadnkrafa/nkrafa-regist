@@ -225,11 +225,7 @@
       return '#3498db';
     }
 
-    function animateCount(el, to, suffix = '', duration = 1000) {
-      let start = 0;
-      const step = (timestamp) => {
-        if (!el.startTime) el.startTime = timestamp;
-        const progress = Math.min((timestamp - el.startTime) / duration, 1);
+    function if (!window.hasAnimated) animateCount($1);
         el.innerText = Math.floor(progress * to) + suffix;
         if (progress < 1) requestAnimationFrame(step);
       };
@@ -237,6 +233,7 @@
     }
 
     function updateDashboard(data) {
+      window.hasAnimated = window.hasAnimated || false;
       const container = document.getElementById('summary');
       container.innerHTML = '';
 
@@ -277,13 +274,13 @@
       });
 
       const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
-      animateCount(document.getElementById('total-count'), grandTotal, ' คน');
-      animateCount(document.getElementById('joined-count'), grandJoin, ' คน');
-      animateCount(document.getElementById('percent-count'), grandPercent, '%');
+      if (!window.hasAnimated) animateCount($1);
+      if (!window.hasAnimated) animateCount($1);
+      if (!window.hasAnimated) animateCount($1);
 
       document.querySelectorAll('.progress-percent').forEach(el => {
         const val = parseFloat(el.dataset.value);
-        animateCount(el, val, '%');
+        if (!window.hasAnimated) animateCount($1);
       });
     }
 
