@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>สรุปการเข้าร่วมงาน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: #eef3f8;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .bar-container {
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .bar {
+      height: 30px;
+      background: #cfe2ff;
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: #0d6efd;
+      width: 0%;
+      color: white;
+      text-align: right;
+      padding-right: 8px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .popup {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .popup h3 {
+      margin-top: 0;
+    }
+    .popup .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .list-columns {
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    .list-columns div {
+      flex: 1;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 2px 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>สรุปการเข้าร่วมงาน</h2>
+  <div id="summary"></div>
+  <div class="overlay" id="overlay">
+    <div class="popup" id="popup">
+      <span class="close-btn" onclick="hidePopup()">&times;</span>
+      <div id="popupContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const callbackName = "loadSummary";
+    const script = document.createElement('script');
+    script.src = `https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?callback=${callbackName}`;
+    document.head.appendChild(script);
+
+    function loadSummary(data) {
+      const container = document.getElementById('summary');
+      const registMap = new Map(data.regist.map(row => row.RTAF_ID));
+
+      const grouped = {};
+      data.data.forEach(row => {
+        if (!row.List) return; // ✅ ข้ามหน่วยที่ไม่ได้ส่งชื่อ
+        const unit = row.Unit;
+        if (!grouped[unit]) grouped[unit] = [];
+        grouped[unit].push(row);
+      });
+
+      Object.entries(grouped).forEach(([unit, people]) => {
+        const total = people.length;
+        const joined = people.filter(p => registMap.has(p.RTAF_ID)).length;
+        const percent = ((joined / total) * 100).toFixed(1);
+
+        const bar = document.createElement('div');
+        bar.className = 'bar-container';
+        bar.innerHTML = `
+          <div class="bar-label">
+            <span>${unit}</span>
+            <span>${joined} / ${total} คน (${percent}%)</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width:${percent}%">${percent}%</div></div>
+        `;
+        bar.onclick = () => showPopup(unit, people, registMap);
+        container.appendChild(bar);
+      });
+    }
+
+    function showPopup(unit, people, registMap) {
+      const total = people.length;
+      const joinedList = people.filter(p => registMap.has(p.RTAF_ID));
+      const notJoinedList = people.filter(p => !registMap.has(p.RTAF_ID));
+      const percent = ((joinedList.length / total) * 100).toFixed(1);
+
+      const html = `
+        <h3>${unit}</h3>
+        <p><strong>ยอดเต็ม:</strong> ${total} คน | <strong>มาจริง:</strong> ${joinedList.length} คน | <strong>คิดเป็น:</strong> ${percent}%</p>
+        <div class="list-columns">
+          <div>
+            <h4>✅ มาร่วมงาน</h4>
+            <ul>${joinedList.map(p => `<li>${p.Rank} ${p.Name}</li>`).join('')}</ul>
+          </div>
+          <div>
+            <h4>❌ ไม่มาร่วมงาน</h4>
+            <ul>${notJoinedList.map(p => `<li>${p.Rank} ${p.Name}</li>`).join('')}</ul>
+          </div>
+        </div>
+      `;
+      document.getElementById('popupContent').innerHTML = html;
+      document.getElementById('overlay').style.display = 'flex';
+    }
+
+    function hidePopup() {
+      document.getElementById('overlay').style.display = 'none';
+    }
+  setInterval(() => {
+  location.reload();
+}, 15000); // รีเฟรชทุก 15 วินาที
+</script>
+</body>
+</html>
