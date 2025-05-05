@@ -70,6 +70,8 @@
   </div>
 
   <script>
+    let currentData = [];
+
     async function getUserId() {
       await liff.init({ liffId: LIFF_ID_SUPERADMIN });
       if (!liff.isLoggedIn()) {
@@ -95,7 +97,8 @@
     async function loadAdminList() {
       const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
       const list = await res.json();
-      renderTable(list);
+      currentData = list;
+      renderTable(currentData);
     }
 
     function renderTable(data) {
@@ -120,10 +123,10 @@
             <td>${row.name}</td>
             <td>${row.unit}</td>
             <td class="text-center">
-              <input type="checkbox" ${row.admin ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
+              <input type="checkbox" ${row.admin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
             </td>
             <td class="text-center">
-              <input type="checkbox" ${row.superadmin ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
+              <input type="checkbox" ${row.superadmin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
             </td>
           </tr>
         `).join('');
@@ -158,7 +161,12 @@
     function updateRole(rtafId, field, value) {
       fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
         .then(res => res.text())
-        .then(msg => console.log(msg))
+        .then(msg => {
+          console.log("📝 updated:", msg);
+          const target = currentData.find(row => row.rtafId === rtafId);
+          if (target) target[field] = value === true || value === 'true';
+          renderTable(currentData);
+        })
         .catch(err => console.error('Error:', err));
     }
 
