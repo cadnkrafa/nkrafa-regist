@@ -169,6 +169,7 @@
         const msg = await res.text();
         console.log("🔁 resetRoles:", msg);
         alert("✅ รีเซ็ตสำเร็จ");
+        await new Promise(resolve => setTimeout(resolve, 500));  // ⏳ รอ 0.5 วินาที
         loadAdminList();
       } catch (err) {
         console.error("❌ resetRoles error:", err);
