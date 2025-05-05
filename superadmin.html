@@ -107,7 +107,9 @@
 
       const units = [...new Set(data.map(row => row.unit))];
       const unitFilter = document.getElementById('unitFilter');
+      const selectedUnit = unitFilter.value;  // ⭐ จำค่าที่เลือกไว้ก่อน render
       unitFilter.innerHTML = '<option value="">-- แสดงทุกหน่วย --</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+      unitFilter.value = selectedUnit; // ⭐ ใส่ค่ากลับหลัง render
 
       const filterAndRender = () => {
         const search = document.getElementById('searchInput').value.toLowerCase();
