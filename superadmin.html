@@ -4,49 +4,155 @@
   <meta charset="UTF-8">
   <title>Super Admin Panel</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="./config.js"></script> <!-- ต้องมี SCRIPT_URL และ LIFF_ID_SUPERADMIN -->
+  <script src="./config.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
-      background: #f0f4f8;
+      background: #eef3f7;
       margin: 0;
       padding: 20px;
     }
     #status {
-      font-size: 1.8em;
-      color: red;
       text-align: center;
+      font-size: 1.6em;
+      color: red;
       margin-top: 100px;
     }
     #panel {
       display: none;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input[type="text"] {
+      padding: 8px;
+      font-size: 1em;
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #d9ecff;
+    }
+    tr:hover {
+      background-color: #f1f9ff;
+    }
+    .logout {
+      background: #ff5e5e;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div id="status">กำลังตรวจสอบสิทธิ์...</div>
   <div id="panel">
-    <!-- ที่นี่จะเป็นฟอร์ม admin/superadmin และ realtime search -->
-    <h1>🎖️ แผงควบคุม Super Admin</h1>
-    <!-- เติมส่วนนี้ในขั้นตอนถัดไป -->
+    <div class="top-bar">
+      <h2>🛡️ Super Admin Panel</h2>
+      <button class="logout" onclick="liff.logout(); location.reload();">ออกจากระบบ</button>
+    </div>
+    <input type="text" id="search" placeholder="🔍 ค้นหาชื่อ...">
+    <table>
+      <thead>
+        <tr>
+          <th>เลขประจำตัว</th>
+          <th>ยศ</th>
+          <th>ชื่อ</th>
+          <th>ตำแหน่ง</th>
+          <th>หน่วย</th>
+          <th>Admin</th>
+          <th>SuperAdmin</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody"></tbody>
+    </table>
   </div>
 
   <script>
+    let originalData = [];
+
     async function getUserId() {
-      try {
-        await liff.init({ liffId: LIFF_ID_SUPERADMIN });
-        if (!liff.isLoggedIn()) {
-          liff.login({ redirectUri: window.location.href });
-          return null;
-        }
-        const profile = await liff.getProfile();
-        return profile.userId;
-      } catch (e) {
-        console.warn("ไม่สามารถใช้ LIFF ได้:", e);
-        // fallback: ดึงจาก URL
-        return new URLSearchParams(window.location.search).get("userId");
+      await liff.init({ liffId: LIFF_ID_SUPERADMIN });
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href });
+        return null;
       }
+      const profile = await liff.getProfile();
+      return profile.userId;
+    }
+
+    async function loadData() {
+      const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
+      const json = await res.json();
+      originalData = json;
+      renderTable(json);
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById("dataBody");
+      tbody.innerHTML = "";
+      data.forEach((row, i) => {
+        const tr = document.createElement("tr");
+        row.forEach((value, j) => {
+          if (j < 5) {
+            const td = document.createElement("td");
+            td.innerText = value;
+            tr.appendChild(td);
+          }
+        });
+
+        // Admin checkbox
+        const adminTd = document.createElement("td");
+        const adminChk = document.createElement("input");
+        adminChk.type = "checkbox";
+        adminChk.checked = row[6] === true;
+        adminChk.onchange = () => updateStatus(row[0], 'Admin', adminChk.checked);
+        adminTd.appendChild(adminChk);
+        tr.appendChild(adminTd);
+
+        // SuperAdmin checkbox
+        const superTd = document.createElement("td");
+        const superChk = document.createElement("input");
+        superChk.type = "checkbox";
+        superChk.checked = row[7] === true;
+        superChk.onchange = () => updateStatus(row[0], 'SuperAdmin', superChk.checked);
+        superTd.appendChild(superChk);
+        tr.appendChild(superTd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateStatus(rtafId, field, value) {
+      fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&field=${field}&value=${value}`)
+        .then(res => res.text())
+        .then(console.log)
+        .catch(console.error);
+    }
+
+    function setupSearch() {
+      document.getElementById("search").addEventListener("input", e => {
+        const keyword = e.target.value.toLowerCase();
+        const filtered = originalData.filter(row => row[2].toLowerCase().includes(keyword));
+        renderTable(filtered);
+      });
     }
 
     async function main() {
@@ -56,8 +162,7 @@
         return;
       }
 
-      // ตรวจสอบสิทธิ์ว่าเป็น superadmin
-      const check = await fetch(`${SCRIPT_URL}?checkSuperAdmin=1&userId=${encodeURIComponent(userId)}`);
+      const check = await fetch(`${SCRIPT_URL}?checkSuperAdmin=1&userId=${userId}`);
       const isSuper = await check.text();
 
       if (isSuper !== 'true') {
@@ -65,11 +170,10 @@
         return;
       }
 
-      // ผ่านสิทธิ์
       document.getElementById("status").style.display = "none";
       document.getElementById("panel").style.display = "block";
-
-      // 🔜 จะใส่ UI ควบคุมสิทธิ์ที่นี่
+      await loadData();
+      setupSearch();
     }
 
     main();
