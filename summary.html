@@ -155,6 +155,16 @@
       margin-bottom: 10px;
       font-size: 16px;
     }
+    .summary div {
+      background: white;
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: border 0.3s ease;
+      border: 2px solid transparent; /* default border */
+    }
     ul {
       list-style: none;
       padding-left: 0;
@@ -190,6 +200,14 @@
 
   <script>
     function getBarColor(percent) {
+      if (percent == 100) return '#2ecc71';
+      if (percent < 25) return '#e74c3c';
+      if (percent < 50) return '#f39c12';
+      if (percent < 75) return '#f1c40f';
+      return '#3498db';
+    }
+
+    function getSummaryBorderColor(percent) {
       if (percent == 100) return '#2ecc71';
       if (percent < 25) return '#e74c3c';
       if (percent < 50) return '#f39c12';
@@ -244,6 +262,13 @@
         <div>เข้าร่วม: ${grandJoin} คน</div>
         <div>คิดเป็น: ${grandPercent}%</div>
       `;
+      
+      const color = getSummaryBorderColor(grandPercent);
+
+      // ใส่ border color ให้ทุก box ด้านบน
+      [...totals.children].forEach(el => {
+        el.style.border = `2px solid ${color}`;
+      });
     }
 
     function fetchData() {
