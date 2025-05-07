@@ -2,211 +2,208 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Admin Panel</title>
   <script src="config.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
       margin: 0;
-      background-color: #eef2f7;
-      color: #1a237e;
+      background: #f5f7fa;
     }
-
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
-      background: #d0e1f9;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 16px 24px;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-
     .header-left {
       font-size: 24px;
       font-weight: bold;
+      color: #333;
     }
-
-    .header-right {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
     .header-right button {
-      padding: 6px 12px;
+      margin-left: 10px;
+      padding: 8px 16px;
+      font-size: 14px;
       border: none;
-      border-radius: 5px;
-      font-family: 'Noto Sans Thai', sans-serif;
+      border-radius: 6px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
     }
-
-    .reset-btn {
-      background-color: #ff9800;
-      color: #fff;
-    }
-
     .logout-btn {
-      background-color: #e53935;
-      color: #fff;
+      background-color: #e74c3c;
+      color: white;
     }
-
-    .tabs {
+    .reset-btn {
+      background-color: #f39c12;
+      color: white;
+    }
+    .tab-container {
       display: flex;
       border-bottom: 2px solid #ccc;
+      background: #f0f0f0;
     }
-
     .tab {
       padding: 12px 20px;
       cursor: pointer;
-      border-right: 1px solid #ccc;
-      background: #f0f0f0;
-    }
-
-    .tab.active {
-      background: #fff;
-      border-bottom: 2px solid #1a237e;
       font-weight: bold;
+      border-right: 1px solid #ccc;
+      background: #e0e0e0;
+      color: #333;
     }
-
+    .tab.active {
+      background: #ffffff;
+      border-bottom: 2px solid #ffffff;
+    }
     .tab-content {
+      display: none;
       padding: 20px;
     }
-
+    .tab-content.active {
+      display: block;
+    }
     .controls {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
-
-    .controls-left {
+    .controls .left-controls {
       display: flex;
-      gap: 10px;
-      flex: 1;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-
-    .controls-left input[type="text"] {
-      flex: 1;
-      padding: 6px 12px;
+    .controls .right-controls {
+      margin-left: auto;
+    }
+    select, input[type="text"] {
+      font-family: 'Noto Sans Thai', sans-serif;
+      padding: 8px;
       font-size: 14px;
-      border-radius: 5px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
-
-    .controls-left select {
-      width: 60%;
-      max-width: 200px;
-      padding: 6px 12px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    .controls-right button {
-      background-color: #4caf50;
+    .add-btn {
+      background-color: #27ae60;
       color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
-
     th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
-      font-size: 14px;
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
     }
-
     th {
-      background: #cfe2f3;
+      background-color: #f2f2f2;
+      font-weight: bold;
     }
-
-    .small-col {
-      width: 120px;
+    .col-id, .col-rank {
+      width: 10%;
     }
-    .tiny-col {
-      width: 80px;
+    .col-name, .col-position {
+      width: 20%;
     }
-    .checkbox-col {
-      width: 60px;
+    .col-unit {
+      width: 15%;
+    }
+    .col-line, .col-reward, .col-actions {
+      width: 8%;
+      text-align: center;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-left">Admin Dashboard</div>
+    <div class="header-left">แผงควบคุม Admin</div>
     <div class="header-right">
-      <button class="reset-btn" onclick="resetSheet('tokens')"><i data-lucide="refresh-ccw"></i>รีเซ็ต Tokens</button>
-      <button class="reset-btn" onclick="resetSheet('regist')"><i data-lucide="refresh-ccw"></i>รีเซ็ต Regist</button>
-      <button class="reset-btn" onclick="resetSheet('rewarders')"><i data-lucide="refresh-ccw"></i>รีเซ็ตผู้จับรางวัล</button>
-      <button class="logout-btn" onclick="logout()"><i data-lucide="log-out"></i>Logout</button>
+      <button class="reset-btn" onclick="resetSheet('tokens')">🧹 รีเซ็ต Tokens</button>
+      <button class="reset-btn" onclick="resetSheet('regist')">🧹 รีเซ็ต Regist</button>
+      <button class="reset-btn" onclick="resetSheet('rewarders')">🧹 รีเซ็ตผู้จับรางวัล</button>
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
     </div>
   </header>
 
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('tab-data')">กำลังพล</div>
+  <div class="tab-container">
+    <div class="tab active" onclick="showTab('tab-personnel')">ข้อมูลกำลังพล</div>
     <div class="tab" onclick="showTab('tab-rank')">ยศ</div>
     <div class="tab" onclick="showTab('tab-unit')">หน่วย</div>
   </div>
 
-  <div class="tab-content" id="tab-data">
+  <div id="tab-personnel" class="tab-content active">
     <div class="controls">
-      <div class="controls-left">
-        <input type="text" placeholder="ค้นหา...">
-        <select>
-          <option>แสดงทุกหน่วย</option>
-          <!-- unit options -->
+      <div class="left-controls">
+        <input type="text" id="searchInput" oninput="filterTable()" placeholder="ค้นหา...">
+        <select id="unitFilter" onchange="filterTable()">
+          <option value="">แสดงทุกหน่วย</option>
         </select>
       </div>
-      <div class="controls-right">
-        <button><i data-lucide="plus"></i>เพิ่ม</button>
+      <div class="right-controls">
+        <button class="add-btn" onclick="addNewRow()">➕ เพิ่ม</button>
       </div>
     </div>
-    <table>
+    <table id="personnelTable">
       <thead>
         <tr>
-          <th class="small-col">เลขประจำตัว</th>
-          <th>ยศ</th>
-          <th>ชื่อ</th>
-          <th>ตำแหน่ง</th>
-          <th>หน่วย</th>
-          <th class="tiny-col">LINE</th>
-          <th class="checkbox-col">ผู้จับรางวัล</th>
-          <th class="small-col">การกระทำ</th>
+          <th class="col-id">เลขประจำตัว</th>
+          <th class="col-rank">ยศ</th>
+          <th class="col-name">ชื่อ</th>
+          <th class="col-position">ตำแหน่ง</th>
+          <th class="col-unit">หน่วย</th>
+          <th class="col-line">สถานะผูกบัญชีไลน์</th>
+          <th class="col-reward">ผู้จับรางวัล</th>
+          <th class="col-actions">การกระทำ</th>
         </tr>
       </thead>
-      <tbody id="data-table-body">
-        <!-- Rows go here -->
+      <tbody>
+        <!-- Data rows will be rendered here -->
       </tbody>
     </table>
   </div>
 
-  <div class="tab-content hidden" id="tab-rank">
-    <!-- Rank management table -->
+  <div id="tab-rank" class="tab-content">
+    <!-- Rank editing content here -->
+    <p>กำลังโหลด...</p>
   </div>
-
-  <div class="tab-content hidden" id="tab-unit">
-    <!-- Unit management table -->
+  <div id="tab-unit" class="tab-content">
+    <!-- Unit editing content here -->
+    <p>กำลังโหลด...</p>
   </div>
 
   <script>
-    lucide.createIcons();
-
-    function showTab(id) {
-      document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
-      document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
-      document.getElementById(id).classList.remove('hidden');
-      event.target.classList.add('active');
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
     }
 
     function logout() {
@@ -225,15 +222,25 @@
         const isAdmin = await res.text();
         if (isAdmin !== 'true') {
           document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
+        } else {
+          // loadData()
         }
       }
     }
 
-    function resetSheet(name) {
-      fetch(`${SCRIPT_URL}?reset=${name}`).then(() => alert(`✅ รีเซ็ต ${name} แล้ว`));
+    window.onload = initLiff;
+
+    function resetSheet(sheetName) {
+      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
     }
 
-    window.onload = initLiff;
+    function filterTable() {
+      // implement search & filter logic
+    }
+
+    function addNewRow() {
+      // implement row adding logic
+    }
   </script>
 </body>
 </html>
