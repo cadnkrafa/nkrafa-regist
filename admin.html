@@ -6,6 +6,7 @@
   <title>Admin Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
   <style>
     body {
@@ -185,11 +186,19 @@
       liff.logout();
       location.reload();
     }
+    
     async function initLiff() {
+      console.log('เริ่ม init LIFF...');
       await liff.init({ liffId: LIFF_ID_ADMIN });
-      if (!liff.isLoggedIn()) liff.login();
-      else {
+      console.log('LIFF init เสร็จแล้ว');
+
+      if (!liff.isLoggedIn()) {
+        console.log('ยังไม่ได้ login');
+        liff.login();
+      } else {
         const profile = await liff.getProfile();
+        console.log('Login แล้ว: ', profile);
+
         const userId = profile.userId;
         const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
         const isAdmin = await res.text();
@@ -198,6 +207,7 @@
         }
       }
     }
+
     window.onload = initLiff;
   </script>
 </body>
