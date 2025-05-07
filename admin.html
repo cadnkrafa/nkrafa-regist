@@ -9,100 +9,24 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
   <style>
-    body {
-      font-family: 'Noto Sans Thai', sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #3498db;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-    }
-    header h1 {
-      font-size: 1.5em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0;
-    }
-    .tab-bar {
-      background: #f2f2f2;
-      display: flex;
-      padding: 0 20px;
-      gap: 10px;
-    }
-    .tab {
-      padding: 10px 16px;
-      background: white;
-      border: 1px solid #ccc;
-      border-bottom: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .tab.active {
-      background: #fff;
-      border-bottom: 2px solid #3498db;
-      color: #3498db;
-    }
-    .top-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 20px 0;
-      flex-wrap: wrap;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-grow: 1;
-      max-width: 30%;
-    }
+    body { font-family: 'Noto Sans Thai', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+    header { background: #3498db; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+    header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 8px; margin: 0; }
+    .tab-bar { background: #f2f2f2; display: flex; padding: 0 20px; gap: 10px; }
+    .tab { padding: 10px 16px; background: white; border: 1px solid #ccc; border-bottom: none; cursor: pointer; font-weight: bold; }
+    .tab.active { background: #fff; border-bottom: 2px solid #3498db; color: #3498db; }
+    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap; }
+    .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 30%; }
     .filters input[type="text"], .filters select {
-      font-family: 'Noto Sans Thai', sans-serif;
-      padding: 8px 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .btn {
-      border: none;
-      padding: 8px 14px;
-      font-size: 14px;
-      border-radius: 5px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
+      font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    .action-buttons { display: flex; gap: 10px; align-items: center; }
+    .btn { border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer; }
     .btn-reset { background: #f39c12; }
     .btn-logout { background: #e74c3c; }
     .btn-add { background: #2ecc71; white-space: nowrap; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-      font-size: 15px;
-    }
-    th {
-      background: #dceeff;
-      font-weight: bold;
-    }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px; }
+    th { background: #dceeff; font-weight: bold; }
     .tab-content { padding: 0 20px; }
     .hidden { display: none; }
     .checkbox-cell input { transform: scale(1.2); }
@@ -118,11 +42,13 @@
       <button class="btn btn-logout" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
     </div>
   </header>
+
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
     <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
     <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
   </div>
+
   <div class="tab-content" id="personnel-tab">
     <div class="top-controls">
       <div class="filters">
@@ -141,10 +67,10 @@
           <th>ชื่อ</th>
           <th>ตำแหน่ง</th>
           <th>หน่วย</th>
-          <th>แก้ไข/ลบ</th>
-          <th>สถานะผูกบัญชีไลน์</th>
           <th>ส่งชื่อร่วมงาน</th>
           <th>ผู้จับรางวัล</th>
+          <th>แก้ไข/ลบ</th>
+          <th>สถานะผูกบัญชีไลน์</th>
         </tr>
       </thead>
       <tbody id="data-table-body"></tbody>
@@ -152,9 +78,10 @@
   </div>
   <div class="tab-content hidden" id="rank-tab"></div>
   <div class="tab-content hidden" id="unit-tab"></div>
+
 <script>
   lucide.createIcons();
-  let allPersonnelData = [], linkData = [];
+  let allPersonnelData = [], linkMap = {};
 
   function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -168,7 +95,6 @@
     script.src = `${SCRIPT_URL}?adminPage=true&type=${sheetName}&action=reset&callback=handleReset`;
     document.body.appendChild(script);
   }
-
   function handleReset() { alert("รีเซ็ตเสร็จแล้ว"); }
   function logout() { liff.logout(); location.reload(); }
 
@@ -188,6 +114,12 @@
     }
   }
 
+  function loadPersonnel() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handlePersonnelData`;
+    document.body.appendChild(script);
+  }
+
   function loadLink() {
     const script = document.createElement('script');
     script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLinkData`;
@@ -195,25 +127,30 @@
   }
 
   function handleLinkData(data) {
-    linkData = data;
+    linkMap = {};
+    data.forEach(row => linkMap[row[1]] = row[0]); // map RTAF_ID -> userId
   }
 
-  function loadPersonnel() {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handlePersonnelData`;
-    document.body.appendChild(script);
-  }
-
-  function loadRank() {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=rank&action=get&callback=handleRankData`;
-    document.body.appendChild(script);
-  }
-
-  function loadUnit() {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=unit&action=get&callback=handleUnitData`;
-    document.body.appendChild(script);
+  function renderPersonnelTable(data) {
+    const tbody = document.getElementById('data-table-body');
+    tbody.innerHTML = '';
+    data.forEach((row, i) => {
+      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , drawer = false] = row;
+      const linked = linkMap[rtafId] ? '✅' : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${rtafId}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${position}</td>
+        <td>${unit}</td>
+        <td><input type="checkbox" ${list === '1' ? 'checked' : ''} onchange="updateList(${i}, this.checked)"></td>
+        <td><input type="checkbox" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="toggleReward(${i}, this.checked)"></td>
+        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${linked}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   }
 
   function handlePersonnelData(data) {
@@ -222,45 +159,10 @@
     populateUnitFilter(data);
   }
 
-  function isLinked(rtafId) {
-    return linkData.some(row => row[1] === rtafId);
-  }
-
-  function renderPersonnelTable(data) {
-    const tbody = document.getElementById('data-table-body');
-    tbody.innerHTML = '';
-    data.forEach((row, i) => {
-      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , reward = false] = row;
-      const linked = isLinked(rtafId);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${rtafId}</td>
-        <td>${rank}</td>
-        <td>${name}</td>
-        <td>${position}</td>
-        <td>${unit}</td>
-        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
-        <td>${linked ? '✅' : ''}</td>
-        <td><input type="checkbox" ${list ? 'checked' : ''} onchange="updateField(${i}, 'list', this.checked)"></td>
-        <td><input type="checkbox" ${reward === true || reward === 'true' ? 'checked' : ''} onchange="updateField(${i}, 'reward', this.checked)"></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function updateField(index, field, value) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&${field}=${value}&callback=handleUpdateField`;
-    document.body.appendChild(script);
-  }
-
-  function handleUpdateField() { console.log('updated'); }
-
   function populateUnitFilter(data) {
     const select = document.getElementById('unitFilter');
-    const units = [...new Set(data.map(row => row[4]).filter(unit => unit))].sort();
-    select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' +
-      units.map(u => `<option value="${u}">${u}</option>`).join('');
+    const units = [...new Set(data.map(row => row[4]).filter(unit => unit))];
+    select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
   }
 
   function applyFilters() {
@@ -279,11 +181,42 @@
     document.getElementById('unitFilter').addEventListener('change', applyFilters);
   });
 
+  function toggleReward(index, value) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&reward=${value}&callback=handleRewardUpdate`;
+    document.body.appendChild(script);
+  }
+  function updateList(index, value) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&list=${value ? '1' : ''}&callback=handleListUpdate`;
+    document.body.appendChild(script);
+  }
+  function handleRewardUpdate() { console.log("Reward updated"); }
+  function handleListUpdate() { console.log("List updated"); }
+
+  function deleteRow(index) {
+    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=deleteRow&index=${index}&callback=loadPersonnel`;
+      document.body.appendChild(script);
+    }
+  }
+
   function handleRankData(data) { console.log("Rank Data", data); }
-  function handleUnitData(data) { console.log("Unit Data", data); }
+  function handleUnitData(data) {
+    const unitFilter = document.querySelector('#unitFilter');
+    unitFilter.innerHTML = `<option value="">แสดงทุกหน่วย</option>`;
+    data.forEach(row => {
+      const unitName = row[1]?.toString().trim();
+      if (unitName) {
+        const option = document.createElement('option');
+        option.value = unitName;
+        option.textContent = unitName;
+        unitFilter.appendChild(option);
+      }
+    });
+  }
   window.onload = initLiff;
 </script>
 </body>
 </html>
-
-
