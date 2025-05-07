@@ -2,165 +2,89 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap">
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
+      background: #f5f8fb;
       margin: 0;
-      background: #f4f7fc;
+      padding: 0;
     }
     header {
-      background: #002e5f;
-      color: white;
-      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: #003366;
+      color: white;
+      padding: 15px 20px;
     }
-    .logout-btn {
-      background: #ff5252;
+    .logout {
+      background: #ff6666;
       border: none;
-      padding: 6px 16px;
-      border-radius: 20px;
+      padding: 8px 14px;
+      border-radius: 8px;
       color: white;
       cursor: pointer;
     }
     .tabs {
       display: flex;
-      background: #dde9f6;
+      background: #e0e7ef;
     }
     .tab {
       flex: 1;
       text-align: center;
-      padding: 14px;
+      padding: 10px;
       cursor: pointer;
       font-weight: bold;
     }
     .tab.active {
       background: white;
-      border-bottom: 3px solid #0072c6;
+      border-bottom: 2px solid #003366;
     }
-    .content {
+    .tab-content {
       padding: 20px;
     }
-    .hidden {
-      display: none;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background: #0072c6;
-      color: white;
-    }
-    .action-btn {
-      background: #ffc107;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 0 2px;
-    }
-    .delete-btn {
-      background: #ff5252;
-      color: white;
-    }
-    .checkbox-cell input {
-      transform: scale(1.2);
-    }
-    .filter-bar {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-      flex-wrap: wrap;
-    }
-    select, input[type="text"] {
-      padding: 6px;
-      margin-bottom: 10px;
-    }
-    .reset-btns {
-      margin-top: 20px;
-    }
-    .reset-btns button {
-      background: #0072c6;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin-right: 10px;
-      cursor: pointer;
-    }
+    .hidden { display: none; }
+    h2 { margin-top: 0; }
   </style>
 </head>
 <body>
   <header>
-    <div>Admin Panel</div>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+    <div>Admin Dashboard</div>
+    <button class="logout" onclick="logout()">Logout</button>
   </header>
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab('personnel')">จัดการกำลังพล</div>
-    <div class="tab" onclick="showTab('rank')">จัดการยศ</div>
-    <div class="tab" onclick="showTab('unit')">จัดการหน่วย</div>
+    <div class="tab active" onclick="showTab(event, 'dataTab')">ข้อมูลกำลังพล</div>
+    <div class="tab" onclick="showTab(event, 'rankTab')">แก้ไขยศ</div>
+    <div class="tab" onclick="showTab(event, 'unitTab')">แก้ไขหน่วย</div>
   </div>
 
-  <div class="content">
-    <div id="personnel" class="tab-content">
-      <div class="filter-bar">
-        <input type="text" id="searchBox" placeholder="ค้นหา..." onkeyup="filterTable()">
-        <select id="unitFilter" onchange="filterTable()">
-          <option value="">ทุกหน่วย</option>
-          <!-- unit options dynamically inserted -->
-        </select>
-      </div>
-      <table id="personnelTable">
-        <thead>
-          <tr>
-            <th>เลขประจำตัว</th>
-            <th>ยศ</th>
-            <th>ชื่อ</th>
-            <th>ตำแหน่ง</th>
-            <th>หน่วย</th>
-            <th>ผูกบัญชี</th>
-            <th>ผู้จับรางวัล</th>
-            <th>การกระทำ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- rows populated via JS -->
-        </tbody>
-      </table>
-      <div class="reset-btns">
-        <button onclick="resetSheet('tokens')">Reset Tokens</button>
-        <button onclick="resetSheet('regist')">Reset Regist</button>
-        <button onclick="resetSheet('drawers')">Reset ผู้จับรางวัล</button>
-      </div>
-    </div>
-
-    <div id="rank" class="tab-content hidden">
-      <h3>แก้ไขยศ</h3>
-      <!-- similar table + add/edit/remove as needed -->
-    </div>
-
-    <div id="unit" class="tab-content hidden">
-      <h3>แก้ไขหน่วย</h3>
-      <!-- similar table + add/edit/remove as needed -->
-    </div>
+  <div class="tab-content" id="dataTab">
+    <h2>ข้อมูลกำลังพล</h2>
+    <input type="text" id="searchInput" placeholder="ค้นหา...">
+    <select id="unitFilter"><option value="">-- ทุกหน่วย --</option></select>
+    <div id="dataTable">Loading...</div>
+    <button onclick="resetSheet('tokens')">Reset Tokens</button>
+    <button onclick="resetSheet('regist')">Reset Regist</button>
+    <button onclick="resetSheet('draw')">Reset ผู้จับรางวัล</button>
   </div>
 
+  <div class="tab-content hidden" id="rankTab">
+    <h2>แก้ไขยศ</h2>
+    <div id="rankTable">Loading...</div>
+  </div>
+
+  <div class="tab-content hidden" id="unitTab">
+    <h2>แก้ไขหน่วย</h2>
+    <div id="unitTable">Loading...</div>
+  </div>
+
+  <script src="./config.js"></script>
   <script>
-    function showTab(tabId) {
+    function showTab(event, tabId) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.remove('hidden');
@@ -179,23 +103,28 @@
       } else {
         const profile = await liff.getProfile();
         const userId = profile.userId;
-        const res = await fetch(`SCRIPT_URL?checkAdmin=true&userId=${userId}`);
+        const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
         const isAdmin = await res.text();
         if (isAdmin !== 'true') {
           document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
+          return;
         }
+        loadData();
       }
     }
 
-    window.onload = initLiff;
-
     function resetSheet(sheetName) {
-      fetch(`SCRIPT_URL?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
+      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
     }
 
-    function filterTable() {
-      // Implement search + unit filter logic here
+    function loadData() {
+      // โหลดข้อมูลตาราง data + rank + unit
+      document.getElementById('dataTable').innerText = '🔧 ยังไม่เชื่อมข้อมูลจริง';
+      document.getElementById('rankTable').innerText = '🔧 ยังไม่เชื่อมข้อมูลจริง';
+      document.getElementById('unitTable').innerText = '🔧 ยังไม่เชื่อมข้อมูลจริง';
     }
+
+    window.onload = initLiff;
   </script>
 </body>
 </html>
