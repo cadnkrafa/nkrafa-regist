@@ -31,9 +31,8 @@
     .tab-bar {
       background: #f2f2f2;
       display: flex;
-      padding: 8px 20px 0;
+      padding: 0 20px;
       gap: 16px;
-      border-bottom: 2px solid #ccc;
     }
     .tab {
       padding: 10px 16px;
@@ -58,14 +57,15 @@
     .filters {
       display: flex;
       gap: 10px;
-      flex: 1;
+      flex-grow: 1;
+      max-width: 70%;
     }
     .filters input[type="text"] {
       padding: 8px 10px;
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      flex: 1 1 33%;
+      flex: 1 1 30%;
     }
     .filters select {
       padding: 8px 10px;
@@ -147,12 +147,12 @@
         <tr>
           <th style="width:10%">เลขประจำตัว</th>
           <th style="width:8%">ยศ</th>
-          <th style="width:20%">ชื่อ</th>
-          <th style="width:20%">ตำแหน่ง</th>
-          <th style="width:20%">หน่วย</th>
+          <th style="width:22%">ชื่อ</th>
+          <th style="width:22%">ตำแหน่ง</th>
+          <th style="width:16%">หน่วย</th>
           <th style="width:10%">สถานะผูกบัญชีไลน์</th>
           <th style="width:6%">ผู้จับรางวัล</th>
-          <th style="width:6%">การกระทำ</th>
+          <th style="width:6%">แก้ไข/ลบ</th>
         </tr>
       </thead>
       <tbody id="data-table-body">
