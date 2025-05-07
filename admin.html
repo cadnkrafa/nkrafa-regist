@@ -2,86 +2,94 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Panel</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Management</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="./config.js"></script>
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
       margin: 0;
-      background: #f4f6fa;
-      color: #1a237e;
+      padding: 0;
+      background-color: #f4f8fb;
     }
     header {
-      padding: 16px 24px;
+      background-color: #0054a6;
+      color: white;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      flex-wrap: wrap;
     }
     header h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
     }
-    .tab-header {
+    .controls {
       display: flex;
-      background: #fff;
-      border-bottom: 2px solid #ccc;
-    }
-    .tab {
-      padding: 14px 24px;
-      cursor: pointer;
-      font-weight: bold;
-      border-bottom: 3px solid transparent;
-    }
-    .tab.active {
-      border-bottom: 3px solid #1a237e;
-      background: #eef2f9;
-    }
-    .tab-content {
-      display: none;
-      padding: 24px;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
       flex-wrap: wrap;
-      margin-bottom: 16px;
     }
-    .toolbar-left {
+    .controls .left-controls {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .toolbar-right {
-      margin-left: auto;
+    .controls input[type="text"] {
+      padding: 6px 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 240px;
     }
-    input[type="text"], select {
-      padding: 8px;
-      font-size: 14px;
+    .controls select {
+      padding: 6px 10px;
+      font-size: 15px;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
-    button {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #1a237e;
+    .controls button {
+      background-color: #ff9800;
       color: white;
-      font-weight: bold;
-      display: inline-flex;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-left: auto;
+      display: flex;
       align-items: center;
       gap: 6px;
     }
-    button:hover {
-      background: #0d153f;
+    .controls button:hover {
+      background-color: #fb8c00;
+    }
+    .tab-bar {
+      display: flex;
+      border-bottom: 2px solid #ccc;
+      background: #e0e0e0;
+    }
+    .tab {
+      padding: 12px 20px;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: white;
+      font-weight: bold;
+      border-bottom: 2px solid #0054a6;
+    }
+    .tab-content {
+      padding: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    .table-wrapper {
+      overflow-x: auto;
     }
     table {
       width: 100%;
@@ -89,95 +97,90 @@
       background: white;
     }
     th, td {
-      padding: 10px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
       text-align: left;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
     }
     th {
-      background: #e0e7ff;
+      background-color: #f0f0f0;
     }
-    .actions button {
-      margin-left: 5px;
+    .action-buttons button {
+      margin-right: 4px;
+      padding: 4px 8px;
+      font-size: 14px;
+      cursor: pointer;
     }
-    .checkbox-cell {
-      text-align: center;
+    .top-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
-    .logout-btn {
-      background: #e53935;
+    .top-right button {
+      background-color: #d32f2f;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Admin Dashboard</h1>
-    <button class="logout-btn" onclick="logout()">
-      <i data-lucide="log-out"></i> Logout
-    </button>
+    <h1>Admin Panel</h1>
+    <div class="top-right">
+      <button onclick="resetSheet('tokens')">รีเซ็ต Tokens</button>
+      <button onclick="resetSheet('regist')">รีเซ็ต Regist</button>
+      <button onclick="resetSheet('drawers')">รีเซ็ต ผู้จับรางวัล</button>
+      <button onclick="logout()">Logout</button>
+    </div>
   </header>
-
-  <div class="tab-header">
+  <div class="tab-bar">
     <div class="tab active" onclick="showTab('dataTab', event)">ข้อมูลกำลังพล</div>
     <div class="tab" onclick="showTab('rankTab', event)">จัดการยศ</div>
     <div class="tab" onclick="showTab('unitTab', event)">จัดการหน่วย</div>
   </div>
-
-  <div id="dataTab" class="tab-content active">
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <input type="text" placeholder="ค้นหา...">
-        <select><option>ทั้งหมด</option></select>
+  <div class="tab-content" id="dataTab">
+    <div class="controls">
+      <div class="left-controls">
+        <input type="text" id="searchInput" placeholder="ค้นหาชื่อ...">
+        <select id="unitFilter">
+          <option value="">แสดงทุกหน่วย</option>
+        </select>
       </div>
-      <div class="toolbar-right">
-        <button><i data-lucide="plus"></i> เพิ่มข้อมูล</button>
-      </div>
+      <button onclick="addNewRow()">
+        <span>➕</span> เพิ่มข้อมูล
+      </button>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>เลขประจำตัว</th>
-          <th>ยศ</th>
-          <th>ชื่อ</th>
-          <th>ตำแหน่ง</th>
-          <th>หน่วย</th>
-          <th>สถานะไลน์</th>
-          <th>ผู้จับรางวัล</th>
-          <th>การกระทำ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1234567890</td>
-          <td>น.ท.</td>
-          <td>สมชาย ใจดี</td>
-          <td>หัวหน้า</td>
-          <td>กองยุทธการ</td>
-          <td>✅</td>
-          <td class="checkbox-cell"><input type="checkbox" checked></td>
-          <td class="actions">
-            <button><i data-lucide="edit"></i></button>
-            <button><i data-lucide="trash"></i></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table id="personnelTable">
+        <thead>
+          <tr>
+            <th>เลขประจำตัว</th>
+            <th>ยศ</th>
+            <th>ชื่อ</th>
+            <th>ตำแหน่ง</th>
+            <th>หน่วย</th>
+            <th>สถานะไลน์</th>
+            <th>ผู้จับรางวัล</th>
+            <th>การกระทำ</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
-
-  <div id="rankTab" class="tab-content">
-    <p>จัดการข้อมูลยศ...</p>
+  <div class="tab-content hidden" id="rankTab">
+    <!-- จัดการยศ -->
   </div>
-
-  <div id="unitTab" class="tab-content">
-    <p>จัดการข้อมูลหน่วย...</p>
+  <div class="tab-content hidden" id="unitTab">
+    <!-- จัดการหน่วย -->
   </div>
-
   <script>
-    lucide.createIcons();
-
     function showTab(tabId, event) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
+      document.getElementById(tabId).classList.remove('hidden');
       event.target.classList.add('active');
     }
 
@@ -193,12 +196,22 @@
       } else {
         const profile = await liff.getProfile();
         const userId = profile.userId;
-        const res = await fetch(`SCRIPT_URL?checkAdmin=true&userId=${userId}`);
+        const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
         const isAdmin = await res.text();
         if (isAdmin !== 'true') {
           document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
+        } else {
+          loadPersonnelData();
         }
       }
+    }
+
+    function resetSheet(sheetName) {
+      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
+    }
+
+    function loadPersonnelData() {
+      // Load and render data here...
     }
 
     window.onload = initLiff;
