@@ -1,188 +1,94 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
   <style>
-    body { font-family: 'Noto Sans Thai', sans-serif; margin: 0; background: #f4f6f8; }
-    header { background: #3498db; padding: 12px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
-    .btn { padding: 8px 14px; border-radius: 5px; font-size: 14px; display: flex; align-items: center; gap: 6px; border: none; color: white; cursor: pointer; }
-    .btn-reset { background: #f39c12; } .btn-logout { background: #e74c3c; }
-    .tab-bar { display: flex; gap: 10px; background: #f2f2f2; padding: 0 20px; }
-    .tab { padding: 10px 16px; border: 1px solid #ccc; border-bottom: none; background: white; cursor: pointer; font-weight: bold; }
-    .tab.active { border-bottom: 2px solid #3498db; color: #3498db; }
-    .tab-content { padding: 0 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px; }
+    body { font-family: 'Noto Sans Thai', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+    header {
+      background: #3498db; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white;
+    }
+    header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 8px; margin: 0; }
+    .tab-bar { background: #f2f2f2; display: flex; padding: 0 20px; gap: 10px; }
+    .tab { padding: 10px 16px; background: white; border: 1px solid #ccc; border-bottom: none; cursor: pointer; font-weight: bold; }
+    .tab.active { background: #fff; border-bottom: 2px solid #3498db; color: #3498db; }
+    .top-controls {
+      display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap;
+    }
+    .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 30%; }
+    .filters input, .filters select {
+      font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc;
+    }
+    .action-buttons { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer;
+    }
+    .btn-reset { background: #f39c12; }
+    .btn-logout { background: #e74c3c; }
+    .btn-add { background: #2ecc71; white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td {
+      border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px;
+    }
     th { background: #dceeff; font-weight: bold; }
-    .top-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding-top: 16px; }
-    .filters { display: flex; gap: 10px; }
-    .filters input, .filters select { padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; font-family: 'Noto Sans Thai', sans-serif; }
+    .tab-content { padding: 0 20px; }
+    .hidden { display: none; }
+    .checkbox-cell input { transform: scale(1.2); }
   </style>
 </head>
 <body>
   <header>
     <h1><i data-lucide="settings"></i> Admin Panel</h1>
-    <div>
+    <div class="action-buttons">
       <button class="btn btn-reset" onclick="resetSheet('tokens')"><i data-lucide="rotate-ccw"></i> Reset Tokens</button>
       <button class="btn btn-reset" onclick="resetSheet('regist')"><i data-lucide="rotate-ccw"></i> Reset Regist</button>
       <button class="btn btn-reset" onclick="resetSheet('drawprize')"><i data-lucide="rotate-ccw"></i> Reset ผู้จับรางวัล</button>
       <button class="btn btn-logout" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
     </div>
   </header>
+
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
+    <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
+    <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
   </div>
+
   <div class="tab-content" id="personnel-tab">
     <div class="top-controls">
       <div class="filters">
         <input id="searchInput" type="text" placeholder="ค้นหา...">
-        <select id="unitFilter"></select>
+        <select id="unitFilter"><option value="">แสดงทุกหน่วย</option></select>
       </div>
+      <button class="btn btn-add" onclick="addNewRow()"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
     </div>
     <table>
       <thead>
         <tr>
-          <th>เลขประจำตัว</th>
-          <th>ยศ</th>
-          <th>ชื่อ</th>
-          <th>ตำแหน่ง</th>
-          <th>หน่วย</th>
-          <th>แก้ไข/ลบ</th>
-          <th>สถานะผูกบัญชีไลน์</th>
-          <th>
-            ส่งชื่อร่วมงาน<br>
-            <input type="checkbox" id="listAllCheckbox" onchange="toggleAllList(this.checked)">
-          </th>
-          <th>ผู้จับรางวัล</th>
+          <th style="width:10%">เลขประจำตัว</th>
+          <th style="width:8%">ยศ</th>
+          <th style="width:20%">ชื่อ</th>
+          <th style="width:20%">ตำแหน่ง</th>
+          <th style="width:16%">หน่วย</th>
+          <th style="width:10%">แก้ไข/ลบ</th>
+          <th style="width:6%">สถานะผูกบัญชีไลน์</th>
+          <th style="width:6%"><input type="checkbox" onchange="toggleAllList(this)"> ส่งชื่อร่วมงาน</th>
+          <th style="width:6%">ผู้จับรางวัล</th>
         </tr>
       </thead>
       <tbody id="data-table-body"></tbody>
     </table>
   </div>
-<script>
+  <div class="tab-content hidden" id="rank-tab"></div>
+  <div class="tab-content hidden" id="unit-tab"></div>
 
-let allPersonnelData = [];
-let linkData = [];
-
-function initLiffAdmin() {
-  liff.init({ liffId: LIFF_ID_ADMIN }).then(() => {
-    if (!liff.isLoggedIn()) return liff.login();
-    liff.getProfile().then(profile => {
-      const userId = profile.userId;
-      fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`)
-        .then(res => res.text())
-        .then(isAdmin => {
-          if (isAdmin === 'true') {
-            loadAllData();
-          } else {
-            document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
-          }
-        });
-    });
-  });
-}
-
-function loadAllData() {
-  loadSheet('data', handlePersonnelData);
-  loadSheet('link', data => linkData = data);
-  loadSheet('rank', handleRankData);
-  loadSheet('unit', handleUnitData);
-}
-
-function loadSheet(sheetName, callback) {
-  const script = document.createElement('script');
-  script.src = `${SCRIPT_URL}?adminPage=true&type=${sheetName}&action=get&callback=${callback.name}`;
-  document.body.appendChild(script);
-}
-
-function handlePersonnelData(data) {
-  allPersonnelData = data;
-  renderPersonnelTable();
-  populateUnitFilter();
-}
-
-function handleRankData(data) {
-  // handle rank if needed
-}
-
-function handleUnitData(data) {
-  const select = document.getElementById('unitFilter');
-  select.innerHTML = '<option value="">แสดงทุกหน่วย</option>';
-  const sorted = data.filter(r => r[1]).sort((a, b) => a[0] - b[0]);
-  sorted.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = opt.text = r[1];
-    select.appendChild(opt);
-  });
-}
-
-function renderPersonnelTable() {
-  const keyword = document.getElementById('searchInput').value.toLowerCase();
-  const unit = document.getElementById('unitFilter').value;
-  const tbody = document.getElementById('data-table-body');
-  tbody.innerHTML = '';
-
-  allPersonnelData.forEach((row, i) => {
-    const [rtafId, rank, name, position, unitName, list, , drawer] = row;
-    const matchKeyword = `${rtafId}${rank}${name}${position}${unitName}`.toLowerCase().includes(keyword);
-    const matchUnit = !unit || unit === unitName;
-    if (!(matchKeyword && matchUnit)) return;
-
-    const isLinked = linkData.some(link => link[1] === rtafId);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${rtafId}</td>
-      <td>${rank}</td>
-      <td>${name}</td>
-      <td>${position}</td>
-      <td>${unitName}</td>
-      <td>
-        <button onclick="editRow(${i})">✏️</button>
-        <button onclick="deleteRow(${i})">🗑️</button>
-      </td>
-      <td>${isLinked ? '✅' : ''}</td>
-      <td class="checkbox-cell">
-        <input type="checkbox" data-index="${i}" onchange="toggleList(this)" ${list === 'TRUE' ? 'checked' : ''}>
-      </td>
-      <td class="checkbox-cell">
-        <input type="checkbox" onchange="toggleDrawer(${i}, this.checked)" ${drawer === true || drawer === 'TRUE' ? 'checked' : ''}>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function toggleDrawer(index, value) {
-  const script = document.createElement('script');
-  script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&drawer=${value}&callback=renderPersonnelTable`;
-  document.body.appendChild(script);
-}
-
-function toggleList(checkbox) {
-  const index = checkbox.dataset.index;
-  const value = checkbox.checked ? 'TRUE' : '';
-  const script = document.createElement('script');
-  script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&list=${value}&callback=renderPersonnelTable`;
-  document.body.appendChild(script);
-}
-
-function toggleAllList(checkbox) {
-  const checkboxes = document.querySelectorAll('input[data-index]');
-  checkboxes.forEach(cb => cb.checked = checkbox.checked);
-  checkboxes.forEach(cb => toggleList(cb));
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('searchInput').addEventListener('input', renderPersonnelTable);
-  document.getElementById('unitFilter').addEventListener('change', renderPersonnelTable);
-});
-
-</script>
+  <script>
+    // JavaScript ทั้งหมดของคุณจะถูกเติมตรงนี้ เช่น initLiff, loadPersonnel, renderPersonnelTable ฯลฯ
+    // จะรวมทุกฟังก์ชันให้ในขั้นตอนถัดไปตามที่คุณร้องขอ
+  </script>
 </body>
 </html>
