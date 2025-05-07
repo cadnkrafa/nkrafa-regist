@@ -286,19 +286,19 @@
     console.log("Rank Data", data);
   }
 
-  function handleUnitData(data) {
-    const unitFilter = document.getElementById('unitFilter');
-    unitFilter.innerHTML = `<option value="">แสดงทุกหน่วย</option>`;
-    data.forEach(row => {
-      const unit = row[0];
-      if (unit) {
-        const option = document.createElement('option');
-        option.value = unit;
-        option.textContent = unit;
-        unitFilter.appendChild(option);
-      }
-    });
-  }
+function handleUnitData(data) {
+  const unitFilter = document.querySelector('.filters select'); // <select>
+  unitFilter.innerHTML = `<option value="">แสดงทุกหน่วย</option>`;
+  data.forEach(row => {
+    const unitName = row[1]?.toString().trim(); // column 2 คือชื่อหน่วย
+    if (unitName) {
+      const option = document.createElement('option');
+      option.value = unitName;
+      option.textContent = unitName;
+      unitFilter.appendChild(option);
+    }
+  });
+}
 
   window.onload = initLiff;
 </script>
