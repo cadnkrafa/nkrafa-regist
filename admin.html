@@ -10,16 +10,24 @@
   <script src="./config.js"></script>
   <style>
     body { font-family: 'Noto Sans Thai', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-    header { background: #3498db; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+    header { background: #3498db; padding: 12px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; color: white; }
     header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 8px; margin: 0; }
-    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap; }
-    .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 30%; }
-    .filters input, .filters select { font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    .action-buttons { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
     .btn { border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-    .btn-reset { background: #f39c12; } .btn-logout { background: #e74c3c; } .btn-add { background: #2ecc71; white-space: nowrap; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px; }
+    .btn-reset { background: #f39c12; }
+    .btn-logout { background: #e74c3c; }
+    .btn-add { background: #2ecc71; white-space: nowrap; }
+    .tab-bar { background: #f2f2f2; display: flex; padding: 0 20px; gap: 10px; }
+    .tab { padding: 10px 16px; background: white; border: 1px solid #ccc; border-bottom: none; cursor: pointer; font-weight: bold; }
+    .tab.active { background: #fff; border-bottom: 2px solid #3498db; color: #3498db; }
+    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap; }
+    .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 70%; }
+    .filters input, .filters select { font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; word-wrap: break-word; }
     th { background: #dceeff; font-weight: bold; }
+    .tab-content { padding: 0 20px; }
+    .hidden { display: none; }
     .checkbox-cell input { transform: scale(1.2); }
   </style>
 </head>
@@ -34,122 +42,184 @@
     </div>
   </header>
 
-  <div class="top-controls">
-    <div class="filters">
-      <input id="searchInput" type="text" placeholder="ค้นหา...">
-      <select id="unitFilter"><option value="">แสดงทุกหน่วย</option></select>
-    </div>
-    <button class="btn btn-add"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
+    <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
+    <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>เลขประจำตัว</th>
-        <th>ยศ</th>
-        <th>ชื่อ</th>
-        <th>ตำแหน่ง</th>
-        <th>หน่วย</th>
-        <th>แก้ไข/ลบ</th>
-        <th>สถานะผูกบัญชีไลน์</th>
-        <th><input type="checkbox" onclick="toggleAll('list', this.checked)"> ส่งชื่อร่วมงาน</th>
-        <th>ผู้จับรางวัล</th>
-      </tr>
-    </thead>
-    <tbody id="data-table-body"></tbody>
-  </table>
+  <div class="tab-content" id="personnel-tab">
+    <div class="top-controls">
+      <div class="filters">
+        <input id="searchInput" type="text" placeholder="ค้นหา...">
+        <select id="unitFilter"><option value="">แสดงทุกหน่วย</option></select>
+      </div>
+      <button class="btn btn-add"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:10%">เลขประจำตัว</th>
+          <th style="width:8%">ยศ</th>
+          <th style="width:15%">ชื่อ</th>
+          <th style="width:15%">ตำแหน่ง</th>
+          <th style="width:15%">หน่วย</th>
+          <th style="width:12%">แก้ไข/ลบ</th>
+          <th style="width:10%">สถานะผูกบัญชีไลน์</th>
+          <th style="width:8%"><input type="checkbox" id="selectAllList" onchange="toggleAllList(this.checked)"> ส่งชื่อร่วมงาน</th>
+          <th style="width:7%">ผู้จับรางวัล</th>
+        </tr>
+      </thead>
+      <tbody id="data-table-body"></tbody>
+    </table>
+  </div>
 
-<script>
-  lucide.createIcons();
-  let allData = [], linkMap = new Map();
+  <div class="tab-content hidden" id="rank-tab"></div>
+  <div class="tab-content hidden" id="unit-tab"></div>
 
-  async function initLiff() {
-    await liff.init({ liffId: LIFF_ID_ADMIN });
-    if (!liff.isLoggedIn()) return liff.login();
-    const profile = await liff.getProfile();
-    const userId = profile.userId;
-    const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
-    if ((await res.text()) !== 'true') {
-      document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
-      return;
+  <script>
+    lucide.createIcons();
+    let allPersonnelData = [], linkMap = {}, drawerMap = {}, listMap = {};
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.remove('hidden');
+      event.target.classList.add('active');
     }
-    loadData();
-  }
 
-  function loadData() {
-    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=data&action=get`, 'handleData');
-    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=unit&action=get`, 'handleUnits');
-    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=link&action=get`, 'handleLinks');
-  }
+    function resetSheet(sheetName) {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=${sheetName}&action=reset&callback=handleReset`;
+      document.body.appendChild(script);
+    }
 
-  function loadJSONP(url, callbackName) {
-    const script = document.createElement('script');
-    script.src = `${url}&callback=${callbackName}`;
-    document.body.appendChild(script);
-  }
+    function handleReset() { alert("รีเซ็ตเสร็จแล้ว"); }
 
-  function handleData(data) {
-    allData = data;
-    renderTable();
-    filterOptions();
-  }
+    function logout() { liff.logout(); location.reload(); }
 
-  function handleUnits(data) {
-    const select = document.getElementById('unitFilter');
-    select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' +
-      data.sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-          .map(r => `<option value="${r[1]}">${r[1]}</option>`).join('');
-  }
+    async function initLiff() {
+      await liff.init({ liffId: LIFF_ID_ADMIN });
+      if (!liff.isLoggedIn()) return liff.login();
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+      const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+      const isAdmin = await res.text();
+      if (isAdmin !== 'true') {
+        document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
+        return;
+      }
+      loadPersonnel(); loadRank(); loadUnit(); loadLink();
+    }
 
-  function handleLinks(data) {
-    linkMap = new Map(data.map(r => [r[1], true]));
-    renderTable();
-  }
+    function loadPersonnel() {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handlePersonnelData`;
+      document.body.appendChild(script);
+    }
+    function loadRank() {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=rank&action=get&callback=handleRankData`;
+      document.body.appendChild(script);
+    }
+    function loadUnit() {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=unit&action=get&callback=handleUnitData`;
+      document.body.appendChild(script);
+    }
+    function loadLink() {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLinkData`;
+      document.body.appendChild(script);
+    }
 
-  function renderTable() {
-    const tbody = document.getElementById('data-table-body');
-    tbody.innerHTML = '';
-    const keyword = document.getElementById('searchInput').value.toLowerCase();
-    const unitFilter = document.getElementById('unitFilter').value;
-    allData.forEach((row, i) => {
-      const [rtafId, rank, name, position, unit, list = '', , drawer = false] = row;
-      if ((unitFilter && unit !== unitFilter) || ![rtafId, rank, name, position, unit].join(' ').toLowerCase().includes(keyword)) return;
-      const lineStatus = linkMap.has(rtafId.toString()) ? '✅' : '';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${rtafId}</td><td>${rank}</td><td>${name}</td><td>${position}</td><td>${unit}</td>
-        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
-        <td>${lineStatus}</td>
-        <td class="checkbox-cell"><input type="checkbox" ${list ? 'checked' : ''} onchange="toggleCheckbox(${i}, 'list', this.checked)"></td>
-        <td class="checkbox-cell"><input type="checkbox" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="toggleCheckbox(${i}, 'drawer', this.checked)"></td>`;
-      tbody.appendChild(tr);
+    function handleLinkData(data) {
+      linkMap = Object.fromEntries(data.map(([userId, rtafId]) => [rtafId.toString(), true]));
+      renderPersonnelTable(allPersonnelData);
+    }
+
+    function handlePersonnelData(data) {
+      allPersonnelData = data;
+      renderPersonnelTable(data);
+      populateUnitFilter(data);
+    }
+
+    function renderPersonnelTable(data) {
+      const tbody = document.getElementById('data-table-body');
+      tbody.innerHTML = '';
+      data.forEach((row, i) => {
+        const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , drawer = false] = row;
+        const linked = linkMap[rtafId] ? '✅' : '';
+        const listChecked = list ? 'checked' : '';
+        const drawerChecked = drawer === true || drawer === 'TRUE' ? 'checked' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${rtafId}</td>
+          <td>${rank}</td>
+          <td>${name}</td>
+          <td>${position}</td>
+          <td>${unit}</td>
+          <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
+          <td>${linked}</td>
+          <td><input type="checkbox" ${listChecked} onchange="toggleList(${i}, this.checked)"></td>
+          <td><input type="checkbox" ${drawerChecked} onchange="toggleDrawer(${i}, this.checked)"></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateUnitFilter(data) {
+      const select = document.getElementById('unitFilter');
+      const units = [...new Set(data.map(row => row[4]).filter(unit => unit))].sort();
+      select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+    }
+
+    function applyFilters() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const unit = document.getElementById('unitFilter').value;
+      const filtered = allPersonnelData.filter(row => {
+        const matchKeyword = row.join(' ').toLowerCase().includes(keyword);
+        const matchUnit = !unit || row[4] === unit;
+        return matchKeyword && matchUnit;
+      });
+      renderPersonnelTable(filtered);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('unitFilter').addEventListener('change', applyFilters);
     });
-  }
 
-  function toggleCheckbox(index, col, val) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&${col}=${val}&callback=renderTable`;
-    document.body.appendChild(script);
-  }
+    function toggleDrawer(index, value) {
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&drawer=${value}&callback=handleUpdate`;
+      document.body.appendChild(script);
+    }
 
-  function toggleAll(col, val) {
-    allData.forEach((_, i) => toggleCheckbox(i, col, val));
-  }
+    function toggleList(index, value) {
+      const script = document.createElement('script');
+      const listVal = value ? encodeURIComponent('✅') : '';
+      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&list=${listVal}&callback=handleUpdate`;
+      document.body.appendChild(script);
+    }
 
-  function resetSheet(sheet) {
-    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=${sheet}&action=reset`, 'handleReset');
-  }
+    function toggleAllList(checked) {
+      allPersonnelData.forEach((_, index) => toggleList(index, checked));
+      setTimeout(() => loadPersonnel(), 1000);
+    }
 
-  function handleReset() { alert('รีเซ็ตสำเร็จ'); }
-  function logout() { liff.logout(); location.reload(); }
+    function deleteRow(index) {
+      if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
+        const script = document.createElement('script');
+        script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=deleteRow&index=${index}&callback=loadPersonnel`;
+        document.body.appendChild(script);
+      }
+    }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('searchInput').addEventListener('input', renderTable);
-    document.getElementById('unitFilter').addEventListener('change', renderTable);
-  });
-
-  window.onload = initLiff;
-</script>
+    function handleRankData(data) { console.log("Rank Data", data); }
+    function handleUnitData(data) { console.log("Unit Data", data); }
+    function handleUpdate() { console.log("Updated"); }
+    window.onload = initLiff;
+  </script>
 </body>
 </html>
-
