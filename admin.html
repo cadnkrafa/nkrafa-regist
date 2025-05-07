@@ -4,173 +4,214 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
-  <script src="./config.js"></script>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="config.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
       margin: 0;
-      padding: 0;
-      background: #f0f4f8;
+      background-color: #eef2f7;
+      color: #1a237e;
     }
+
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
-      background: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      background: #d0e1f9;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    button {
-      font-family: 'Noto Sans Thai', sans-serif;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 14px;
-      border: none;
-      cursor: pointer;
-    }
-    .logout-btn {
-      background: #37474f;
-      color: white;
-    }
-    .reset-btn {
-      background: orange;
-      color: white;
-    }
-    .add-btn {
-      background: #2ecc71;
-      color: white;
-    }
-    .tab-bar {
-      display: flex;
-      border-bottom: 1px solid #ccc;
-    }
-    .tab {
-      padding: 10px 20px;
-      cursor: pointer;
-      background: #fff;
-      border: none;
+
+    .header-left {
+      font-size: 24px;
       font-weight: bold;
     }
-    .tab.active {
-      border-bottom: 3px solid #3498db;
-      color: #3498db;
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
+
+    .header-right button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      font-family: 'Noto Sans Thai', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reset-btn {
+      background-color: #ff9800;
+      color: #fff;
+    }
+
+    .logout-btn {
+      background-color: #e53935;
+      color: #fff;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      cursor: pointer;
+      border-right: 1px solid #ccc;
+      background: #f0f0f0;
+    }
+
+    .tab.active {
+      background: #fff;
+      border-bottom: 2px solid #1a237e;
+      font-weight: bold;
+    }
+
     .tab-content {
       padding: 20px;
     }
-    .hidden { display: none; }
-    .toolbar {
+
+    .controls {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
-    .search-group {
+
+    .controls-left {
       display: flex;
       gap: 10px;
       flex: 1;
-      max-width: 600px;
     }
-    .search-group input, .search-group select {
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-family: 'Noto Sans Thai';
+
+    .controls-left input[type="text"] {
       flex: 1;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
+
+    .controls-left select {
+      width: 60%;
+      max-width: 200px;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .controls-right button {
+      background-color: #4caf50;
+      color: white;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
-      font-size: 14px;
+      background: #fff;
     }
+
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 6px;
       text-align: center;
+      font-size: 14px;
     }
+
     th {
-      background: #e0e0e0;
+      background: #cfe2f3;
     }
-    .action-btn {
-      padding: 5px 10px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
+
+    .small-col {
+      width: 120px;
     }
-    .edit-btn { background: #3498db; color: white; }
-    .delete-btn { background: #e74c3c; color: white; }
+    .tiny-col {
+      width: 80px;
+    }
+    .checkbox-col {
+      width: 60px;
+    }
   </style>
 </head>
 <body>
   <header>
-    <div><strong>ADMIN DASHBOARD</strong></div>
+    <div class="header-left">Admin Dashboard</div>
     <div class="header-right">
-      <button class="reset-btn" onclick="resetSheet('tokens')">Reset Tokens</button>
-      <button class="reset-btn" onclick="resetSheet('regist')">Reset Regist</button>
-      <button class="reset-btn" onclick="resetSheet('rewarders')">Reset ผู้จับรางวัล</button>
-      <button class="logout-btn" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
+      <button class="reset-btn" onclick="resetSheet('tokens')"><i data-lucide="refresh-ccw"></i>รีเซ็ต Tokens</button>
+      <button class="reset-btn" onclick="resetSheet('regist')"><i data-lucide="refresh-ccw"></i>รีเซ็ต Regist</button>
+      <button class="reset-btn" onclick="resetSheet('rewarders')"><i data-lucide="refresh-ccw"></i>รีเซ็ตผู้จับรางวัล</button>
+      <button class="logout-btn" onclick="logout()"><i data-lucide="log-out"></i>Logout</button>
     </div>
   </header>
-  <div class="tab-bar">
-    <button class="tab active" onclick="showTab('tab-personnel', event)">กำลังพล</button>
-    <button class="tab" onclick="showTab('tab-rank', event)">ยศ</button>
-    <button class="tab" onclick="showTab('tab-unit', event)">หน่วย</button>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('tab-data')">กำลังพล</div>
+    <div class="tab" onclick="showTab('tab-rank')">ยศ</div>
+    <div class="tab" onclick="showTab('tab-unit')">หน่วย</div>
   </div>
-  <div id="tab-personnel" class="tab-content">
-    <div class="toolbar">
-      <div class="search-group">
-        <input type="text" id="searchInput" placeholder="ค้นหา...">
-        <select id="unitFilter">
+
+  <div class="tab-content" id="tab-data">
+    <div class="controls">
+      <div class="controls-left">
+        <input type="text" placeholder="ค้นหา...">
+        <select>
           <option>แสดงทุกหน่วย</option>
+          <!-- unit options -->
         </select>
       </div>
-      <button class="add-btn"><i data-lucide="plus"></i> เพิ่ม</button>
+      <div class="controls-right">
+        <button><i data-lucide="plus"></i>เพิ่ม</button>
+      </div>
     </div>
     <table>
       <thead>
         <tr>
-          <th>เลขประจำตัว</th>
+          <th class="small-col">เลขประจำตัว</th>
           <th>ยศ</th>
           <th>ชื่อ</th>
           <th>ตำแหน่ง</th>
           <th>หน่วย</th>
-          <th>สถานะไลน์</th>
-          <th>ผู้จับรางวัล</th>
-          <th>การกระทำ</th>
+          <th class="tiny-col">LINE</th>
+          <th class="checkbox-col">ผู้จับรางวัล</th>
+          <th class="small-col">การกระทำ</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- Dynamic rows -->
+      <tbody id="data-table-body">
+        <!-- Rows go here -->
       </tbody>
     </table>
   </div>
-  <div id="tab-rank" class="tab-content hidden">
-    <h3>รายการยศ</h3>
-    <!-- Editable list of ranks -->
+
+  <div class="tab-content hidden" id="tab-rank">
+    <!-- Rank management table -->
   </div>
-  <div id="tab-unit" class="tab-content hidden">
-    <h3>รายการหน่วย</h3>
-    <!-- Editable list of units -->
+
+  <div class="tab-content hidden" id="tab-unit">
+    <!-- Unit management table -->
   </div>
 
   <script>
-    function showTab(tabId, event) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.remove('hidden');
+    lucide.createIcons();
+
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
+      document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+      document.getElementById(id).classList.remove('hidden');
       event.target.classList.add('active');
+    }
+
+    function logout() {
+      liff.logout();
+      location.reload();
     }
 
     async function initLiff() {
@@ -188,19 +229,11 @@
       }
     }
 
-    function logout() {
-      liff.logout();
-      location.reload();
+    function resetSheet(name) {
+      fetch(`${SCRIPT_URL}?reset=${name}`).then(() => alert(`✅ รีเซ็ต ${name} แล้ว`));
     }
 
-    function resetSheet(sheetName) {
-      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
-    }
-
-    window.onload = () => {
-      lucide.createIcons();
-      initLiff();
-    };
+    window.onload = initLiff;
   </script>
 </body>
 </html>
