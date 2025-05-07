@@ -9,26 +9,27 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
   <style>
-    body { font-family: 'Noto Sans Thai', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-    header { background: #3498db; padding: 12px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; color: white; }
-    header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 8px; margin: 0; }
-    .action-buttons { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
-    .btn { border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-    .btn-reset { background: #f39c12; }
-    .btn-logout { background: #e74c3c; }
-    .btn-add { background: #2ecc71; white-space: nowrap; }
-    .tab-bar { background: #f2f2f2; display: flex; padding: 0 20px; gap: 10px; }
-    .tab { padding: 10px 16px; background: white; border: 1px solid #ccc; border-bottom: none; cursor: pointer; font-weight: bold; }
-    .tab.active { background: #fff; border-bottom: 2px solid #3498db; color: #3498db; }
-    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap; }
-    .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 70%; }
-    .filters input, .filters select { font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; word-wrap: break-word; }
-    th { background: #dceeff; font-weight: bold; }
-    .tab-content { padding: 0 20px; }
-    .hidden { display: none; }
-    .checkbox-cell input { transform: scale(1.2); }
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #3498db;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    header h1 {
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -42,65 +43,37 @@
     </div>
   </header>
 
-  <div class="tab-bar">
-    <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
-    <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
-    <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
-  </div>
+<script>
+  lucide.createIcons();
+  let allData = [];
+  let unitOrder = [];
 
-  <div class="tab-content" id="personnel-tab">
-    <div class="top-controls">
-      <div class="filters">
-        <input id="searchInput" type="text" placeholder="ค้นหา...">
-        <select id="unitFilter"><option value="">แสดงทุกหน่วย</option></select>
-      </div>
-      <button class="btn btn-add"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width:10%">เลขประจำตัว</th>
-          <th style="width:8%">ยศ</th>
-          <th style="width:20%">ชื่อ</th>
-          <th style="width:20%">ตำแหน่ง</th>
-          <th style="width:10%">หน่วย</th>
-          <th style="width:10%">แก้ไข/ลบ</th>
-          <th style="width:10%">สถานะผูกบัญชีไลน์</th>
-          <th style="width:6%"><input type="checkbox" id="selectAllList" onchange="toggleAllList(this.checked)"> ส่งชื่อร่วมงาน</th>
-          <th style="width:6%">ผู้จับรางวัล</th>
-        </tr>
-      </thead>
-      <tbody id="data-table-body"></tbody>
-    </table>
-  </div>
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.remove('hidden');
+    event.target.classList.add('active');
+  }
 
-  <div class="tab-content hidden" id="rank-tab"></div>
-  <div class="tab-content hidden" id="unit-tab"></div>
+  function resetSheet(sheetName) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=${sheetName}&action=reset&callback=handleReset`;
+    document.body.appendChild(script);
+  }
 
-  <script>
-    lucide.createIcons();
-    let allPersonnelData = [], linkMap = {}, drawerMap = {}, listMap = {};
+  function handleReset() {
+    alert("รีเซ็ตเสร็จแล้ว");
+  }
 
-    function showTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(tabId).classList.remove('hidden');
-      event.target.classList.add('active');
-    }
+  function logout() {
+    liff.logout();
+    location.reload();
+  }
 
-    function resetSheet(sheetName) {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=${sheetName}&action=reset&callback=handleReset`;
-      document.body.appendChild(script);
-    }
-
-    function handleReset() { alert("รีเซ็ตเสร็จแล้ว"); }
-
-    function logout() { liff.logout(); location.reload(); }
-
-    async function initLiff() {
-      await liff.init({ liffId: LIFF_ID_ADMIN });
-      if (!liff.isLoggedIn()) return liff.login();
+  async function initLiff() {
+    await liff.init({ liffId: LIFF_ID_ADMIN });
+    if (!liff.isLoggedIn()) liff.login();
+    else {
       const profile = await liff.getProfile();
       const userId = profile.userId;
       const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
@@ -111,115 +84,89 @@
       }
       loadPersonnel(); loadRank(); loadUnit(); loadLink();
     }
+  }
 
-    function loadPersonnel() {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handlePersonnelData`;
-      document.body.appendChild(script);
-    }
-    function loadRank() {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=rank&action=get&callback=handleRankData`;
-      document.body.appendChild(script);
-    }
-    function loadUnit() {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=unit&action=get&callback=handleUnitData`;
-      document.body.appendChild(script);
-    }
-    function loadLink() {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLinkData`;
-      document.body.appendChild(script);
-    }
+  function loadPersonnel() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handlePersonnelData`;
+    document.body.appendChild(script);
+  }
 
-    function handleLinkData(data) {
-      linkMap = Object.fromEntries(data.map(([userId, rtafId]) => [rtafId.toString(), true]));
-      renderPersonnelTable(allPersonnelData);
-    }
+  function loadRank() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=rank&action=get&callback=handleRankData`;
+    document.body.appendChild(script);
+  }
 
-    function handlePersonnelData(data) {
-      allPersonnelData = data;
-      renderPersonnelTable(data);
-      populateUnitFilter(data);
-    }
+  function loadUnit() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=unit&action=get&callback=handleUnitData`;
+    document.body.appendChild(script);
+  }
 
-    function renderPersonnelTable(data) {
-      const tbody = document.getElementById('data-table-body');
-      tbody.innerHTML = '';
-      data.forEach((row, i) => {
-        const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , drawer = false] = row;
-        const linked = linkMap[rtafId] ? '✅' : '';
-        const listChecked = list ? 'checked' : '';
-        const drawerChecked = drawer === true || drawer === 'TRUE' ? 'checked' : '';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${rtafId}</td>
-          <td>${rank}</td>
-          <td>${name}</td>
-          <td>${position}</td>
-          <td>${unit}</td>
-          <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
-          <td>${linked}</td>
-          <td><input type="checkbox" ${listChecked} onchange="toggleList(${i}, this.checked)"></td>
-          <td><input type="checkbox" ${drawerChecked} onchange="toggleDrawer(${i}, this.checked)"></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+  function loadLink() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLinkData`;
+    document.body.appendChild(script);
+  }
 
-    function populateUnitFilter(data) {
-      const select = document.getElementById('unitFilter');
-      const units = [...new Set(data.map(row => row[4]).filter(unit => unit))].sort();
-      select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
-    }
+  let linkedRtafIds = [];
 
-    function applyFilters() {
-      const keyword = document.getElementById('searchInput').value.toLowerCase();
-      const unit = document.getElementById('unitFilter').value;
-      const filtered = allPersonnelData.filter(row => {
-        const matchKeyword = row.join(' ').toLowerCase().includes(keyword);
-        const matchUnit = !unit || row[4] === unit;
-        return matchKeyword && matchUnit;
-      });
-      renderPersonnelTable(filtered);
-    }
+  function handleLinkData(data) {
+    linkedRtafIds = data.map(row => row[1]?.toString());
+    renderTable();
+  }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('searchInput').addEventListener('input', applyFilters);
-      document.getElementById('unitFilter').addEventListener('change', applyFilters);
+  function handleUnitData(data) {
+    const select = document.getElementById("unitFilter");
+    unitOrder = data.map(row => row[1]);
+    select.innerHTML = `<option value="">แสดงทุกหน่วย</option>` +
+      unitOrder.map(unit => `<option value="${unit}">${unit}</option>`).join('');
+  }
+
+  function handlePersonnelData(data) {
+    allData = data;
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('data-table-body');
+    tbody.innerHTML = '';
+    allData.forEach((row, i) => {
+      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', admin = '', superadmin = '', drawer = false] = row;
+      const isLinked = linkedRtafIds.includes(rtafId.toString());
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${rtafId}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${position}</td>
+        <td>${unit}</td>
+        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${isLinked ? '✅' : ''}</td>
+        <td class="checkbox-cell"><input type="checkbox" ${list ? 'checked' : ''} onchange="toggleList(${i}, this.checked)"></td>
+        <td class="checkbox-cell"><input type="checkbox" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="toggleDrawer(${i}, this.checked)"></td>
+      `;
+      tbody.appendChild(tr);
     });
+  }
 
-    function toggleDrawer(index, value) {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&drawer=${value}&callback=handleUpdate`;
-      document.body.appendChild(script);
-    }
+  function toggleList(index, checked) {
+    const value = checked ? '✅' : '';
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&list=${encodeURIComponent(value)}&callback=loadPersonnel`;
+    document.body.appendChild(script);
+  }
 
-    function toggleList(index, value) {
-      const script = document.createElement('script');
-      const listVal = value ? encodeURIComponent('✅') : '';
-      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&list=${listVal}&callback=handleUpdate`;
-      document.body.appendChild(script);
-    }
+  function toggleDrawer(index, checked) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&reward=${checked}&callback=loadPersonnel`;
+    document.body.appendChild(script);
+  }
 
-    function toggleAllList(checked) {
-      allPersonnelData.forEach((_, index) => toggleList(index, checked));
-      setTimeout(() => loadPersonnel(), 1000);
-    }
+  window.onload = initLiff;
+</script>
 
-    function deleteRow(index) {
-      if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
-        const script = document.createElement('script');
-        script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=deleteRow&index=${index}&callback=loadPersonnel`;
-        document.body.appendChild(script);
-      }
-    }
-
-    function handleRankData(data) { console.log("Rank Data", data); }
-    function handleUnitData(data) { console.log("Unit Data", data); }
-    function handleUpdate() { console.log("Updated"); }
-    window.onload = initLiff;
-  </script>
 </body>
 </html>
+
