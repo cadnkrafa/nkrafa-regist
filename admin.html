@@ -178,17 +178,17 @@
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.remove('hidden');
-    event.currentTarget.classList.add('active');
+    event.target.classList.add('active');
   }
 
   function resetSheet(sheetName) {
-    fetch(`${SCRIPT_URL}?type=${sheetName}&action=reset`)
-      .then(() => alert(`รีเซ็ต ${sheetName} แล้ว`))
-      .then(() => {
-        if (sheetName === 'data') loadPersonnel();
-        if (sheetName === 'rank') loadRank();
-        if (sheetName === 'unit') loadUnit();
-      });
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=${sheetName}&action=reset&callback=handleReset`;
+    document.body.appendChild(script);
+  }
+
+  function handleReset(response) {
+    alert("รีเซ็ตเสร็จแล้ว");
   }
 
   function logout() {
@@ -198,30 +198,41 @@
 
   async function initLiff() {
     await liff.init({ liffId: LIFF_ID_ADMIN });
-    if (!liff.isLoggedIn()) return liff.login();
-
-    const profile = await liff.getProfile();
-    const userId = profile.userId;
-    const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
-    const isAdmin = await res.text();
-    if (isAdmin !== 'true') {
-      document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
-      return;
+    if (!liff.isLoggedIn()) liff.login();
+    else {
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+      const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+      const isAdmin = await res.text();
+      if (isAdmin !== 'true') {
+        document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
+        return;
+      }
+      loadPersonnel();
+      loadRank();
+      loadUnit();
     }
-
-    // โหลดข้อมูลทั้ง 3 แท็บ
-    loadPersonnel();
-    loadRank();
-    loadUnit();
   }
 
-  async function loadPersonnel() {
-    const res = await fetch(`${SCRIPT_URL}?type=data&action=get`);
-    const data = await res.json();
-    renderPersonnelTable(data);
+  function loadPersonnel() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handlePersonnelData`;
+    document.body.appendChild(script);
   }
 
-  function renderPersonnelTable(data) {
+  function loadRank() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=rank&action=get&callback=handleRankData`;
+    document.body.appendChild(script);
+  }
+
+  function loadUnit() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=unit&action=get&callback=handleUnitData`;
+    document.body.appendChild(script);
+  }
+
+  function handlePersonnelData(data) {
     const tbody = document.getElementById('data-table-body');
     tbody.innerHTML = '';
     data.forEach((row, i) => {
@@ -246,32 +257,36 @@
     });
   }
 
+  function handleRankData(data) {
+    console.log("Rank Data:", data);
+    // TODO: render rank list
+  }
+
+  function handleUnitData(data) {
+    console.log("Unit Data:", data);
+    // TODO: render unit list
+  }
+
   function toggleReward(index, value) {
-    fetch(`${SCRIPT_URL}?type=data&action=update&index=${index}&reward=${value}`);
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&reward=${value}&callback=handleRewardUpdate`;
+    document.body.appendChild(script);
+  }
+
+  function handleRewardUpdate(response) {
+    console.log("Reward updated");
   }
 
   async function deleteRow(index) {
     if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
-      await fetch(`${SCRIPT_URL}?type=data&action=deleteRow&index=${index}`);
-      loadPersonnel();
+      const script = document.createElement('script');
+      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=deleteRow&index=${index}&callback=loadPersonnel`;
+      document.body.appendChild(script);
     }
-  }
-
-  async function loadRank() {
-    const res = await fetch(`${SCRIPT_URL}?type=rank&action=get`);
-    const data = await res.json();
-    const container = document.getElementById('rank-tab');
-    container.innerHTML = `<ul>${data.map((r, i) => `<li>${i + 1}. ${r[0]}</li>`).join('')}</ul>`;
-  }
-
-  async function loadUnit() {
-    const res = await fetch(`${SCRIPT_URL}?type=unit&action=get`);
-    const data = await res.json();
-    const container = document.getElementById('unit-tab');
-    container.innerHTML = `<ul>${data.map((u, i) => `<li>${i + 1}. ${u[0]}</li>`).join('')}</ul>`;
   }
 
   window.onload = initLiff;
 </script>
+
 </body>
 </html>
