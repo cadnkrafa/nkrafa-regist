@@ -2,186 +2,191 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Management</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <title>Admin | จัดการข้อมูลกำลังพล</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f8fb;
+      background: #f5f7fb;
     }
     header {
-      background-color: #0054a6;
+      background: #1a237e;
       color: white;
-      padding: 10px 20px;
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
     }
     header h1 {
+      font-size: 20px;
       margin: 0;
-      font-size: 22px;
     }
-    .controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px 20px;
-      flex-wrap: wrap;
-    }
-    .controls .left-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .controls input[type="text"] {
-      padding: 6px 10px;
-      font-size: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 240px;
-    }
-    .controls select {
-      padding: 6px 10px;
-      font-size: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .controls button {
-      background-color: #ff9800;
-      color: white;
+    header button {
+      background: #d32f2f;
       border: none;
-      padding: 8px 16px;
+      color: white;
+      padding: 8px 14px;
       border-radius: 6px;
-      font-size: 15px;
-      cursor: pointer;
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .controls button:hover {
-      background-color: #fb8c00;
-    }
-    .tab-bar {
-      display: flex;
-      border-bottom: 2px solid #ccc;
-      background: #e0e0e0;
-    }
-    .tab {
-      padding: 12px 20px;
-      cursor: pointer;
-    }
-    .tab.active {
-      background: white;
-      font-weight: bold;
-      border-bottom: 2px solid #0054a6;
-    }
-    .tab-content {
-      padding: 20px;
-    }
-    .hidden {
-      display: none;
-    }
-    .table-wrapper {
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-    th, td {
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-    .action-buttons button {
-      margin-right: 4px;
-      padding: 4px 8px;
       font-size: 14px;
       cursor: pointer;
     }
-    .top-right {
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 15px 20px;
+    }
+    .toolbar .filters {
       display: flex;
       gap: 10px;
-      align-items: center;
+      flex-wrap: wrap;
     }
-    .top-right button {
-      background-color: #d32f2f;
-      border: none;
-      color: white;
+    .toolbar input[type="text"] {
       padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      width: 220px;
+      font-family: 'Noto Sans Thai', sans-serif;
     }
+    .toolbar select {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+    .toolbar .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .toolbar .actions button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+    .toolbar .add-btn {
+      background-color: #4caf50;
+      color: white;
+    }
+    .toolbar .reset-btn {
+      background-color: #ff9800;
+      color: white;
+    }
+
+    table {
+      width: 95%;
+      margin: 10px auto;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+      text-align: center;
+    }
+    th {
+      background: #e0e0e0;
+    }
+    .checkbox {
+      transform: scale(1.2);
+    }
+    .btn {
+      padding: 5px 10px;
+      margin: 0 2px;
+      font-size: 13px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+    .btn.edit { background: #2196f3; color: white; }
+    .btn.delete { background: #e53935; color: white; }
+    .btn.save { background: #43a047; color: white; }
+    .btn.cancel { background: #9e9e9e; color: white; }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <header>
-    <h1>Admin Panel</h1>
-    <div class="top-right">
-      <button onclick="resetSheet('tokens')">รีเซ็ต Tokens</button>
-      <button onclick="resetSheet('regist')">รีเซ็ต Regist</button>
-      <button onclick="resetSheet('drawers')">รีเซ็ต ผู้จับรางวัล</button>
-      <button onclick="logout()">Logout</button>
+    <h1>ADMIN | จัดการข้อมูลกำลังพล</h1>
+    <div>
+      <button onclick="logout()"><i data-lucide="log-out" style="width:16px"></i> ออกจากระบบ</button>
     </div>
   </header>
-  <div class="tab-bar">
-    <div class="tab active" onclick="showTab('dataTab', event)">ข้อมูลกำลังพล</div>
-    <div class="tab" onclick="showTab('rankTab', event)">จัดการยศ</div>
-    <div class="tab" onclick="showTab('unitTab', event)">จัดการหน่วย</div>
-  </div>
-  <div class="tab-content" id="dataTab">
-    <div class="controls">
-      <div class="left-controls">
-        <input type="text" id="searchInput" placeholder="ค้นหาชื่อ...">
-        <select id="unitFilter">
-          <option value="">แสดงทุกหน่วย</option>
-        </select>
-      </div>
-      <button onclick="addNewRow()">
-        <span>➕</span> เพิ่มข้อมูล
+
+  <div class="toolbar">
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="ค้นหา...">
+      <select id="unitFilter">
+        <option value="">แสดงทุกหน่วย</option>
+        <!-- ตัวเลือกหน่วยจะถูกเติมจาก JS -->
+      </select>
+    </div>
+    <div class="actions">
+      <button class="add-btn" onclick="addNewRow()">
+        <i data-lucide="plus-circle"></i> เพิ่มข้อมูล
+      </button>
+      <button class="reset-btn" onclick="resetSheets()">
+        <i data-lucide="rotate-ccw"></i> รีเซ็ตข้อมูล
       </button>
     </div>
-    <div class="table-wrapper">
-      <table id="personnelTable">
-        <thead>
-          <tr>
-            <th>เลขประจำตัว</th>
-            <th>ยศ</th>
-            <th>ชื่อ</th>
-            <th>ตำแหน่ง</th>
-            <th>หน่วย</th>
-            <th>สถานะไลน์</th>
-            <th>ผู้จับรางวัล</th>
-            <th>การกระทำ</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
   </div>
-  <div class="tab-content hidden" id="rankTab">
-    <!-- จัดการยศ -->
+
+  <div id="mainTableWrapper">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th>เลขประจำตัว</th>
+          <th>ยศ</th>
+          <th>ชื่อ</th>
+          <th>ตำแหน่ง</th>
+          <th>หน่วย</th>
+          <th>ผูกบัญชีไลน์</th>
+          <th>ผู้จับรางวัล</th>
+          <th>การกระทำ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- แถวข้อมูลจะเติมจาก JS -->
+      </tbody>
+    </table>
   </div>
-  <div class="tab-content hidden" id="unitTab">
-    <!-- จัดการหน่วย -->
-  </div>
+
   <script>
-    function showTab(tabId, event) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById(tabId).classList.remove('hidden');
-      event.target.classList.add('active');
+    lucide.createIcons();
+
+    async function initLiff() {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) return liff.login();
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+
+      const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+      const isAdmin = await res.text();
+      if (isAdmin !== 'true') {
+        document.body.innerHTML = '<h2 style="padding:40px;text-align:center;color:red;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h2>';
+        return;
+      }
+
+      loadData(); // เริ่มโหลดข้อมูลเมื่อยืนยันว่าเป็น Admin
     }
 
     function logout() {
@@ -189,29 +194,24 @@
       location.reload();
     }
 
-    async function initLiff() {
-      await liff.init({ liffId: "2007226288-r5X4aV5X" });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      } else {
-        const profile = await liff.getProfile();
-        const userId = profile.userId;
-        const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
-        const isAdmin = await res.text();
-        if (isAdmin !== 'true') {
-          document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
-        } else {
-          loadPersonnelData();
-        }
-      }
+    function resetSheets() {
+      const confirmReset = confirm('⚠️ ยืนยันการรีเซ็ตข้อมูลทั้งหมดใน tokens, regist, rewarders?');
+      if (!confirmReset) return;
+      ['tokens', 'regist', 'rewarders'].forEach(sheet => {
+        fetch(`${SCRIPT_URL}?reset=${sheet}`).then(() => {
+          alert(`✅ รีเซ็ต ${sheet} สำเร็จแล้ว`);
+        });
+      });
     }
 
-    function resetSheet(sheetName) {
-      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
+    function addNewRow() {
+      // ฟังก์ชันเพิ่มแถวใหม่ (จะเติมในภายหลัง)
+      alert("🛠 ยังไม่ได้เชื่อมฟังก์ชันเพิ่มแถวใหม่");
     }
 
-    function loadPersonnelData() {
-      // Load and render data here...
+    function loadData() {
+      // โหลดข้อมูลจาก Script และเติมในตาราง
+      alert("🛠 ยังไม่ได้เชื่อมกับ Google Apps Script สำหรับโหลดข้อมูล");
     }
 
     window.onload = initLiff;
