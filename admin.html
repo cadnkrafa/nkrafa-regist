@@ -118,13 +118,11 @@
       <button class="btn btn-logout" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
     </div>
   </header>
-
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
     <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
     <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
   </div>
-
   <div class="tab-content" id="personnel-tab">
     <div class="top-controls">
       <div class="filters">
@@ -138,26 +136,25 @@
     <table>
       <thead>
         <tr>
-          <th style="width:10%">เลขประจำตัว</th>
-          <th style="width:8%">ยศ</th>
-          <th style="width:20%">ชื่อ</th>
-          <th style="width:20%">ตำแหน่ง</th>
-          <th style="width:16%">หน่วย</th>
-          <th style="width:10%">สถานะผูกบัญชีไลน์</th>
-          <th style="width:6%">ผู้จับรางวัล</th>
-          <th style="width:10%">แก้ไข/ลบ</th>
+          <th>เลขประจำตัว</th>
+          <th>ยศ</th>
+          <th>ชื่อ</th>
+          <th>ตำแหน่ง</th>
+          <th>หน่วย</th>
+          <th>แก้ไข/ลบ</th>
+          <th>สถานะผูกบัญชีไลน์</th>
+          <th>ส่งชื่อร่วมงาน</th>
+          <th>ผู้จับรางวัล</th>
         </tr>
       </thead>
       <tbody id="data-table-body"></tbody>
     </table>
   </div>
-
   <div class="tab-content hidden" id="rank-tab"></div>
   <div class="tab-content hidden" id="unit-tab"></div>
-
 <script>
   lucide.createIcons();
-  let allPersonnelData = [];
+  let allPersonnelData = [], linkData = [];
 
   function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -172,14 +169,8 @@
     document.body.appendChild(script);
   }
 
-  function handleReset() {
-    alert("รีเซ็ตเสร็จแล้ว");
-  }
-
-  function logout() {
-    liff.logout();
-    location.reload();
-  }
+  function handleReset() { alert("รีเซ็ตเสร็จแล้ว"); }
+  function logout() { liff.logout(); location.reload(); }
 
   async function initLiff() {
     await liff.init({ liffId: LIFF_ID_ADMIN });
@@ -193,8 +184,18 @@
         document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
         return;
       }
-      loadPersonnel(); loadRank(); loadUnit();
+      loadLink(); loadPersonnel(); loadRank(); loadUnit();
     }
+  }
+
+  function loadLink() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLinkData`;
+    document.body.appendChild(script);
+  }
+
+  function handleLinkData(data) {
+    linkData = data;
   }
 
   function loadPersonnel() {
@@ -221,11 +222,16 @@
     populateUnitFilter(data);
   }
 
+  function isLinked(rtafId) {
+    return linkData.some(row => row[1] === rtafId);
+  }
+
   function renderPersonnelTable(data) {
     const tbody = document.getElementById('data-table-body');
     tbody.innerHTML = '';
     data.forEach((row, i) => {
-      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', lineUser = '', reward = false] = row;
+      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , reward = false] = row;
+      const linked = isLinked(rtafId);
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${rtafId}</td>
@@ -233,17 +239,26 @@
         <td>${name}</td>
         <td>${position}</td>
         <td>${unit}</td>
-        <td>${lineUser ? '✅' : ''}</td>
-        <td><input type="checkbox" ${reward === true || reward === 'true' ? 'checked' : ''} onchange="toggleReward(${i}, this.checked)"></td>
         <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${linked ? '✅' : ''}</td>
+        <td><input type="checkbox" ${list ? 'checked' : ''} onchange="updateField(${i}, 'list', this.checked)"></td>
+        <td><input type="checkbox" ${reward === true || reward === 'true' ? 'checked' : ''} onchange="updateField(${i}, 'reward', this.checked)"></td>
       `;
       tbody.appendChild(tr);
     });
   }
 
+  function updateField(index, field, value) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&${field}=${value}&callback=handleUpdateField`;
+    document.body.appendChild(script);
+  }
+
+  function handleUpdateField() { console.log('updated'); }
+
   function populateUnitFilter(data) {
     const select = document.getElementById('unitFilter');
-    const units = [...new Set(data.map(row => row[4]).filter(unit => unit))];
+    const units = [...new Set(data.map(row => row[4]).filter(unit => unit))].sort();
     select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' +
       units.map(u => `<option value="${u}">${u}</option>`).join('');
   }
@@ -264,44 +279,11 @@
     document.getElementById('unitFilter').addEventListener('change', applyFilters);
   });
 
-  function toggleReward(index, value) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&reward=${value}&callback=handleRewardUpdate`;
-    document.body.appendChild(script);
-  }
-
-  function handleRewardUpdate() {
-    console.log("Reward updated");
-  }
-
-  function deleteRow(index) {
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
-      const script = document.createElement('script');
-      script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=deleteRow&index=${index}&callback=loadPersonnel`;
-      document.body.appendChild(script);
-    }
-  }
-
-  function handleRankData(data) {
-    console.log("Rank Data", data);
-  }
-
-function handleUnitData(data) {
-  const unitFilter = document.querySelector('.filters select'); // <select>
-  unitFilter.innerHTML = `<option value="">แสดงทุกหน่วย</option>`;
-  data.forEach(row => {
-    const unitName = row[1]?.toString().trim(); // column 2 คือชื่อหน่วย
-    if (unitName) {
-      const option = document.createElement('option');
-      option.value = unitName;
-      option.textContent = unitName;
-      unitFilter.appendChild(option);
-    }
-  });
-}
-
+  function handleRankData(data) { console.log("Rank Data", data); }
+  function handleUnitData(data) { console.log("Unit Data", data); }
   window.onload = initLiff;
 </script>
 </body>
 </html>
+
 
