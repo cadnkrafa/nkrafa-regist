@@ -1,209 +1,86 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel</title>
-  <script src="config.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
   <style>
-    body {
-      font-family: 'Noto Sans Thai', sans-serif;
-      margin: 0;
-      background: #f5f7fa;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
-      background: #ffffff;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-    .header-left {
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
-    }
-    .header-right button {
-      margin-left: 10px;
-      padding: 8px 16px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .logout-btn {
-      background-color: #e74c3c;
-      color: white;
-    }
-    .reset-btn {
-      background-color: #f39c12;
-      color: white;
-    }
-    .tab-container {
-      display: flex;
-      border-bottom: 2px solid #ccc;
-      background: #f0f0f0;
-    }
-    .tab {
-      padding: 12px 20px;
-      cursor: pointer;
-      font-weight: bold;
-      border-right: 1px solid #ccc;
-      background: #e0e0e0;
-      color: #333;
-    }
-    .tab.active {
-      background: #ffffff;
-      border-bottom: 2px solid #ffffff;
-    }
-    .tab-content {
-      display: none;
-      padding: 20px;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .controls .left-controls {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .controls .right-controls {
-      margin-left: auto;
-    }
-    select, input[type="text"] {
-      font-family: 'Noto Sans Thai', sans-serif;
-      padding: 8px;
-      font-size: 14px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .add-btn {
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    th, td {
-      padding: 10px 8px;
-      text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-    .col-id, .col-rank {
-      width: 10%;
-    }
-    .col-name, .col-position {
-      width: 20%;
-    }
-    .col-unit {
-      width: 15%;
-    }
-    .col-line, .col-reward, .col-actions {
-      width: 8%;
-      text-align: center;
-    }
-    .icon-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-    .hidden {
-      display: none;
-    }
+    body { font-family: 'Noto Sans Thai', sans-serif; }
+    .tab.active { background-color: #e0f2fe; border-bottom: 2px solid #0ea5e9; }
   </style>
 </head>
-<body>
-  <header>
-    <div class="header-left">แผงควบคุม Admin</div>
-    <div class="header-right">
-      <button class="reset-btn" onclick="resetSheet('tokens')">🧹 รีเซ็ต Tokens</button>
-      <button class="reset-btn" onclick="resetSheet('regist')">🧹 รีเซ็ต Regist</button>
-      <button class="reset-btn" onclick="resetSheet('rewarders')">🧹 รีเซ็ตผู้จับรางวัล</button>
-      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+<body class="bg-gray-100">
+  <div class="bg-blue-500 text-white p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">Admin Panel</h1>
+    <div class="flex items-center gap-2">
+      <button onclick="resetSheet('tokens')" class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded">Reset Tokens</button>
+      <button onclick="resetSheet('regist')" class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded">Reset Regist</button>
+      <button onclick="resetSheet('rewarders')" class="bg-orange-400 hover:bg-orange-500 text-white px-3 py-1 rounded">Reset ผู้จับรางวัล</button>
+      <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-9v1" /></svg>
+        <span>Logout</span>
+      </button>
     </div>
-  </header>
-
-  <div class="tab-container">
-    <div class="tab active" onclick="showTab('tab-personnel')">ข้อมูลกำลังพล</div>
-    <div class="tab" onclick="showTab('tab-rank')">ยศ</div>
-    <div class="tab" onclick="showTab('tab-unit')">หน่วย</div>
   </div>
 
-  <div id="tab-personnel" class="tab-content active">
-    <div class="controls">
-      <div class="left-controls">
-        <input type="text" id="searchInput" oninput="filterTable()" placeholder="ค้นหา...">
-        <select id="unitFilter" onchange="filterTable()">
+  <div class="p-4">
+    <div class="flex gap-2 border-b">
+      <button class="tab px-4 py-2 active" onclick="showTab('tab-personnel', event)">ข้อมูลกำลังพล</button>
+      <button class="tab px-4 py-2" onclick="showTab('tab-rank', event)">จัดการยศ</button>
+      <button class="tab px-4 py-2" onclick="showTab('tab-unit', event)">จัดการหน่วย</button>
+    </div>
+
+    <div class="flex items-center justify-between my-4">
+      <div class="flex items-center gap-2 w-full">
+        <input type="text" id="searchInput" placeholder="ค้นหา..." oninput="filterTable()" class="flex-grow w-[150%] px-4 py-2 border rounded-md" />
+        <select id="unitFilter" onchange="filterTable()" class="w-[130%] px-4 py-2 border rounded-md">
           <option value="">แสดงทุกหน่วย</option>
         </select>
       </div>
-      <div class="right-controls">
-        <button class="add-btn" onclick="addNewRow()">➕ เพิ่ม</button>
-      </div>
+      <button onclick="addRow()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        เพิ่มรายชื่อ
+      </button>
     </div>
-    <table id="personnelTable">
-      <thead>
-        <tr>
-          <th class="col-id">เลขประจำตัว</th>
-          <th class="col-rank">ยศ</th>
-          <th class="col-name">ชื่อ</th>
-          <th class="col-position">ตำแหน่ง</th>
-          <th class="col-unit">หน่วย</th>
-          <th class="col-line">สถานะผูกบัญชีไลน์</th>
-          <th class="col-reward">ผู้จับรางวัล</th>
-          <th class="col-actions">การกระทำ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Data rows will be rendered here -->
-      </tbody>
-    </table>
-  </div>
 
-  <div id="tab-rank" class="tab-content">
-    <!-- Rank editing content here -->
-    <p>กำลังโหลด...</p>
-  </div>
-  <div id="tab-unit" class="tab-content">
-    <!-- Unit editing content here -->
-    <p>กำลังโหลด...</p>
+    <div id="tab-personnel" class="tab-content">
+      <table id="personnelTable" class="min-w-full border bg-white">
+        <thead class="bg-blue-100">
+          <tr>
+            <th class="w-[10%] border p-2">เลขประจำตัว</th>
+            <th class="w-[10%] border p-2">ยศ</th>
+            <th class="w-[20%] border p-2">ชื่อ</th>
+            <th class="w-[20%] border p-2">ตำแหน่ง</th>
+            <th class="w-[15%] border p-2">หน่วย</th>
+            <th class="w-[10%] border p-2">สถานะผูกบัญชีไลน์</th>
+            <th class="w-[7.5%] border p-2">ผู้จับรางวัล</th>
+            <th class="w-[7.5%] border p-2">การกระทำ</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="tab-rank" class="tab-content hidden">
+      <h2 class="text-xl font-bold mb-2">จัดการยศ</h2>
+      <!-- Table for ranks -->
+    </div>
+
+    <div id="tab-unit" class="tab-content hidden">
+      <h2 class="text-xl font-bold mb-2">จัดการหน่วย</h2>
+      <!-- Table for units -->
+    </div>
   </div>
 
   <script>
-    function showTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    function showTab(tabId, event) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.remove('hidden');
+      if (event) event.target.classList.add('active');
     }
 
     function logout() {
@@ -222,8 +99,6 @@
         const isAdmin = await res.text();
         if (isAdmin !== 'true') {
           document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
-        } else {
-          // loadData()
         }
       }
     }
@@ -235,11 +110,7 @@
     }
 
     function filterTable() {
-      // implement search & filter logic
-    }
-
-    function addNewRow() {
-      // implement row adding logic
+      // Implement search + unit filter logic here
     }
   </script>
 </body>
