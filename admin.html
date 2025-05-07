@@ -171,44 +171,86 @@
     <!-- จัดการหน่วย -->
   </div>
 
-  <script>
-    lucide.createIcons();
-    function showTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(tabId).classList.remove('hidden');
-      event.target.classList.add('active');
-    }
-    function resetSheet(sheetName) {
-      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
-    }
-    function logout() {
-      liff.logout();
-      location.reload();
-    }
-    
-    async function initLiff() {
-      console.log('เริ่ม init LIFF...');
-      await liff.init({ liffId: LIFF_ID_ADMIN });
-      console.log('LIFF init เสร็จแล้ว');
+<script>
+  lucide.createIcons();
 
-      if (!liff.isLoggedIn()) {
-        console.log('ยังไม่ได้ login');
-        liff.login();
-      } else {
-        const profile = await liff.getProfile();
-        console.log('Login แล้ว: ', profile);
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.remove('hidden');
+    event.target.classList.add('active');
+  }
 
-        const userId = profile.userId;
-        const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
-        const isAdmin = await res.text();
-        if (isAdmin !== 'true') {
-          document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
-        }
+  function resetSheet(sheetName) {
+    fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
+  }
+
+  function logout() {
+    liff.logout();
+    location.reload();
+  }
+
+  async function initLiff() {
+    await liff.init({ liffId: LIFF_ID_ADMIN });
+    if (!liff.isLoggedIn()) liff.login();
+    else {
+      const profile = await liff.getProfile();
+      const userId = profile.userId;
+      const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+      const isAdmin = await res.text();
+      if (isAdmin !== 'true') {
+        document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
+        return;
       }
+      // ✅ เมื่อยืนยันว่าเป็น Admin แล้ว โหลดข้อมูลเลย
+      loadPersonnel();
     }
+  }
 
-    window.onload = initLiff;
-  </script>
+  async function loadPersonnel() {
+    const res = await fetch(`${SCRIPT_URL}?type=data&action=get`);
+    const data = await res.json();
+    renderPersonnelTable(data);
+  }
+
+  function renderPersonnelTable(data) {
+    const tbody = document.getElementById('data-table-body');
+    tbody.innerHTML = '';
+    data.forEach((row, i) => {
+      const [
+        rtafId = '', rank = '', name = '', position = '', unit = '', list = '', lineUser = '', reward = false
+      ] = row;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${rtafId}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${position}</td>
+        <td>${unit}</td>
+        <td>${lineUser ? '✅' : ''}</td>
+        <td><input type="checkbox" ${reward === true || reward === 'true' ? 'checked' : ''} onchange="toggleReward(${i}, this.checked)"></td>
+        <td>
+          <button onclick="editRow(${i})">✏️</button>
+          <button onclick="deleteRow(${i})">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function toggleReward(index, value) {
+    fetch(`${SCRIPT_URL}?type=data&action=update&index=${index}&reward=${value}`);
+  }
+
+  async function deleteRow(index) {
+    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
+      await fetch(`${SCRIPT_URL}?type=data&action=deleteRow&index=${index}`);
+      loadPersonnel();
+    }
+  }
+
+  window.onload = initLiff;
+</script>
+
 </body>
 </html>
