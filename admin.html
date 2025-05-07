@@ -10,34 +10,16 @@
   <script src="./config.js"></script>
   <style>
     body { font-family: 'Noto Sans Thai', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-    header {
-      background: #3498db; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white;
-    }
+    header { background: #3498db; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
     header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 8px; margin: 0; }
-    .tab-bar { background: #f2f2f2; display: flex; padding: 0 20px; gap: 10px; }
-    .tab { padding: 10px 16px; background: white; border: 1px solid #ccc; border-bottom: none; cursor: pointer; font-weight: bold; }
-    .tab.active { background: #fff; border-bottom: 2px solid #3498db; color: #3498db; }
-    .top-controls {
-      display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap;
-    }
+    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap; }
     .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 30%; }
-    .filters input, .filters select {
-      font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc;
-    }
-    .action-buttons { display: flex; gap: 10px; align-items: center; }
-    .btn {
-      border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer;
-    }
-    .btn-reset { background: #f39c12; }
-    .btn-logout { background: #e74c3c; }
-    .btn-add { background: #2ecc71; white-space: nowrap; }
+    .filters input, .filters select { font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    .btn { border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .btn-reset { background: #f39c12; } .btn-logout { background: #e74c3c; } .btn-add { background: #2ecc71; white-space: nowrap; }
     table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td {
-      border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px;
-    }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px; }
     th { background: #dceeff; font-weight: bold; }
-    .tab-content { padding: 0 20px; }
-    .hidden { display: none; }
     .checkbox-cell input { transform: scale(1.2); }
   </style>
 </head>
@@ -52,43 +34,122 @@
     </div>
   </header>
 
-  <div class="tab-bar">
-    <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
-    <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
-    <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
-  </div>
-
-  <div class="tab-content" id="personnel-tab">
-    <div class="top-controls">
-      <div class="filters">
-        <input id="searchInput" type="text" placeholder="ค้นหา...">
-        <select id="unitFilter"><option value="">แสดงทุกหน่วย</option></select>
-      </div>
-      <button class="btn btn-add" onclick="addNewRow()"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
+  <div class="top-controls">
+    <div class="filters">
+      <input id="searchInput" type="text" placeholder="ค้นหา...">
+      <select id="unitFilter"><option value="">แสดงทุกหน่วย</option></select>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width:10%">เลขประจำตัว</th>
-          <th style="width:8%">ยศ</th>
-          <th style="width:20%">ชื่อ</th>
-          <th style="width:20%">ตำแหน่ง</th>
-          <th style="width:16%">หน่วย</th>
-          <th style="width:10%">แก้ไข/ลบ</th>
-          <th style="width:6%">สถานะผูกบัญชีไลน์</th>
-          <th style="width:6%"><input type="checkbox" onchange="toggleAllList(this)"> ส่งชื่อร่วมงาน</th>
-          <th style="width:6%">ผู้จับรางวัล</th>
-        </tr>
-      </thead>
-      <tbody id="data-table-body"></tbody>
-    </table>
+    <button class="btn btn-add"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
   </div>
-  <div class="tab-content hidden" id="rank-tab"></div>
-  <div class="tab-content hidden" id="unit-tab"></div>
 
-  <script>
-    // JavaScript ทั้งหมดของคุณจะถูกเติมตรงนี้ เช่น initLiff, loadPersonnel, renderPersonnelTable ฯลฯ
-    // จะรวมทุกฟังก์ชันให้ในขั้นตอนถัดไปตามที่คุณร้องขอ
-  </script>
+  <table>
+    <thead>
+      <tr>
+        <th>เลขประจำตัว</th>
+        <th>ยศ</th>
+        <th>ชื่อ</th>
+        <th>ตำแหน่ง</th>
+        <th>หน่วย</th>
+        <th>แก้ไข/ลบ</th>
+        <th>สถานะผูกบัญชีไลน์</th>
+        <th><input type="checkbox" onclick="toggleAll('list', this.checked)"> ส่งชื่อร่วมงาน</th>
+        <th>ผู้จับรางวัล</th>
+      </tr>
+    </thead>
+    <tbody id="data-table-body"></tbody>
+  </table>
+
+<script>
+  lucide.createIcons();
+  let allData = [], linkMap = new Map();
+
+  async function initLiff() {
+    await liff.init({ liffId: LIFF_ID_ADMIN });
+    if (!liff.isLoggedIn()) return liff.login();
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+    const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+    if ((await res.text()) !== 'true') {
+      document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
+      return;
+    }
+    loadData();
+  }
+
+  function loadData() {
+    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=data&action=get`, 'handleData');
+    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=unit&action=get`, 'handleUnits');
+    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=link&action=get`, 'handleLinks');
+  }
+
+  function loadJSONP(url, callbackName) {
+    const script = document.createElement('script');
+    script.src = `${url}&callback=${callbackName}`;
+    document.body.appendChild(script);
+  }
+
+  function handleData(data) {
+    allData = data;
+    renderTable();
+    filterOptions();
+  }
+
+  function handleUnits(data) {
+    const select = document.getElementById('unitFilter');
+    select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' +
+      data.sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+          .map(r => `<option value="${r[1]}">${r[1]}</option>`).join('');
+  }
+
+  function handleLinks(data) {
+    linkMap = new Map(data.map(r => [r[1], true]));
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('data-table-body');
+    tbody.innerHTML = '';
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    const unitFilter = document.getElementById('unitFilter').value;
+    allData.forEach((row, i) => {
+      const [rtafId, rank, name, position, unit, list = '', , drawer = false] = row;
+      if ((unitFilter && unit !== unitFilter) || ![rtafId, rank, name, position, unit].join(' ').toLowerCase().includes(keyword)) return;
+      const lineStatus = linkMap.has(rtafId.toString()) ? '✅' : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${rtafId}</td><td>${rank}</td><td>${name}</td><td>${position}</td><td>${unit}</td>
+        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${lineStatus}</td>
+        <td class="checkbox-cell"><input type="checkbox" ${list ? 'checked' : ''} onchange="toggleCheckbox(${i}, 'list', this.checked)"></td>
+        <td class="checkbox-cell"><input type="checkbox" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="toggleCheckbox(${i}, 'drawer', this.checked)"></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function toggleCheckbox(index, col, val) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&${col}=${val}&callback=renderTable`;
+    document.body.appendChild(script);
+  }
+
+  function toggleAll(col, val) {
+    allData.forEach((_, i) => toggleCheckbox(i, col, val));
+  }
+
+  function resetSheet(sheet) {
+    loadJSONP(`${SCRIPT_URL}?adminPage=true&type=${sheet}&action=reset`, 'handleReset');
+  }
+
+  function handleReset() { alert('รีเซ็ตสำเร็จ'); }
+  function logout() { liff.logout(); location.reload(); }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+    document.getElementById('unitFilter').addEventListener('change', renderTable);
+  });
+
+  window.onload = initLiff;
+</script>
 </body>
 </html>
+
