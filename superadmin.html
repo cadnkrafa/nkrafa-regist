@@ -43,11 +43,11 @@
 
     <div class="row mb-3">
       <div class="col-md-4">
-        <input id="searchInput" type="text" class="form-control" placeholder="🔍 ค้นหาชื่อ">
+        <input id="searchInput" type="text" class="form-control" placeholder="🔍 ค้นหา...">
       </div>
       <div class="col-md-2">
         <select id="unitFilter" class="form-select">
-          <option value="">-- แสดงทุกหน่วย --</option>
+          <option value="">แสดงทุกหน่วย</option>
         </select>
       </div>
     </div>
@@ -108,7 +108,7 @@
       const units = [...new Set(data.map(row => row.unit))];
       const unitFilter = document.getElementById('unitFilter');
       const selectedUnit = unitFilter.value;  // ⭐ จำค่าที่เลือกไว้ก่อน render
-      unitFilter.innerHTML = '<option value="">-- แสดงทุกหน่วย --</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+      unitFilter.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
       unitFilter.value = selectedUnit; // ⭐ ใส่ค่ากลับหลัง render
 
       const filterAndRender = () => {
