@@ -62,19 +62,12 @@
       flex-grow: 1;
       max-width: 30%;
     }
-    .filters input[type="text"] {
+    .filters input[type="text"], .filters select {
+      font-family: 'Noto Sans Thai', sans-serif;
       padding: 8px 10px;
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      flex: 1 1 30%;
-    }
-    .filters select {
-      padding: 8px 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      flex: 1 1 40%;
     }
     .action-buttons {
       display: flex;
@@ -112,9 +105,7 @@
     }
     .tab-content { padding: 0 20px; }
     .hidden { display: none; }
-    .checkbox-cell input {
-      transform: scale(1.2);
-    }
+    .checkbox-cell input { transform: scale(1.2); }
   </style>
 </head>
 <body>
@@ -137,9 +128,9 @@
   <div class="tab-content" id="personnel-tab">
     <div class="top-controls">
       <div class="filters">
-        <input type="text" placeholder="ค้นหา...">
-        <select>
-          <option>แสดงทุกหน่วย</option>
+        <input id="searchInput" type="text" placeholder="ค้นหา...">
+        <select id="unitFilter">
+          <option value="">แสดงทุกหน่วย</option>
         </select>
       </div>
       <button class="btn btn-add"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
@@ -157,22 +148,16 @@
           <th style="width:10%">แก้ไข/ลบ</th>
         </tr>
       </thead>
-      <tbody id="data-table-body">
-        <!-- รายการข้อมูล -->
-      </tbody>
+      <tbody id="data-table-body"></tbody>
     </table>
   </div>
 
-  <div class="tab-content hidden" id="rank-tab">
-    <!-- จัดการยศ -->
-  </div>
-
-  <div class="tab-content hidden" id="unit-tab">
-    <!-- จัดการหน่วย -->
-  </div>
+  <div class="tab-content hidden" id="rank-tab"></div>
+  <div class="tab-content hidden" id="unit-tab"></div>
 
 <script>
   lucide.createIcons();
+  let allPersonnelData = [];
 
   function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -187,7 +172,7 @@
     document.body.appendChild(script);
   }
 
-  function handleReset(response) {
+  function handleReset() {
     alert("รีเซ็ตเสร็จแล้ว");
   }
 
@@ -208,9 +193,7 @@
         document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
         return;
       }
-      loadPersonnel();
-      loadRank();
-      loadUnit();
+      loadPersonnel(); loadRank(); loadUnit();
     }
   }
 
@@ -233,12 +216,16 @@
   }
 
   function handlePersonnelData(data) {
+    allPersonnelData = data;
+    renderPersonnelTable(data);
+    populateUnitFilter(data);
+  }
+
+  function renderPersonnelTable(data) {
     const tbody = document.getElementById('data-table-body');
     tbody.innerHTML = '';
     data.forEach((row, i) => {
-      const [
-        rtafId = '', rank = '', name = '', position = '', unit = '', list = '', lineUser = '', reward = false
-      ] = row;
+      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', lineUser = '', reward = false] = row;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${rtafId}</td>
@@ -248,24 +235,34 @@
         <td>${unit}</td>
         <td>${lineUser ? '✅' : ''}</td>
         <td><input type="checkbox" ${reward === true || reward === 'true' ? 'checked' : ''} onchange="toggleReward(${i}, this.checked)"></td>
-        <td>
-          <button onclick="editRow(${i})">✏️</button>
-          <button onclick="deleteRow(${i})">🗑️</button>
-        </td>
+        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
       `;
       tbody.appendChild(tr);
     });
   }
 
-  function handleRankData(data) {
-    console.log("Rank Data:", data);
-    // TODO: render rank list
+  function populateUnitFilter(data) {
+    const select = document.getElementById('unitFilter');
+    const units = [...new Set(data.map(row => row[4]).filter(unit => unit))];
+    select.innerHTML = '<option value="">แสดงทุกหน่วย</option>' +
+      units.map(u => `<option value="${u}">${u}</option>`).join('');
   }
 
-  function handleUnitData(data) {
-    console.log("Unit Data:", data);
-    // TODO: render unit list
+  function applyFilters() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    const unit = document.getElementById('unitFilter').value;
+    const filtered = allPersonnelData.filter(row => {
+      const matchKeyword = row.join(' ').toLowerCase().includes(keyword);
+      const matchUnit = !unit || row[4] === unit;
+      return matchKeyword && matchUnit;
+    });
+    renderPersonnelTable(filtered);
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('unitFilter').addEventListener('change', applyFilters);
+  });
 
   function toggleReward(index, value) {
     const script = document.createElement('script');
@@ -273,11 +270,11 @@
     document.body.appendChild(script);
   }
 
-  function handleRewardUpdate(response) {
+  function handleRewardUpdate() {
     console.log("Reward updated");
   }
 
-  async function deleteRow(index) {
+  function deleteRow(index) {
     if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
       const script = document.createElement('script');
       script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=deleteRow&index=${index}&callback=loadPersonnel`;
@@ -285,8 +282,16 @@
     }
   }
 
+  function handleRankData(data) {
+    console.log("Rank Data", data);
+  }
+
+  function handleUnitData(data) {
+    console.log("Unit Data", data);
+  }
+
   window.onload = initLiff;
 </script>
-
 </body>
 </html>
+
