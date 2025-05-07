@@ -87,8 +87,8 @@
       const check = await fetch(`${SCRIPT_URL}?checkSuperAdmin=1&userId=${encodeURIComponent(userId)}`);
       const isSuper = await check.text();
       if (isSuper !== 'true') {
-        alert('❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
-        document.body.innerHTML = '<h3 class="text-center text-danger mt-5">❌ คุณไม่มีสิทธิ์เข้าถึงหน้านี้</h3>';
+        alert('⛔ คุณไม่มีสิทธิ์เข้าใช้งาน');
+        document.body.innerHTML = '<h3 class="text-center text-danger mt-5">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h3>';
         return;
       }
       loadAdminList();
