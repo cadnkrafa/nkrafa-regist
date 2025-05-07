@@ -6,6 +6,7 @@
   <title>Admin Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="./config.js"></script>
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
@@ -178,7 +179,7 @@
       event.target.classList.add('active');
     }
     function resetSheet(sheetName) {
-      fetch(`SCRIPT_URL?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
+      fetch(`${SCRIPT_URL}?reset=${sheetName}`).then(() => alert(`รีเซ็ต ${sheetName} แล้ว`));
     }
     function logout() {
       liff.logout();
@@ -190,10 +191,10 @@
       else {
         const profile = await liff.getProfile();
         const userId = profile.userId;
-        const res = await fetch(`SCRIPT_URL?checkAdmin=true&userId=${userId}`);
+        const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
         const isAdmin = await res.text();
         if (isAdmin !== 'true') {
-          document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
+          document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
         }
       }
     }
