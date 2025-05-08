@@ -160,7 +160,7 @@
 
   let allPersonnelData = [];
   let unitList = [];
-  let linkMap = {}; // rtafId -> true
+  let linkMap = {};
 
   function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -241,54 +241,59 @@
     renderPersonnelTable(data);
   }
 
-function renderPersonnelTable(data) {
-  const tbody = document.getElementById('data-table-body');
-  tbody.innerHTML = '';
-  data.forEach((row, i) => {
-    const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , , drawer = ''] = row;
-    const isLinked = !!linkMap[rtafId.toString()];
-    const indexInAllData = allPersonnelData.findIndex(r => String(r[0]) === String(rtafId));
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${rtafId}</td>
-      <td>${rank}</td>
-      <td>${name}</td>
-      <td>${position}</td>
-      <td>${unit}</td>
-      <td>
-        <button onclick="editRow(${indexInAllData})">✏️</button>
-        <button onclick="deleteRow(${indexInAllData})">🗑️</button>
-      </td>
-      <td>${isLinked ? '✅' : ''}</td>
-      <td class="checkbox-cell">
-        <input type="checkbox" data-index="${indexInAllData}" ${list ? 'checked' : ''} onchange="handleListChange(this)">
-      </td>
-      <td class="checkbox-cell">
-        <input type="checkbox" data-index="${indexInAllData}" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="handleDrawerChange(this)">
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+  function renderPersonnelTable(data) {
+    const tbody = document.getElementById('data-table-body');
+    tbody.innerHTML = '';
+    const headerCheckbox = document.getElementById('selectAllList');
+    if (headerCheckbox) headerCheckbox.checked = false;
 
-  function handleListUpdate() {}
-  function handleDrawerUpdate() {}
-
-  function handleRewardUpdate() {
-    console.log("อัปเดตผู้จับรางวัลแล้ว");
+    data.forEach((row, i) => {
+      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , , drawer = ''] = row;
+      const isLinked = !!linkMap[rtafId.toString()];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${rtafId}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${position}</td>
+        <td>${unit}</td>
+        <td>
+          <button onclick="editRow(${i})">✏️</button>
+          <button onclick="deleteRow(${i})">🗑️</button>
+        </td>
+        <td>${isLinked ? '✅' : ''}</td>
+        <td class="checkbox-cell">
+          <input type="checkbox" data-rtaf="${rtafId}" ${list ? 'checked' : ''} onchange="handleListChange(this)">
+        </td>
+        <td class="checkbox-cell">
+          <input type="checkbox" data-rtaf="${rtafId}" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="handleDrawerChange(this)">
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
   }
 
-  function handleListChange(checkbox) {
-    const index = checkbox.dataset.index;
-    const value = checkbox.checked;
-    toggleList(index, value);
+  function handleListChange(cb) {
+    const rtafId = cb.dataset.rtaf;
+    const value = cb.checked;
+    fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=list&value=${value}`)
+      .then(res => res.text())
+      .then(() => {
+        const person = allPersonnelData.find(r => String(r[0]) === rtafId);
+        if (person) person[5] = value ? '✅' : '';
+      });
   }
 
-function handleDrawerChange(checkbox) {
-  const index = checkbox.dataset.index;
-  const value = checkbox.checked;
-  toggleDrawer(index, value);
-}
+  function handleDrawerChange(cb) {
+    const rtafId = cb.dataset.rtaf;
+    const value = cb.checked;
+    fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=drawer&value=${value}`)
+      .then(res => res.text())
+      .then(() => {
+        const person = allPersonnelData.find(r => String(r[0]) === rtafId);
+        if (person) person[8] = value;
+      });
+  }
 
   function deleteRow(index) {
     if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
@@ -313,34 +318,25 @@ function handleDrawerChange(checkbox) {
     });
     renderPersonnelTable(filtered);
   }
-  
-function toggleList(index, value) {
-  const rtafId = allPersonnelData[index][0]; // RTAF_ID
-  fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=list&value=${value}`)
-    .then(res => res.text())
-    .then(() => {
-      allPersonnelData[index][5] = value ? '✅' : ''; // list อยู่ column 6
-      renderPersonnelTable(allPersonnelData);
-    });
-}
 
-function toggleDrawer(index, value) {
-  const rtafId = allPersonnelData[index][0]; // RTAF_ID
-  fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=drawer&value=${value}`)
-    .then(res => res.text())
-    .then(() => {
-      allPersonnelData[index][8] = value === true || value === 'true'; // drawer อยู่ column 9
-      renderPersonnelTable(allPersonnelData);
+  function toggleAllList(checked) {
+    const filtered = allPersonnelData.filter(row => {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const unit = document.getElementById('unitFilter').value;
+      const matchKeyword = row.join(' ').toLowerCase().includes(keyword);
+      const matchUnit = !unit || row[4] === unit;
+      return matchKeyword && matchUnit;
     });
-}
-
-function toggleAllList(checked) {
-  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-index][data-type="list"]');
-  checkboxes.forEach(cb => {
-    cb.checked = checked;
-    toggleList(cb.dataset.index, checked);
-  });
-}
+    filtered.forEach(row => {
+      const rtafId = row[0];
+      fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=list&value=${checked}`)
+        .then(res => res.text())
+        .then(() => {
+          row[5] = checked ? '✅' : '';
+        });
+    });
+    renderPersonnelTable(allPersonnelData);
+  }
 
   window.onload = initLiff;
 </script>
