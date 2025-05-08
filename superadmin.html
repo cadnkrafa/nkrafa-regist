@@ -160,19 +160,17 @@
       });
     }
 
-function updateRole(rtafId, field, value) {
-  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
-    .then(res => res.text())
-    .then(msg => {
-      console.log("📝 updated:", msg);
-      const target = currentData.find(row => row.rtafId === rtafId);
-      if (target) {
-        target[field] = value; // ✅ อัปเดต local data ให้ตรง
-        renderTable(currentData); // ✅ แล้วค่อย render ใหม่
-      }
-    })
-    .catch(err => console.error('Error:', err));
-}
+    function updateRole(rtafId, field, value) {
+      fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+        .then(res => res.text())
+        .then(msg => {
+          console.log("📝 updated:", msg);
+          const target = currentData.find(row => row.rtafId === rtafId);
+          if (target) target[field] = value === true || value === 'true';
+          renderTable(currentData);
+        })
+        .catch(err => console.error('Error:', err));
+    }
 
     async function resetRoles() {
       if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
