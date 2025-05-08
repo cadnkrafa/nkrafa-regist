@@ -314,17 +314,25 @@ function handleDrawerChange(checkbox) {
     renderPersonnelTable(filtered);
   }
   
-  function toggleList(index, value) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=list&index=${index}&value=${value}&callback=handleListUpdate`;
-    document.body.appendChild(script);
-  }
+function toggleList(index, value) {
+  const rtafId = allPersonnelData[index][0]; // RTAF_ID
+  fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=list&value=${value}`)
+    .then(res => res.text())
+    .then(() => {
+      allPersonnelData[index][5] = value ? '✅' : ''; // list อยู่ column 6
+      renderPersonnelTable(allPersonnelData);
+    });
+}
 
-  function toggleDrawer(index, value) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=drawer&index=${index}&value=${value}&callback=handleDrawerUpdate`;
-    document.body.appendChild(script);
-  }
+function toggleDrawer(index, value) {
+  const rtafId = allPersonnelData[index][0]; // RTAF_ID
+  fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=drawer&value=${value}`)
+    .then(res => res.text())
+    .then(() => {
+      allPersonnelData[index][8] = value === true || value === 'true'; // drawer อยู่ column 9
+      renderPersonnelTable(allPersonnelData);
+    });
+}
 
 function toggleAllList(checked) {
   const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-index][data-type="list"]');
