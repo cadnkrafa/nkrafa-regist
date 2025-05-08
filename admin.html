@@ -238,7 +238,12 @@ function renderPersonnelTable(data) {
 function updateCheckbox(rtafId, field, value) {
   fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
     .then(res => res.text())
-    .then(txt => console.log('✅ updated', rtafId, field, value))
+    .then(txt => {
+      console.log('✅ updated', rtafId, field, value);
+      // ✅ อัปเดตค่าใน personnelData ด้วย
+      const person = personnelData.find(p => p.rtafId === rtafId);
+      if (person) person[field] = value;
+    })
     .catch(err => console.error('❌ error:', err));
 }
 
