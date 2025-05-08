@@ -155,6 +155,78 @@
   <div class="tab-content hidden" id="rank-tab"></div>
   <div class="tab-content hidden" id="unit-tab"></div>
 
+
+<script>
+  lucide.createIcons();
+  let allData = [], linkData = [];
+
+  async function initLiff() {
+    await liff.init({ liffId: LIFF_ID_ADMIN });
+    if (!liff.isLoggedIn()) return liff.login();
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+    const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+    const isAdmin = await res.text();
+    if (isAdmin !== 'true') {
+      document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h1>';
+      return;
+    }
+    loadData(); loadLink();
+  }
+
+  function loadData() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handleData`;
+    document.body.appendChild(script);
+  }
+
+  function loadLink() {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLink`;
+    document.body.appendChild(script);
+  }
+
+  function handleData(data) {
+    allData = data;
+    tryRenderTable();
+  }
+
+  function handleLink(data) {
+    linkData = data;
+    tryRenderTable();
+  }
+
+  function tryRenderTable() {
+    if (!allData.length || !linkData.length) return;
+    const tbody = document.getElementById('data-table-body');
+    tbody.innerHTML = '';
+    allData.forEach((row, i) => {
+      const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
+      const isLinked = linkData.some(l => String(l[1]) === String(id));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${pos}</td>
+        <td>${unit}</td>
+        <td><button onclick="editRow(${i})">✏️</button><button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${isLinked ? '✅' : ''}</td>
+        <td><input type="checkbox" ${list === 'TRUE' ? 'checked' : ''} onchange="updateField('${id}', 'list', this.checked)"></td>
+        <td><input type="checkbox" ${drawer === true || drawer === 'TRUE' ? 'checked' : ''} onchange="updateField('${id}', 'drawer', this.checked)"></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateField(rtafId, field, value) {
+    fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+      .then(res => res.text())
+      .then(msg => console.log('✅ Updated', field, value))
+      .catch(err => console.error('❌ Update failed', err));
+  }
+
+  window.onload = initLiff;
+</script>
 </body>
 
 <script>
@@ -211,28 +283,28 @@
     renderTable();
   }
 
-function renderTable() {
-  const tbody = document.getElementById('data-table-body');
-  if (!allData.length) return;
-  tbody.innerHTML = '';
-  allData.forEach((row, i) => {
-    const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
-    const isLinked = linkData.some(l => String(l[1]) === String(id));
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${id}</td>
-      <td>${rank}</td>
-      <td>${name}</td>
-      <td>${pos}</td>
-      <td>${unit}</td>
-      <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
-      <td>${isLinked ? '✅' : ''}</td>
-      <td><input type="checkbox" ${list === 'TRUE' ? 'checked' : ''} onchange="updateField('${id}', 'list', this.checked)"></td>
-      <td><input type="checkbox" ${drawer === true || drawer === 'TRUE' ? 'checked' : ''} onchange="updateField('${id}', 'drawer', this.checked)"></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+  function renderTable() {
+    const tbody = document.getElementById('data-table-body');
+    if (!allData.length) return;
+    tbody.innerHTML = '';
+    allData.forEach((row, i) => {
+      const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
+      const isLinked = linkData.some(l => String(l[1]) === String(id));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${pos}</td>
+        <td>${unit}</td>
+        <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${isLinked ? '✅' : ''}</td>
+        <td><input type="checkbox" ${list === 'TRUE' ? 'checked' : ''} onchange="updateField('${rtafId}', 'list', this.checked)"></td>
+        <td><input type="checkbox" ${drawer === true ? 'checked' : ''} onchange="updateField('${rtafId}', 'drawer', this.checked)"></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
   // ✅ updateField สำหรับส่งชื่อร่วมงาน และผู้จับรางวัล
   function updateField(rtafId, field, value) {
