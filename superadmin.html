@@ -70,131 +70,141 @@
   </div>
 
   <script>
-    let currentData = [];
+let currentData = [];
+let unitList = [];
 
-    async function getUserId() {
-      await liff.init({ liffId: LIFF_ID_SUPERADMIN });
-      if (!liff.isLoggedIn()) {
-        liff.login({ redirectUri: window.location.href });
-        return;
-      }
-      const profile = await liff.getProfile();
-      return profile.userId;
-    }
+async function getUserId() {
+  await liff.init({ liffId: LIFF_ID_SUPERADMIN });
+  if (!liff.isLoggedIn()) {
+    liff.login({ redirectUri: window.location.href });
+    return;
+  }
+  const profile = await liff.getProfile();
+  return profile.userId;
+}
 
-    async function main() {
-      const userId = await getUserId();
-      const check = await fetch(`${SCRIPT_URL}?checkSuperAdmin=1&userId=${encodeURIComponent(userId)}`);
-      const isSuper = await check.text();
-      if (isSuper !== 'true') {
-        alert('⛔ คุณไม่มีสิทธิ์เข้าใช้งาน');
-        document.body.innerHTML = '<h3 class="text-center text-danger mt-5">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h3>';
-        return;
-      }
-      loadAdminList();
-    }
+async function main() {
+  const userId = await getUserId();
+  const check = await fetch(`${SCRIPT_URL}?checkSuperAdmin=1&userId=${encodeURIComponent(userId)}`);
+  const isSuper = await check.text();
+  if (isSuper !== 'true') {
+    alert('⛔ คุณไม่มีสิทธิ์เข้าใช้งาน');
+    document.body.innerHTML = '<h3 class="text-center text-danger mt-5">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h3>';
+    return;
+  }
+  await loadUnitList();
+  loadAdminList();
+}
 
-    async function loadAdminList() {
-      const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
-      const list = await res.json();
-      currentData = list;
-      renderTable(currentData);
-    }
+async function loadUnitList() {
+  const res = await fetch(`${SCRIPT_URL}?getUnitList=1`);
+  const list = await res.json();
+  unitList = list.map(row => row[1]);
+}
 
-    function renderTable(data) {
-      const table = document.getElementById('adminTable');
-      table.innerHTML = '';
+async function loadAdminList() {
+  const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
+  const list = await res.json();
+  currentData = list;
+  renderTable(currentData);
+}
 
-      const units = [...new Set(data.map(row => row.unit))];
-      const unitFilter = document.getElementById('unitFilter');
-      const selectedUnit = unitFilter.value;  // ⭐ จำค่าที่เลือกไว้ก่อน render
-      unitFilter.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
-      unitFilter.value = selectedUnit; // ⭐ ใส่ค่ากลับหลัง render
+function renderTable(data) {
+  const table = document.getElementById('adminTable');
+  table.innerHTML = '';
 
-      const filterAndRender = () => {
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const unit = unitFilter.value;
-        const filtered = data.filter(row =>
-          (!unit || row.unit === unit) &&
-          (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
-        );
-        table.innerHTML = filtered.map(row => `
-          <tr>
-            <td>${row.rtafId}</td>
-            <td>${row.rank}</td>
-            <td>${row.name}</td>
-            <td>${row.unit}</td>
-            <td class="text-center">
-              <input type="checkbox" ${row.admin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
-            </td>
-            <td class="text-center">
-              <input type="checkbox" ${row.superadmin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
-            </td>
-          </tr>
-        `).join('');
-      };
+  const unitFilter = document.getElementById('unitFilter');
+  const selectedUnit = unitFilter.value;
 
-      document.getElementById('searchInput').oninput = filterAndRender;
-      document.getElementById('unitFilter').onchange = filterAndRender;
-      filterAndRender();
+  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))];
+  unitFilter.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+  unitFilter.value = selectedUnit;
 
-      const headers = document.querySelectorAll("th");
-      headers.forEach((th, index) => {
-        th.style.cursor = "pointer";
-        th.onclick = () => {
-          const rows = Array.from(table.querySelectorAll("tr"));
-          const getText = row => row.children[index].textContent.trim().toLowerCase();
-          const isBool = index >= 4;
-          rows.sort((a, b) => {
-            let valA = getText(a), valB = getText(b);
-            if (isBool) {
-              valA = valA === 'true';
-              valB = valB === 'true';
-            }
-            return (valA > valB ? 1 : valA < valB ? -1 : 0) * (sortState.asc ? 1 : -1);
-          });
-          sortState.asc = sortState.column === index ? !sortState.asc : true;
-          sortState.column = index;
-          rows.forEach(row => table.appendChild(row));
-        };
+  const filterAndRender = () => {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const unit = unitFilter.value;
+    const filtered = data.filter(row =>
+      (!unit || row.unit === unit) &&
+      (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+    );
+    table.innerHTML = filtered.map(row => `
+      <tr>
+        <td>${row.rtafId}</td>
+        <td>${row.rank}</td>
+        <td>${row.name}</td>
+        <td>${row.unit}</td>
+        <td class="text-center">
+          <input type="checkbox" ${row.admin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
+        </td>
+        <td class="text-center">
+          <input type="checkbox" ${row.superadmin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
+        </td>
+      </tr>
+    `).join('');
+  };
+
+  document.getElementById('searchInput').oninput = filterAndRender;
+  document.getElementById('unitFilter').onchange = filterAndRender;
+  filterAndRender();
+
+  const headers = document.querySelectorAll("th");
+  headers.forEach((th, index) => {
+    th.style.cursor = "pointer";
+    th.onclick = () => {
+      const rows = Array.from(table.querySelectorAll("tr"));
+      const getText = row => row.children[index].textContent.trim().toLowerCase();
+      const isBool = index >= 4;
+      rows.sort((a, b) => {
+        let valA = getText(a), valB = getText(b);
+        if (isBool) {
+          valA = valA === 'true';
+          valB = valB === 'true';
+        }
+        return (valA > valB ? 1 : valA < valB ? -1 : 0) * (sortState.asc ? 1 : -1);
       });
-    }
+      sortState.asc = sortState.column === index ? !sortState.asc : true;
+      sortState.column = index;
+      rows.forEach(row => table.appendChild(row));
+    };
+  });
+}
 
-    function updateRole(rtafId, field, value) {
-      fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
-        .then(res => res.text())
-        .then(msg => {
-          console.log("📝 updated:", msg);
-          const target = currentData.find(row => row.rtafId === rtafId);
-          if (target) target[field] = value === true || value === 'true';
-          renderTable(currentData);
-        })
-        .catch(err => console.error('Error:', err));
-    }
+function updateRole(rtafId, field, value) {
+  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+    .then(res => res.text())
+    .then(msg => {
+      console.log("📝 updated:", msg);
+      const target = currentData.find(row => row.rtafId === rtafId);
+      if (target) target[field] = value === true || value === 'true';
+      renderTable(currentData);
+    })
+    .catch(err => console.error('Error:', err));
+}
 
-    async function resetRoles() {
-      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
-      try {
-        const res = await fetch(`${SCRIPT_URL}?resetRoles=1`);
-        const msg = await res.text();
-        console.log("🔁 resetRoles:", msg);
-        alert("✅ รีเซ็ตสำเร็จ");
-        await new Promise(resolve => setTimeout(resolve, 500));
-        loadAdminList();
-      } catch (err) {
-        console.error("❌ resetRoles error:", err);
-        alert("❌ เกิดข้อผิดพลาดในการรีเซ็ต");
-      }
-    }
+async function resetRoles() {
+  if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
+  try {
+    const res = await fetch(`${SCRIPT_URL}?resetRoles=1`);
+    const msg = await res.text();
+    console.log("🔁 resetRoles:", msg);
+    alert("✅ รีเซ็ตสำเร็จ");
+    await new Promise(resolve => setTimeout(resolve, 500));
+    loadAdminList();
+  } catch (err) {
+    console.error("❌ resetRoles error:", err);
+    alert("❌ เกิดข้อผิดพลาดในการรีเซ็ต");
+  }
+}
 
-    function logout() {
-      if (liff.isLoggedIn()) liff.logout();
-      location.reload();
-    }
+function logout() {
+  if (liff.isLoggedIn()) liff.logout();
+  location.reload();
+}
 
-    let sortState = { column: null, asc: true };
-    main();
-  </script>
+let sortState = { column: null, asc: true };
+main();
+</script>
+
 </body>
 </html>
 
