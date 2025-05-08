@@ -319,24 +319,41 @@
     renderPersonnelTable(filtered);
   }
 
-  function toggleAllList(checked) {
-    const filtered = allPersonnelData.filter(row => {
-      const keyword = document.getElementById('searchInput').value.toLowerCase();
-      const unit = document.getElementById('unitFilter').value;
-      const matchKeyword = row.join(' ').toLowerCase().includes(keyword);
-      const matchUnit = !unit || row[4] === unit;
-      return matchKeyword && matchUnit;
+function toggleList(index, value) {
+  const rtafId = allPersonnelData[index][0];
+  fetch(`${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByRtafId&rtafId=${rtafId}&field=list&value=${value}`)
+    .then(() => {
+      allPersonnelData[index][5] = value ? '✅' : '';
+      renderPersonnelTable(applyCurrentFilters());
     });
-    filtered.forEach(row => {
-      const rtafId = row[0];
-      fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=list&value=${checked}`)
-        .then(res => res.text())
-        .then(() => {
-          row[5] = checked ? '✅' : '';
-        });
+}
+
+function toggleDrawer(index, value) {
+  const rtafId = allPersonnelData[index][0];
+  fetch(`${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByRtafId&rtafId=${rtafId}&field=drawer&value=${value}`)
+    .then(() => {
+      allPersonnelData[index][8] = value === true || value === 'true';
+      renderPersonnelTable(applyCurrentFilters());
     });
-    renderPersonnelTable(allPersonnelData);
-  }
+}
+
+function toggleAllList(checked) {
+  const currentData = applyCurrentFilters();
+  currentData.forEach(row => {
+    const index = allPersonnelData.findIndex(r => String(r[0]) === String(row[0]));
+    if (index !== -1) toggleList(index, checked);
+  });
+}
+
+  function applyCurrentFilters() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const unit = document.getElementById('unitFilter').value;
+  return allPersonnelData.filter(row => {
+    const matchKeyword = row.join(' ').toLowerCase().includes(keyword);
+    const matchUnit = !unit || row[4] === unit;
+    return matchKeyword && matchUnit;
+  });
+}
 
   window.onload = initLiff;
 </script>
