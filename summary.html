@@ -217,33 +217,30 @@ function getSummaryBorderColor(percent) {
   return '#3498db';
 }
 
-const normalize = txt => txt.trim().replace(/​/g, '');
+function normalize(text) {
+  return text?.trim().replace(/\u200B/g, '') || '';
+}
 
-async function fetchUnitList() {
+async function loadUnitListThenSummary() {
   try {
     const res = await fetch(`${SCRIPT_URL}?getUnitList=1`);
-    const data = await res.json();
-    unitList = data.map(row => normalize(row[1]));
-    fetchData();
-    setInterval(fetchData, 15000);
+    const raw = await res.json();
+    unitList = raw.map(row => normalize(row[1]));
   } catch (err) {
-    console.error('❌ Failed to load unit list:', err);
-    fetchData();
-    setInterval(fetchData, 15000);
+    console.warn('⚠️ โหลด unitList ไม่ได้:', err);
+    unitList = []; // fallback
   }
+  fetchData();
+  setInterval(fetchData, 15000);
 }
 
-async function fetchData() {
-  try {
-    const res = await fetch(`${SCRIPT_URL}?summary=1&_t=${Date.now()}`);
-    const data = await res.json();
-    updateDashboard(data);
-  } catch (err) {
-    console.error('❌ Failed to load summary data:', err);
-  }
+function fetchData() {
+  const SCRIPT = document.createElement('script');
+  SCRIPT.src = `${SCRIPT_URL}?summary=1&callback=loadSummary&_t=${Date.now()}`;
+  document.head.appendChild(SCRIPT);
 }
 
-function updateDashboard(data) {
+window.loadSummary = function(data) {
   const container = document.getElementById('summary');
   const totals = document.getElementById('totals');
   container.innerHTML = '';
@@ -262,10 +259,11 @@ function updateDashboard(data) {
   const orderedUnits = unitList.length ? unitList : Object.keys(grouped).sort();
 
   orderedUnits.forEach(unit => {
-    const people = grouped[unit] || [];
+    const people = grouped[unit];
+    if (!people || people.length === 0) return; // ข้ามถ้าไม่มีข้อมูล
     const total = people.length;
     const joined = people.filter(p => registMap.has(p.RTAF_ID)).length;
-    const percent = total === 0 ? 0 : ((joined / total) * 100).toFixed(1);
+    const percent = ((joined / total) * 100).toFixed(1);
 
     grandTotal += total;
     grandJoin += joined;
@@ -286,7 +284,7 @@ function updateDashboard(data) {
     container.appendChild(div);
   });
 
-  const grandPercent = grandTotal === 0 ? 0 : ((grandJoin / grandTotal) * 100).toFixed(1);
+  const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
   totals.innerHTML = `
     <div>ยอดรวม: ${grandTotal} คน</div>
     <div>เข้าร่วม: ${grandJoin} คน</div>
@@ -296,13 +294,13 @@ function updateDashboard(data) {
   [...totals.children].forEach(el => {
     el.style.border = `4px solid ${color}`;
   });
-}
+};
 
 function showPopup(unit, people, registMap) {
   const total = people.length;
   const joinedList = people.filter(p => registMap.has(p.RTAF_ID));
   const notJoinedList = people.filter(p => !registMap.has(p.RTAF_ID));
-  const percent = total === 0 ? 0 : ((joinedList.length / total) * 100).toFixed(1);
+  const percent = ((joinedList.length / total) * 100).toFixed(1);
 
   const html = `
     <h3>${unit}</h3>
@@ -326,7 +324,7 @@ function hidePopup() {
   document.getElementById('overlay').style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', fetchUnitList);
+document.addEventListener('DOMContentLoaded', loadUnitListThenSummary);
 </script>
 
 </body>
