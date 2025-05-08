@@ -185,7 +185,7 @@ function logout() {
 }
 
 async function loadPersonnelData() {
-  const res = await fetch(${SCRIPT_URL}?getPersonnel=1);
+  const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
   const data = await res.json();
   personnelData = data;
   renderPersonnelTable(data);
@@ -206,7 +206,7 @@ function renderPersonnelTable(data) {
     (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
   ).forEach(row => {
     const tr = document.createElement('tr');
-    tr.innerHTML = 
+    tr.innerHTML = `
       <td>${row.rtafId}</td>
       <td>${row.rank}</td>
       <td>${row.name}</td>
@@ -223,14 +223,14 @@ function renderPersonnelTable(data) {
       <td class="checkbox-cell">
         <input type="checkbox" ${row.drawer ? 'checked' : ''} onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
       </td>
-    ;
+    `;
     tbody.appendChild(tr);
   });
   lucide.createIcons();
 }
 
 function updateCheckbox(rtafId, field, value) {
-  fetch(${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value})
+  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
     .then(res => res.text())
     .then(txt => console.log('✅ updated', rtafId, field, value))
     .catch(err => console.error('❌ error:', err));
