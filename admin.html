@@ -157,6 +157,7 @@
 
 <script>
 let personnelData = [];
+let unitList = [];
 
 async function initLiffAndCheckAdmin() {
   await liff.init({ liffId: LIFF_ID_ADMIN });
@@ -174,6 +175,7 @@ async function initLiffAndCheckAdmin() {
     return;
   }
 
+  await loadUnitList();
   loadPersonnelData();
 }
 
@@ -182,6 +184,12 @@ function logout() {
     liff.logout();
     location.reload();
   }
+}
+
+async function loadUnitList() {
+  const res = await fetch(`${SCRIPT_URL}?getUnitList=1`);
+  const list = await res.json();
+  unitList = list.map(row => row[1]);
 }
 
 async function loadPersonnelData() {
@@ -197,7 +205,7 @@ function renderPersonnelTable(data) {
 
   const search = document.getElementById('searchInput').value.toLowerCase();
   const unitFilter = document.getElementById('unitFilter').value;
-  const units = [...new Set(data.map(row => row.unit))];
+  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))].sort();
   document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
   document.getElementById('unitFilter').value = unitFilter;
 
@@ -240,7 +248,6 @@ function updateCheckbox(rtafId, field, value) {
     .then(res => res.text())
     .then(txt => {
       console.log('✅ updated', rtafId, field, value);
-      // ✅ อัปเดตค่าใน personnelData ด้วย
       const person = personnelData.find(p => p.rtafId === rtafId);
       if (person) person[field] = value;
     })
@@ -252,6 +259,6 @@ document.getElementById('unitFilter').addEventListener('change', () => renderPer
 
 document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
 </script>
-  
+
 </body>
 </html>
