@@ -213,8 +213,14 @@ function renderPersonnelTable(data) {
       <td>${row.position}</td>
       <td>${row.unit}</td>
       <td>
-        <button class="btn btn-sm btn-primary"><i data-lucide="edit"></i></button>
-        <button class="btn btn-sm btn-danger"><i data-lucide="trash-2"></i></button>
+        <div style="display: inline-flex; gap: 6px;">
+        <button class="btn btn-sm btn-warning" title="แก้ไข">
+          <i data-lucide="edit"></i>
+        </button>
+        <button class="btn btn-sm btn-danger" title="ลบ">
+          <i data-lucide="trash-2"></i>
+        </button>
+      </div>
       </td>
       <td>${row.linked ? '✅' : ''}</td>
       <td class="checkbox-cell">
