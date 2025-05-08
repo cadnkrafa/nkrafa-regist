@@ -72,6 +72,25 @@
 <script>
 let personnelData = [];
 
+async function initLiffAndCheckAdmin() {
+  await liff.init({ liffId: LIFF_ID_ADMIN });
+  if (!liff.isLoggedIn()) {
+    liff.login({ redirectUri: window.location.href });
+    return;
+  }
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+  const isAdmin = await res.text();
+
+  if (isAdmin !== 'true') {
+    document.body.innerHTML = '<h2 style="text-align:center; color:red; padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h2>';
+    return;
+  }
+
+  loadPersonnelData(); // ✅ ถ้าผ่านสิทธิ์ ค่อยโหลดข้อมูล
+}
+
 async function loadPersonnelData() {
   const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
   const data = await res.json();
@@ -127,7 +146,7 @@ function updateCheckbox(rtafId, field, value) {
 document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
 document.getElementById('unitFilter').addEventListener('change', () => renderPersonnelTable(personnelData));
 
-document.addEventListener('DOMContentLoaded', loadPersonnelData);
+document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
 </script>
   
 </body>
