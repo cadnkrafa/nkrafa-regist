@@ -1,73 +1,159 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Super Admin Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
-      background: #f4f7fa;
-      padding: 20px;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
     }
-    .logout-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+    header {
+      background: #3498db;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
     }
-    .reset-btn {
-      position: absolute;
-      top: 20px;
-      right: 110px;
+    header h1 {
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
     }
-    table td, table th {
-      vertical-align: middle;
-      font-size: 0.95em;
+    .tab-bar {
+      background: #f2f2f2;
+      display: flex;
+      padding: 0 20px;
+      gap: 10px;
     }
-    th:nth-child(1) { width: 110px; }
-    th:nth-child(2) { width: 80px; }
-    th:nth-child(3) { width: 160px; }
-    th:nth-child(4) { width: 160px; }
-    th:nth-child(5), th:nth-child(6) { width: 100px; text-align: center; }
+    .tab {
+      padding: 10px 16px;
+      background: white;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab.active {
+      background: #fff;
+      border-bottom: 2px solid #3498db;
+      color: #3498db;
+    }
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px 0;
+      flex-wrap: wrap;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-grow: 1;
+      max-width: 30%;
+    }
+    .filters input[type="text"], .filters select {
+      font-family: 'Noto Sans Thai', sans-serif;
+      padding: 8px 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 5px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .btn-reset { background: #f39c12; }
+    .btn-logout { background: #e74c3c; }
+    .btn-add { background: #2ecc71; white-space: nowrap; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 15px;
+    }
+    th {
+      background: #dceeff;
+      font-weight: bold;
+    }
+    .tab-content { padding: 0 20px; }
+    .hidden { display: none; }
+    .checkbox-cell input { transform: scale(1.2); }
   </style>
 </head>
 <body>
-  <button class="btn btn-warning reset-btn" onclick="resetRoles()">Reset สิทธิ์</button>
-  <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
-
-  <div class="container">
-    <h2 class="text-center mb-4">🎖️ Super Admin Panel</h2>
-
-    <div class="row mb-3">
-      <div class="col-md-3">
-        <input id="searchInput" type="text" class="form-control" placeholder="🔍 ค้นหา...">
-      </div>
-      <div class="col-md-2">
-        <select id="unitFilter" class="form-select">
-          <option value="">แสดงทุกหน่วย</option>
-        </select>
-      </div>
+  <header>
+    <h1><i data-lucide="settings"></i> Admin Panel</h1>
+    <div class="action-buttons">
+      <button class="btn btn-reset" onclick="resetSheet('tokens')"><i data-lucide="rotate-ccw"></i> Reset Tokens</button>
+      <button class="btn btn-reset" onclick="resetSheet('regist')"><i data-lucide="rotate-ccw"></i> Reset Regist</button>
+      <button class="btn btn-reset" onclick="resetSheet('drawprize')"><i data-lucide="rotate-ccw"></i> Reset ผู้จับรางวัล</button>
+      <button class="btn btn-logout" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
     </div>
+  </header>
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead class="table-primary">
-          <tr>
-            <th>เลขประจำตัว</th>
-            <th>ยศ</th>
-            <th>ชื่อ</th>
-            <th>หน่วย</th>
-            <th>Admin</th>
-            <th>SuperAdmin</th>
-          </tr>
-        </thead>
-        <tbody id="adminTable"></tbody>
-      </table>
-    </div>
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
+    <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
+    <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
   </div>
+
+  <div class="tab-content" id="personnel-tab">
+    <div class="top-controls">
+      <div class="filters">
+        <input id="searchInput" type="text" placeholder="🔍 ค้นหา...">
+        <select id="unitFilter"></select>
+      </div>
+      <button class="btn btn-add" onclick="addNewRow()"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:10%">เลขประจำตัว</th>
+          <th style="width:8%">ยศ</th>
+          <th style="width:20%">ชื่อ</th>
+          <th style="width:20%">ตำแหน่ง</th>
+          <th style="width:10%">หน่วย</th>
+          <th style="width:10%">แก้ไข/ลบ</th>
+          <th style="width:8%">สถานะผูกบัญชีไลน์</th>
+          <th style="width:8%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this.checked)">
+          </th>
+          <th style="width:8%">ผู้จับรางวัล</th>
+        </tr>
+      </thead>
+      <tbody id="data-table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="tab-content hidden" id="rank-tab"></div>
+  <div class="tab-content hidden" id="unit-tab"></div>
 
 <script>
 let personnelData = [];
@@ -92,7 +178,7 @@ async function initLiffAndCheckAdmin() {
 }
 
 async function loadPersonnelData() {
-  const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
+  const res = await fetch(${SCRIPT_URL}?getPersonnel=1);
   const data = await res.json();
   personnelData = data;
   renderPersonnelTable(data);
@@ -105,7 +191,7 @@ function renderPersonnelTable(data) {
   const search = document.getElementById('searchInput').value.toLowerCase();
   const unitFilter = document.getElementById('unitFilter').value;
   const units = [...new Set(data.map(row => row.unit))];
-  document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+  document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => <option value="${u}">${u}</option>).join('');
   document.getElementById('unitFilter').value = unitFilter;
 
   data.filter(row =>
@@ -113,7 +199,7 @@ function renderPersonnelTable(data) {
     (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
   ).forEach(row => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `
+    tr.innerHTML = 
       <td>${row.rtafId}</td>
       <td>${row.rank}</td>
       <td>${row.name}</td>
@@ -130,14 +216,14 @@ function renderPersonnelTable(data) {
       <td class="checkbox-cell">
         <input type="checkbox" ${row.drawer ? 'checked' : ''} onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
       </td>
-    `;
+    ;
     tbody.appendChild(tr);
   });
   lucide.createIcons();
 }
 
 function updateCheckbox(rtafId, field, value) {
-  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+  fetch(${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value})
     .then(res => res.text())
     .then(txt => console.log('✅ updated', rtafId, field, value))
     .catch(err => console.error('❌ error:', err));
