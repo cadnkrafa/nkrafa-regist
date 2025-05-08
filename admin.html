@@ -160,6 +160,7 @@
 
   let allPersonnelData = [];
   let unitList = [];
+  let linkMap = {}; // rtafId -> true
 
   function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
@@ -217,8 +218,6 @@
     document.body.appendChild(script);
   }
 
-  let linkMap = {}; // rtafId -> true
-
   function handleLinkData(data) {
     linkMap = {};
     data.forEach(row => {
@@ -245,11 +244,8 @@
   function renderPersonnelTable(data) {
     const tbody = document.getElementById('data-table-body');
     tbody.innerHTML = '';
-    const headerCheckbox = document.getElementById('selectAllList');
-    if (headerCheckbox) headerCheckbox.checked = false;
-
     data.forEach((row, i) => {
-      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', admin = '', superAdmin = '', drawer = ''] = row;
+      const [rtafId = '', rank = '', name = '', position = '', unit = '', list = '', , , drawer = ''] = row;
       const isLinked = !!linkMap[rtafId.toString()];
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -264,7 +260,7 @@
         </td>
         <td>${isLinked ? '✅' : ''}</td>
         <td class="checkbox-cell">
-          <input type="checkbox" ${list ? 'checked' : ''} onchange="toggleList(${i}, this.checked)">
+          <input type="checkbox" data-type="list" ${list ? 'checked' : ''} onchange="toggleList(${i}, this.checked)">
         </td>
         <td class="checkbox-cell">
           <input type="checkbox" ${drawer === true || drawer === 'true' ? 'checked' : ''} onchange="toggleDrawer(${i}, this.checked)">
@@ -274,17 +270,8 @@
     });
   }
 
-  function toggleList(index, value) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=list&index=${index}&value=${value}&callback=()=>{}`;
-    document.body.appendChild(script);
-  }
-
-  function toggleDrawer(index, value) {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=drawer&index=${index}&value=${value}&callback=()=>{}`;
-    document.body.appendChild(script);
-  }
+  function handleListUpdate() {}
+  function handleDrawerUpdate() {}
 
   function handleRewardUpdate() {
     console.log("อัปเดตผู้จับรางวัลแล้ว");
@@ -313,9 +300,23 @@
     });
     renderPersonnelTable(filtered);
   }
+  
+  function toggleList(index, value) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=list&index=${index}&value=${value}&callback=handleListUpdate`;
+    document.body.appendChild(script);
+  }
+
+  function toggleDrawer(index, value) {
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=drawer&index=${index}&value=${value}&callback=handleDrawerUpdate`;
+    document.body.appendChild(script);
+  }
 
   function toggleAllList(checked) {
-    allPersonnelData.forEach((row, i) => {
+    const checkboxes = document.querySelectorAll('#data-table-body tr input[type="checkbox"][data-type="list"]');
+    checkboxes.forEach((checkbox, i) => {
+      checkbox.checked = checked;
       toggleList(i, checked);
     });
   }
