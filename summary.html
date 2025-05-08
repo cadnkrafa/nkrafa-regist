@@ -217,27 +217,29 @@ function getSummaryBorderColor(percent) {
   return '#3498db';
 }
 
-function fetchUnitList() {
-  const script = document.createElement('script');
-  script.src = `${SCRIPT_URL}?getUnitList=1&callback=handleUnitList`;
-  document.body.appendChild(script);
+async function fetchUnitList() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?getUnitList=1`);
+    const data = await res.json();
+    unitList = data.map(row => row[1]);
+    fetchData();
+    setInterval(fetchData, 15000);
+  } catch (err) {
+    console.error('❌ Failed to load unit list:', err);
+    fetchData();
+    setInterval(fetchData, 15000);
+  }
 }
 
-function handleUnitList(data) {
-  unitList = data.map(row => row[1]);
-  fetchData();
-  setInterval(fetchData, 15000);
+async function fetchData() {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?summary=1&_t=${Date.now()}`);
+    const data = await res.json();
+    updateDashboard(data);
+  } catch (err) {
+    console.error('❌ Failed to load summary data:', err);
+  }
 }
-
-function fetchData() {
-  const SCRIPT = document.createElement('script');
-  SCRIPT.src = `${SCRIPT_URL}?summary=1&callback=loadSummary&_t=${Date.now()}`;
-  document.head.appendChild(SCRIPT);
-}
-
-window.loadSummary = function(data) {
-  updateDashboard(data);
-};
 
 function updateDashboard(data) {
   const container = document.getElementById('summary');
@@ -322,7 +324,7 @@ function hidePopup() {
   document.getElementById('overlay').style.display = 'none';
 }
 
-fetchUnitList();
+document.addEventListener('DOMContentLoaded', fetchUnitList);
 </script>
 
 </body>
