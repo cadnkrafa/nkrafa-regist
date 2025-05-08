@@ -217,11 +217,13 @@ function getSummaryBorderColor(percent) {
   return '#3498db';
 }
 
+const normalize = txt => txt.trim().replace(/​/g, '');
+
 async function fetchUnitList() {
   try {
     const res = await fetch(`${SCRIPT_URL}?getUnitList=1`);
     const data = await res.json();
-    unitList = data.map(row => row[1]);
+    unitList = data.map(row => normalize(row[1]));
     fetchData();
     setInterval(fetchData, 15000);
   } catch (err) {
@@ -251,7 +253,7 @@ function updateDashboard(data) {
 
   data.data.forEach(row => {
     if (!row.List) return;
-    const unit = row.Unit;
+    const unit = normalize(row.Unit);
     if (!grouped[unit]) grouped[unit] = [];
     grouped[unit].push(row);
   });
