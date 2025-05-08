@@ -220,18 +220,36 @@
       const isLinked = linkData.some(l => String(l[1]) === String(id));
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${id}</td>
+        <td>${rtafId}</td>
         <td>${rank}</td>
         <td>${name}</td>
-        <td>${pos}</td>
+        <td>${position}</td>
         <td>${unit}</td>
-        <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>
+          <button onclick="editRow(${i})">✏️</button>
+          <button onclick="deleteRow(${i})">🗑️</button>
+        </td>
         <td>${isLinked ? '✅' : ''}</td>
-        <td><input type="checkbox" ${list === true || list === '✅' ? 'checked' : ''}></td>
-        <td><input type="checkbox" ${drawer === true ? 'checked' : ''}></td>
-      `;
+        <td class="checkbox-cell">
+          <input type="checkbox" ${list === 'TRUE' ? 'checked' : ''} onchange="updateField('${rtafId}', 'list', this.checked)">
+        </td>
+        <td class="checkbox-cell">
+          <input type="checkbox" ${drawer === true || drawer === 'TRUE' ? 'checked' : ''} onchange="updateField('${rtafId}', 'drawer', this.checked)">
+        </td>`;
       tbody.appendChild(tr);
     });
+  }
+
+  // ✅ updateField สำหรับส่งชื่อร่วมงาน และผู้จับรางวัล
+  function updateField(rtafId, field, value) {
+    fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=${field}&value=${value}`)
+      .then(res => res.text())
+      .then(msg => {
+        console.log(`✅ ${field} updated:`, msg);
+      })
+      .catch(err => {
+        console.error(`❌ Error updating ${field}:`, err);
+      });
   }
 
   window.onload = initLiff;
