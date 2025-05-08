@@ -9,103 +9,25 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="./config.js"></script>
   <style>
-    body {
-      font-family: 'Noto Sans Thai', sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #3498db;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-    }
-    header h1 {
-      font-size: 1.5em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0;
-    }
-    .tab-bar {
-      background: #f2f2f2;
-      display: flex;
-      padding: 0 20px;
-      gap: 10px;
-    }
-    .tab {
-      padding: 10px 16px;
-      background: white;
-      border: 1px solid #ccc;
-      border-bottom: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .tab.active {
-      background: #fff;
-      border-bottom: 2px solid #3498db;
-      color: #3498db;
-    }
-    .top-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 20px 0;
-      flex-wrap: wrap;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-grow: 1;
-      max-width: 30%;
-    }
-    .filters input[type="text"], .filters select {
-      font-family: 'Noto Sans Thai', sans-serif;
-      padding: 8px 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .btn {
-      border: none;
-      padding: 8px 14px;
-      font-size: 14px;
-      border-radius: 5px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
+    body { font-family: 'Noto Sans Thai', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+    header { background: #3498db; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+    header h1 { font-size: 1.5em; display: flex; align-items: center; gap: 8px; margin: 0; }
+    .tab-bar { background: #f2f2f2; display: flex; padding: 0 20px; gap: 10px; }
+    .tab { padding: 10px 16px; background: white; border: 1px solid #ccc; border-bottom: none; cursor: pointer; font-weight: bold; }
+    .tab.active { background: #fff; border-bottom: 2px solid #3498db; color: #3498db; }
+    .top-controls { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0; flex-wrap: wrap; }
+    .filters { display: flex; gap: 10px; flex-grow: 1; max-width: 30%; }
+    .filters input, .filters select { font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+    .action-buttons { display: flex; gap: 10px; align-items: center; }
+    .btn { border: none; padding: 8px 14px; font-size: 14px; border-radius: 5px; color: white; display: flex; align-items: center; gap: 6px; cursor: pointer; }
     .btn-reset { background: #f39c12; }
     .btn-logout { background: #e74c3c; }
     .btn-add { background: #2ecc71; white-space: nowrap; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-      font-size: 15px;
-    }
-    th {
-      background: #dceeff;
-      font-weight: bold;
-    }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 15px; }
+    th { background: #dceeff; font-weight: bold; }
     .tab-content { padding: 0 20px; }
     .hidden { display: none; }
-    .checkbox-cell input { transform: scale(1.2); }
   </style>
 </head>
 <body>
@@ -126,26 +48,18 @@
   </div>
 
   <div class="tab-content" id="personnel-tab">
-    <div class="top-controls">
-      <div class="filters">
-        <input id="searchInput" type="text" placeholder="🔍 ค้นหา...">
-        <select id="unitFilter"></select>
-      </div>
-      <button class="btn btn-add" onclick="addNewRow()"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
-    </div>
     <table>
       <thead>
         <tr>
-          <th style="width:10%">เลขประจำตัว</th>
-          <th style="width:8%">ยศ</th>
-          <th style="width:20%">ชื่อ</th>
-          <th style="width:20%">ตำแหน่ง</th>
-          <th style="width:10%">หน่วย</th>
-          <th style="width:10%">แก้ไข/ลบ</th>
-          <th style="width:8%">สถานะผูกบัญชีไลน์</th>
-          <th style="width:8%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this.checked)">
-          </th>
-          <th style="width:8%">ผู้จับรางวัล</th>
+          <th>เลขประจำตัว</th>
+          <th>ยศ</th>
+          <th>ชื่อ</th>
+          <th>ตำแหน่ง</th>
+          <th>หน่วย</th>
+          <th>แก้ไข/ลบ</th>
+          <th>สถานะผูกบัญชีไลน์</th>
+          <th>ส่งชื่อร่วมงาน</th>
+          <th>ผู้จับรางวัล</th>
         </tr>
       </thead>
       <tbody id="data-table-body"></tbody>
@@ -155,7 +69,84 @@
   <div class="tab-content hidden" id="rank-tab"></div>
   <div class="tab-content hidden" id="unit-tab"></div>
 
+<script>
+  lucide.createIcons();
+  let allData = [], linkData = [];
+
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.remove('hidden');
+    event.target.classList.add('active');
+  }
+
+  function resetSheet(sheet) {
+    const s = document.createElement('script');
+    s.src = `${SCRIPT_URL}?adminPage=true&type=${sheet}&action=reset&callback=()=>{}`;
+    document.body.appendChild(s);
+  }
+
+  function logout() {
+    liff.logout(); location.reload();
+  }
+
+  async function initLiff() {
+    await liff.init({ liffId: LIFF_ID_ADMIN });
+    if (!liff.isLoggedIn()) liff.login();
+    else {
+      const profile = await liff.getProfile();
+      const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${profile.userId}`);
+      if ((await res.text()) !== 'true') {
+        document.body.innerHTML = '<h2 style="text-align:center;color:red;padding:40px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h2>';
+        return;
+      }
+      loadData();
+    }
+  }
+
+  function loadData() {
+    const dataScript = document.createElement('script');
+    dataScript.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handleData`;
+    document.body.appendChild(dataScript);
+    const linkScript = document.createElement('script');
+    linkScript.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLink`;
+    document.body.appendChild(linkScript);
+  }
+
+  function handleData(data) {
+    allData = data;
+    renderTable();
+  }
+
+  function handleLink(data) {
+    linkData = data;
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('data-table-body');
+    if (!allData.length) return;
+    tbody.innerHTML = '';
+    allData.forEach((row, i) => {
+      const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
+      const isLinked = linkData.some(l => String(l[1]) === String(id));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${pos}</td>
+        <td>${unit}</td>
+        <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${isLinked ? '✅' : ''}</td>
+        <td><input type="checkbox" ${list === true || list === '✅' ? 'checked' : ''}></td>
+        <td><input type="checkbox" ${drawer === true ? 'checked' : ''}></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  window.onload = initLiff;
+</script>
 </body>
 </html>
-
-
