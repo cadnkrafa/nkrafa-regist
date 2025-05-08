@@ -155,11 +155,12 @@
   <div class="tab-content hidden" id="rank-tab"></div>
   <div class="tab-content hidden" id="unit-tab"></div>
 
+// ✅ โค้ด admin.html หลังลบ loadData/loadLink/handleLink และเปลี่ยนเป็นโหลดแบบใหม่
+
 <script>
   lucide.createIcons();
 
   let allData = [];
-  let linkMap = {};
 
   async function initLiff() {
     await liff.init({ liffId: LIFF_ID_ADMIN });
@@ -173,33 +174,13 @@
         document.body.innerHTML = '<h1 style="text-align:center;color:red;padding:50px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>';
         return;
       }
-      loadData();
+      loadPersonnelData();
     }
   }
 
-  function loadData() {
-    loadLink(); // โหลดก่อนแล้วค่อย render
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handleData`;
-    document.body.appendChild(script);
-  }
-
-  function loadLink() {
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLink`;
-    document.body.appendChild(script);
-  }
-
-  function handleLink(data) {
-    linkMap = {};
-    data.forEach(row => {
-      const rtafId = row[1];
-      if (rtafId) linkMap[String(rtafId)] = true;
-    });
-    renderTable(allData);
-  }
-
-  function handleData(data) {
+  async function loadPersonnelData() {
+    const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
+    const data = await res.json();
     allData = data;
     renderTable(data);
   }
@@ -208,32 +189,31 @@
     const tbody = document.getElementById('data-table-body');
     tbody.innerHTML = '';
     data.forEach((row, index) => {
-      const rtafId = row[0] || '';
-      const linked = linkMap[rtafId] ? '✅' : '';
-      const rank = row[1] || '';
-      const name = row[2] || '';
-      const position = row[3] || '';
-      const unit = row[4] || '';
-      const list = row[5] === true || row[5] === '✅';
-      const drawer = row[8] === true || row[8] === 'true';
-
+      const linked = row.linked ? '✅' : '';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${rtafId}</td>
-        <td>${rank}</td>
-        <td>${name}</td>
-        <td>${position}</td>
-        <td>${unit}</td>
+        <td>${row.rtafId}</td>
+        <td>${row.rank}</td>
+        <td>${row.name}</td>
+        <td>${row.position}</td>
+        <td>${row.unit}</td>
         <td>
           <button onclick="editRow(${index})">✏️</button>
           <button onclick="deleteRow(${index})">🗑️</button>
         </td>
         <td>${linked}</td>
-        <td><input type="checkbox" ${list ? 'checked' : ''}></td>
-        <td><input type="checkbox" ${drawer ? 'checked' : ''}></td>
+        <td><input type="checkbox" ${row.list ? 'checked' : ''} onchange="updateCheckbox('${row.rtafId}', 'list', this.checked)"></td>
+        <td><input type="checkbox" ${row.drawer ? 'checked' : ''} onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)"></td>
       `;
       tbody.appendChild(tr);
     });
+  }
+
+  function updateCheckbox(rtafId, field, value) {
+    fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+      .then(res => res.text())
+      .then(msg => console.log('✅ Updated:', rtafId, field, value))
+      .catch(err => console.error('❌ Error:', err));
   }
 
   function editRow(index) {
