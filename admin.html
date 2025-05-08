@@ -155,6 +155,7 @@
   <div class="tab-content hidden" id="rank-tab"></div>
   <div class="tab-content hidden" id="unit-tab"></div>
 
+</body>
 
 <script>
   lucide.createIcons();
@@ -223,99 +224,6 @@
       .then(res => res.text())
       .then(msg => console.log('✅ Updated', field, value))
       .catch(err => console.error('❌ Update failed', err));
-  }
-
-  window.onload = initLiff;
-</script>
-</body>
-
-<script>
-  lucide.createIcons();
-  let allData = [], linkData = [];
-
-  function showTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(tabId).classList.remove('hidden');
-    event.target.classList.add('active');
-  }
-
-  function resetSheet(sheet) {
-    const s = document.createElement('script');
-    s.src = `${SCRIPT_URL}?adminPage=true&type=${sheet}&action=reset&callback=()=>{}`;
-    document.body.appendChild(s);
-  }
-
-  function logout() {
-    liff.logout(); location.reload();
-  }
-
-  async function initLiff() {
-    await liff.init({ liffId: LIFF_ID_ADMIN });
-    if (!liff.isLoggedIn()) liff.login();
-    else {
-      const profile = await liff.getProfile();
-      const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${profile.userId}`);
-      if ((await res.text()) !== 'true') {
-        document.body.innerHTML = '<h2 style="text-align:center;color:red;padding:40px;">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h2>';
-        return;
-      }
-      loadData();
-    }
-  }
-
-  function loadData() {
-    const dataScript = document.createElement('script');
-    dataScript.src = `${SCRIPT_URL}?adminPage=true&type=data&action=get&callback=handleData`;
-    document.body.appendChild(dataScript);
-    const linkScript = document.createElement('script');
-    linkScript.src = `${SCRIPT_URL}?adminPage=true&type=link&action=get&callback=handleLink`;
-    document.body.appendChild(linkScript);
-  }
-
-  function handleData(data) {
-    allData = data;
-    renderTable();
-  }
-
-  function handleLink(data) {
-    linkData = data;
-    renderTable();
-  }
-
-  function renderTable() {
-    const tbody = document.getElementById('data-table-body');
-    if (!allData.length) return;
-    tbody.innerHTML = '';
-    allData.forEach((row, i) => {
-      const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
-      const isLinked = linkData.some(l => String(l[1]) === String(id));
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td>${rank}</td>
-        <td>${name}</td>
-        <td>${pos}</td>
-        <td>${unit}</td>
-        <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
-        <td>${isLinked ? '✅' : ''}</td>
-        <td><input type="checkbox" ${list === 'TRUE' ? 'checked' : ''} onchange="updateField('${rtafId}', 'list', this.checked)"></td>
-        <td><input type="checkbox" ${drawer === true ? 'checked' : ''} onchange="updateField('${rtafId}', 'drawer', this.checked)"></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // ✅ updateField สำหรับส่งชื่อร่วมงาน และผู้จับรางวัล
-  function updateField(rtafId, field, value) {
-    fetch(`${SCRIPT_URL}?updateField=1&rtafId=${rtafId}&field=${field}&value=${value}`)
-      .then(res => res.text())
-      .then(msg => {
-        console.log(`✅ ${field} updated:`, msg);
-      })
-      .catch(err => {
-        console.error(`❌ Error updating ${field}:`, err);
-      });
   }
 
   window.onload = initLiff;
