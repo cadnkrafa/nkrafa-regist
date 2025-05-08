@@ -211,20 +211,20 @@
     renderTable();
   }
 
-function renderTable() {
-  const tbody = document.getElementById('data-table-body');
-  if (!allData.length) return;
-  tbody.innerHTML = '';
-  allData.forEach((row, i) => {
-    const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
-    const isLinked = linkData.some(l => String(l[1]) === String(id));
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${id}</td>
-      <td>${rank}</td>
-      <td>${name}</td>
-      <td>${pos}</td>
-      <td>${unit}</td>
+  function renderTable() {
+    const tbody = document.getElementById('data-table-body');
+    if (!allData.length) return;
+    tbody.innerHTML = '';
+    allData.forEach((row, i) => {
+      const [id, rank, name, pos, unit, list, admin, superAdmin, drawer] = row;
+      const isLinked = linkData.some(l => String(l[1]) === String(id));
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${id}</td>
+        <td>${rank}</td>
+        <td>${name}</td>
+        <td>${pos}</td>
+        <td>${unit}</td>
       <td>
         <button onclick="editRow(${i})">✏️</button>
         <button onclick="deleteRow(${i})">🗑️</button>
