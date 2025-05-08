@@ -225,20 +225,14 @@
         <td>${name}</td>
         <td>${pos}</td>
         <td>${unit}</td>
-      <td>
-        <button onclick="editRow(${i})">✏️</button>
-        <button onclick="deleteRow(${i})">🗑️</button>
-      </td>
-      <td>${isLinked ? '✅' : ''}</td>
-      <td class="checkbox-cell">
-        <input type="checkbox" ${list === 'TRUE' ? 'checked' : ''} onchange="updateField('${id}', 'list', this.checked)">
-      </td>
-      <td class="checkbox-cell">
-        <input type="checkbox" ${drawer === true || drawer === 'TRUE' ? 'checked' : ''} onchange="updateField('${id}', 'drawer', this.checked)">
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
+        <td><button onclick="editRow(${i})">✏️</button> <button onclick="deleteRow(${i})">🗑️</button></td>
+        <td>${isLinked ? '✅' : ''}</td>
+        <td><input type="checkbox" ${list === true || list === '✅' ? 'checked' : ''}></td>
+        <td><input type="checkbox" ${drawer === true ? 'checked' : ''}></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
   // ✅ updateField สำหรับส่งชื่อร่วมงาน และผู้จับรางวัล
   function updateField(rtafId, field, value) {
