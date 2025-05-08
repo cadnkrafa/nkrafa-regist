@@ -177,6 +177,13 @@ async function initLiffAndCheckAdmin() {
   loadPersonnelData(); // ✅ ถ้าผ่านสิทธิ์ ค่อยโหลดข้อมูล
 }
 
+function logout() {
+  if (liff.isLoggedIn()) {
+    liff.logout();
+    location.reload();
+  }
+}
+
 async function loadPersonnelData() {
   const res = await fetch(${SCRIPT_URL}?getPersonnel=1);
   const data = await res.json();
