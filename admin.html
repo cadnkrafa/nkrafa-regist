@@ -142,10 +142,10 @@
           <th style="width:20%">ตำแหน่ง</th>
           <th style="width:10%">หน่วย</th>
           <th style="width:10%">แก้ไข/ลบ</th>
-          <th style="width:10%">สถานะผูกบัญชีไลน์</th>
-          <th style="width:6%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this.checked)">
+          <th style="width:8%">สถานะผูกบัญชีไลน์</th>
+          <th style="width:8%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this.checked)">
           </th>
-          <th style="width:6%">ผู้จับรางวัล</th>
+          <th style="width:8%">ผู้จับรางวัล</th>
         </tr>
       </thead>
       <tbody id="data-table-body"></tbody>
@@ -276,14 +276,13 @@
 
   function toggleList(index, value) {
     const script = document.createElement('script');
-    const setValue = value ? encodeURIComponent('✅') : '';
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&list=${setValue}&callback=loadPersonnel`;
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=list&index=${index}&value=${value}&callback=()=>{}`;
     document.body.appendChild(script);
   }
 
   function toggleDrawer(index, value) {
     const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=update&index=${index}&drawer=${value}&callback=handleRewardUpdate`;
+    script.src = `${SCRIPT_URL}?adminPage=true&type=data&action=updateFieldByIndex&field=drawer&index=${index}&value=${value}&callback=()=>{}`;
     document.body.appendChild(script);
   }
 
