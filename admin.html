@@ -250,7 +250,6 @@ function addNewRow() {
 
 function submitNewRow() {
   const newData = {
-    addPersonnel: true,
     rtafId: document.getElementById('new-rtafId').value.trim(),
     rank: document.getElementById('new-rank').value.trim(),
     name: document.getElementById('new-name').value.trim(),
@@ -258,12 +257,12 @@ function submitNewRow() {
     unit: document.getElementById('new-unit').value
   };
 
-  if (!newData.rtafId || !newData.rank || !newData.name || !newData.unit) {
+  if (!newData.rtafId || !newData.rank || !newData.name || !newData.position || !newData.unit) {
     alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
     return;
   }
 
-  fetch(`${SCRIPT_URL}?addPersonnel=1`, {
+  fetch(`${SCRIPT_URL}?addPersonnel=true`, {
     method: 'POST',
     body: JSON.stringify(newData),
     headers: { 'Content-Type': 'application/json' }
