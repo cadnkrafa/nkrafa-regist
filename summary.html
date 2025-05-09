@@ -165,19 +165,19 @@
       transition: border 0.3s ease;
       border: 2px solid transparent; /* default border */
     }
-    .progress-gradient {
-      background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
-      height: 20px;
+    .progress-wrapper {
+      background-color: #eee;
       border-radius: 10px;
       overflow: hidden;
+      height: 20px;
       position: relative;
     }
     .progress-fill {
-      background-color: white;
       height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
+      width: 100%;
+      background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
+      transform-origin: left;
+      transform: scaleX(PERCENT / 100); /* จะใส่ผ่าน inline style ด้านล่าง */
     }
     ul {
       list-style: none;
@@ -282,8 +282,8 @@ window.loadSummary = function(data) {
         <span>${joined} จาก ${total}</span>
       </div>
       <div class="progress-wrapper">
-        <div class="progress-gradient">
-          <div class="progress-fill" style="width:${percent}%"></div>
+        <div class="progress-wrapper">
+          <div class="progress-fill" style="transform: scaleX(${percent / 100})"></div>
         </div>
         <div class="progress-percent">${percent}%</div>
       </div>
