@@ -160,7 +160,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e);
+  background: linear-gradient(to right, #e74c3c, #f39c12, #f1c40f, #d0e44f, #6cc644);
   z-index: 1;
 }
 .progress-clip {
@@ -236,10 +236,11 @@ let unitList = [];
 
 function getSummaryBorderColor(percent) {
   if (percent == 100) return '#08b425';
-  if (percent < 25) return '#e74c3c';
-  if (percent < 50) return '#ff9c00';
-  if (percent < 75) return '#f1c40f';
-  return '#a8cc2e';
+  if (percent < 20) return '#e74c3c';
+  if (percent < 40) return '#f39c12';
+  if (percent < 60) return '#f1c40f';
+  if (percent < 80) return '#d0e44f';
+  return '#6cc644';
 }
 
 function normalize(text) {
