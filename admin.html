@@ -283,31 +283,38 @@ async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex';
-
   masterCheckbox.disabled = true;
-  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list\"]');
+
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list"]');
   checkboxes.forEach(cb => cb.disabled = true);
 
-  for (const row of visibleRows) {
-    const rtafId = row.rtafId;
+  const updates = [];
+
+  visibleRows.forEach(row => {
     if (row.list !== checked) {
       row.list = checked;
+      const cb = document.querySelector(`#data-table-body input[data-rtafId="${row.rtafId}"]`);
+      if (cb) cb.checked = checked;
+      updates.push({ rtafId: row.rtafId, field: "list", value: checked });
+    }
+  });
 
-      const checkbox = document.querySelector(`#data-table-body input[data-rtafId=\"${rtafId}\"]`);
-      if (checkbox) checkbox.checked = checked;
-
-      try {
-        const res = await fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`);
-        const text = await res.text();
-        console.log(`✅ ${rtafId}: ${text}`);
-      } catch (err) {
-        console.warn(`❌ ${rtafId}:`, err);
-      }
+  if (updates.length > 0) {
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batchUpdate: true, updates })
+      });
+      const text = await res.text();
+      console.log("✅ Batch update:", text);
+    } catch (err) {
+      console.error("❌ Batch update error:", err);
     }
   }
 
-  checkboxes.forEach(cb => cb.disabled = false);
   masterCheckbox.disabled = false;
+  checkboxes.forEach(cb => cb.disabled = false);
   overlay.style.display = 'none';
 
   alert('✅ บันทึกสำเร็จ');
