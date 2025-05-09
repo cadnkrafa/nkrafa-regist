@@ -157,12 +157,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e);
+  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
   z-index: 1;
 }
 .progress-clip {
   height: 100%;
-  background-color: #e0e0e0; /* ✅ เปลี่ยนจาก white */
+  background-color: #e0e0e0;
   position: absolute;
   right: 0;
   top: 0;
@@ -178,9 +178,6 @@
   font-weight: bold;
   z-index: 3;
 }
-.progress-percent-white {
-  color: white;
-}
 .full-success {
   background-color: #08b425;
   color: white;
@@ -193,6 +190,7 @@
   height: 20px;
   border-radius: 10px;
   padding: 0 10px;
+  margin-bottom: 5px;
 }
     ul {
       list-style: none;
@@ -291,30 +289,32 @@ window.loadSummary = function(data) {
 
     const div = document.createElement('div');
     div.className = 'bar-container';
-    div.innerHTML = `
-      <div class="bar-label">
-        <span>${unit}</span>
-        <span>${joined} จาก ${total}</span>
-      </div>
-      if (percent == 100) {
-        div.innerHTML = `
-          <div class="bar-label">
-            <span>${unit}</span>
-            <span>${joined} จาก ${total}</span>
-          </div>
-          <div class="progress-wrapper full-success">
-            <div class="progress-percent-white">100.0%</div>
-          </div>
-        `;
-      } else {
+
+    if (percent == 100) {
+      div.innerHTML = `
+        <div class="bar-label">
+          <span>${unit}</span>
+          <span>${joined} จาก ${total}</span>
+        </div>
+        <div class="progress-wrapper full-success">
+          100.0%
+        </div>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="bar-label">
+          <span>${unit}</span>
+          <span>${joined} จาก ${total}</span>
+        </div>
         <div class="progress-wrapper">
           <div class="progress-gradient">
             <div class="progress-clip" style="width: ${100 - percent}%"></div>
           </div>
           <div class="progress-percent">${percent}%</div>
         </div>
-      }
-    `;
+      `;
+    }
+
     div.onclick = () => showPopup(unit, people, registMap);
     container.appendChild(div);
   });
