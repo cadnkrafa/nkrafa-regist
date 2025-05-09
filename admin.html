@@ -254,7 +254,7 @@ function submitNewRow() {
     rank: document.getElementById('new-rank').value.trim(),
     name: document.getElementById('new-name').value.trim(),
     position: document.getElementById('new-position').value.trim(),
-    unit: document.getElementById('new-unit').value
+    unit: document.getElementById('new-unit').value.trim()
   };
 
   if (!newData.rtafId || !newData.rank || !newData.name || !newData.position || !newData.unit) {
@@ -262,9 +262,12 @@ function submitNewRow() {
     return;
   }
 
-  fetch(`${SCRIPT_URL}?addPersonnel=true`, {
+  fetch(`${SCRIPT_URL}`, {
     method: 'POST',
-    body: JSON.stringify(newData),
+    body: JSON.stringify({
+      addPersonnel: true,
+      ...newData
+    }),
     headers: { 'Content-Type': 'application/json' }
   })
     .then(res => res.text())
@@ -272,6 +275,8 @@ function submitNewRow() {
       if (txt.includes("success")) {
         alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว");
         loadPersonnelData();
+      } else if (txt.includes("duplicate")) {
+        alert("⚠️ มีข้อมูลเลขนี้อยู่ในระบบแล้ว");
       } else {
         alert("❌ ไม่สามารถเพิ่มข้อมูลได้");
       }
