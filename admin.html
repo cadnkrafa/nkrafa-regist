@@ -111,6 +111,21 @@
 <body>
   <header>
     <h1><i data-lucide="settings"></i> Admin Panel</h1>
+    <div id="overlay" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  color: #000;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-weight: bold;
+">
+  ⏳ กำลังบันทึกข้อมูล...
+</div>
     <div class="action-buttons">
       <button class="btn btn-reset" onclick="resetSheet('tokens')"><i data-lucide="rotate-ccw"></i> Reset Tokens</button>
       <button class="btn btn-reset" onclick="resetSheet('regist')"><i data-lucide="rotate-ccw"></i> Reset Regist</button>
@@ -271,7 +286,11 @@ async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
   const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
 
-  // ปิด interaction ชั่วคราว
+  // แสดง overlay ป้องกันการคลิก
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
+
+  // ปิดทุก interaction
   masterCheckbox.disabled = true;
   checkboxes.forEach(cb => cb.disabled = true);
 
@@ -281,7 +300,6 @@ async function toggleAllList(masterCheckbox) {
     const rtafId = cb.getAttribute('data-rtafId');
     const currentChecked = cb.checked;
 
-    // อัปเดตเฉพาะที่ต่างจาก masterCheckbox
     if (currentChecked !== checked) {
       cb.checked = checked;
       updatePromises.push(updateCheckbox(rtafId, 'list', checked));
@@ -290,11 +308,12 @@ async function toggleAllList(masterCheckbox) {
 
   await Promise.all(updatePromises);
 
-  // เปิด interaction กลับ
+  // เปิดใช้งานกลับ
   masterCheckbox.disabled = false;
   checkboxes.forEach(cb => cb.disabled = false);
+  overlay.style.display = 'none';
 
-  console.log('✅ อัปเดต checkbox ทั้งหมดเสร็จแล้ว');
+  alert('✅ บันทึกสำเร็จ');
 }
 
 document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
