@@ -241,8 +241,14 @@ function addNewRow() {
       </select>
     </td>
     <td colspan="4">
-      <button onclick="submitNewRow()" style="margin-right: 8px; background: #2ecc71; color: white; border: none; padding: 5px 10px;">✅ บันทึก</button>
-      <button onclick="renderPersonnelTable(personnelData)" style="background: #e74c3c; color: white; border: none; padding: 5px 10px;">❌ ยกเลิก</button>
+        <div class="flex items-center gap-2">
+          <button onclick="submitNewRow()" class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="แก้ไข">
+            <i data-lucide="save"></i>
+          </button>
+          <button onclick="renderPersonnelTable(personnelData)" class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ลบ">
+            <i data-lucide="cancel"></i>
+          </button>
+        </div>
     </td>
   `;
   tbody.prepend(tr);
