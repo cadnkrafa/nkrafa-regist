@@ -275,8 +275,17 @@ function updateCheckbox(rtafId, field, value) {
       console.log('✅ updated', rtafId, field, value);
       const person = personnelData.find(p => p.rtafId === rtafId);
       if (person) person[field] = value;
+
+      // ✅ ตรวจสถานะ master checkbox ใหม่
+      if (field === 'list') updateCheckAllListStatus();
     })
     .catch(err => console.error('❌ error:', err));
+}
+
+function updateCheckAllListStatus() {
+  const master = document.getElementById('checkAllList');
+  const allChecked = visibleRows.every(row => row.list === true);
+  master.checked = allChecked;
 }
 
 async function toggleAllList(masterCheckbox) {
