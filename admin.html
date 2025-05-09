@@ -231,11 +231,13 @@ function renderPersonnelTable(data) {
         </div>
       </td>
       <td>${row.linked ? '✅' : ''}</td>
-      <td class="checkbox-cell">
-        <input type="checkbox" ${row.list ? 'checked' : ''} onchange="updateCheckbox('${row.rtafId}', 'list', this.checked)">
+      <td class="checkbox-cell text-center">
+        <input type="checkbox" ${row.list ? 'checked' : ''} data-field="list" data-rtafId="${row.rtafId}"
+          onchange="updateCheckbox('${row.rtafId}', 'list', this.checked)">
       </td>
-      <td class="checkbox-cell">
-        <input type="checkbox" ${row.drawer ? 'checked' : ''} onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
+      <td class="checkbox-cell text-center">
+        <input type="checkbox" ${row.drawer ? 'checked' : ''}
+          onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
       </td>
     `;
     tbody.appendChild(tr);
@@ -254,9 +256,21 @@ function updateCheckbox(rtafId, field, value) {
     .catch(err => console.error('❌ error:', err));
 }
 
+function toggleAllList(masterCheckbox) {
+  const checked = masterCheckbox.checked;
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
+
+  checkboxes.forEach(cb => {
+    if (cb.checked !== checked) {
+      cb.checked = checked;
+      const rtafId = cb.getAttribute('data-rtafId');
+      updateCheckbox(rtafId, 'list', checked);
+    }
+  });
+}
+
 document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
 document.getElementById('unitFilter').addEventListener('change', () => renderPersonnelTable(personnelData));
-
 document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
 </script>
 
