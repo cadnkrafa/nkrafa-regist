@@ -148,7 +148,7 @@
   height: 20px;
   border-radius: 10px;
   overflow: hidden;
-  background-color: #eee;
+  background: #e0e0e0;
   margin-bottom: 5px;
 }
 .progress-gradient {
@@ -282,7 +282,7 @@ window.loadSummary = function(data) {
       </div>
 <div class="progress-wrapper">
   <div class="progress-gradient">
-    <div class="progress-clip" style="width: ${percent}%"></div>
+    <div class="progress-clip" style="width: ${100 - percent}%"></div>
   </div>
   <div class="progress-percent">${percent}%</div>
 </div>
