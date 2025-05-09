@@ -63,26 +63,6 @@
       font-weight: bold;
       margin-bottom: 6px;
     }
-.progress-wrapper {
-  position: relative;
-  height: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  background-color: #eee;
-  margin-bottom: 5px;
-}
-
-.progress-gradient {
-  height: 100%;
-  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
-}
-
-.progress-percent {
-  text-align: right;
-  font-size: 0.85rem;
-  margin-top: 2px;
-  color: #333;
-}
     .overlay {
       position: fixed;
       top: 0;
@@ -163,19 +143,40 @@
       transition: border 0.3s ease;
       border: 2px solid transparent; /* default border */
     }
-    .progress-wrapper {
-      background-color: #eee;
-      border-radius: 10px;
-      overflow: hidden;
-      height: 20px;
-      position: relative;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
-      transform-origin: left;
-      transform: scaleX(PERCENT / 100); /* จะใส่ผ่าน inline style ด้านล่าง */
+.progress-wrapper {
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #eee;
+  margin-bottom: 5px;
+}
+.progress-gradient {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
+  z-index: 1;
+}
+.progress-clip {
+  height: 100%;
+  background-color: white;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
+}
+    .progress-percent {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #000;
+      font-size: 13px;
+      font-weight: bold;
+      z-index: 1;
     }
     ul {
       list-style: none;
@@ -280,7 +281,9 @@ window.loadSummary = function(data) {
         <span>${joined} จาก ${total}</span>
       </div>
 <div class="progress-wrapper">
-  <div class="progress-gradient" style="width: ${percent}%"></div>
+  <div class="progress-gradient">
+    <div class="progress-clip" style="width: ${percent}%"></div>
+  </div>
   <div class="progress-percent">${percent}%</div>
 </div>
     `;
