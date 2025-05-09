@@ -173,6 +173,7 @@
 <script>
 let personnelData = [];
 let unitList = [];
+let visibleRows = [];
 
 async function initLiffAndCheckAdmin() {
   await liff.init({ liffId: LIFF_ID_ADMIN });
@@ -224,10 +225,12 @@ function renderPersonnelTable(data) {
   document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
   document.getElementById('unitFilter').value = unitFilter;
 
-  data.filter(row =>
+  visibleRows = data.filter(row =>
     (!unitFilter || row.unit === unitFilter) &&
     (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
-  ).forEach(row => {
+  );
+
+  visibleRows.forEach(row => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${row.rtafId}</td>
@@ -256,19 +259,13 @@ function renderPersonnelTable(data) {
       </td>
     `;
     tbody.appendChild(tr);
-    // ตรวจว่าทุกแถวถูกติ๊กหรือไม่
-    const allChecked = data
-      .filter(row =>
-        (!unitFilter || row.unit === unitFilter) &&
-        (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
-      )
-      .every(row => row.list === true);
+  });
 
-    // อัปเดต checkbox หัวตาราง
-    const master = document.getElementById('checkAllList');
-    if (master) master.checked = allChecked;
-      });
-   lucide.createIcons();
+  const allChecked = visibleRows.every(row => row.list === true);
+  const master = document.getElementById('checkAllList');
+  if (master) master.checked = allChecked;
+
+  lucide.createIcons();
 }
 
 function updateCheckbox(rtafId, field, value) {
@@ -284,22 +281,22 @@ function updateCheckbox(rtafId, field, value) {
 
 async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
-  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
 
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex';
-
   masterCheckbox.disabled = true;
-  checkboxes.forEach(cb => cb.disabled = true);
 
   const updatePromises = [];
 
-  for (const cb of checkboxes) {
-    const rtafId = cb.getAttribute('data-rtafId');
-    const currentChecked = cb.checked;
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list"]');
+  checkboxes.forEach(cb => cb.disabled = true);
 
-    if (currentChecked !== checked) {
-      cb.checked = checked;
+  visibleRows.forEach(row => {
+    const rtafId = row.rtafId;
+    if (row.list !== checked) {
+      row.list = checked;
+      const checkbox = document.querySelector(`#data-table-body input[data-rtafId="${rtafId}"]`);
+      if (checkbox) checkbox.checked = checked;
 
       const promise = fetchWithTimeout(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`, { timeout: 5000 })
         .then(res => res.text())
@@ -308,16 +305,17 @@ async function toggleAllList(masterCheckbox) {
 
       updatePromises.push(promise);
     }
-  }
+  });
 
   await Promise.allSettled(updatePromises);
 
-  overlay.style.display = 'none';
   masterCheckbox.disabled = false;
   checkboxes.forEach(cb => cb.disabled = false);
+  overlay.style.display = 'none';
 
   alert('✅ บันทึกสำเร็จ');
 }
+
 
 function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
