@@ -160,7 +160,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
+  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e);
   z-index: 1;
 }
 .progress-clip {
@@ -286,20 +286,21 @@ window.loadSummary = function(data) {
   orderedUnits.forEach(unit => {
     const people = grouped[unit];
     if (!people || people.length === 0) return;
+
     const total = people.length;
     const joined = people.filter(p => registMap.has(p.RTAF_ID)).length;
-    const percent = ((joined / total) * 100).toFixed(1);
+    const percent = parseFloat(((joined / total) * 100).toFixed(1));
 
     grandTotal += total;
     grandJoin += joined;
 
     const div = document.createElement('div');
-    div.className = 'bar-container' + (percent == 100 ? ' full' : '');
+    div.className = 'bar-container' + (percent === 100 ? ' full' : '');
 
-    if (percent == 100) {
+    if (percent === 100) {
       div.innerHTML = `
         <div class="full-success-label">
-          🏅⭐ ${unit} มาครบ จำนวน <strong>${joined}</strong> คน (<strong>100%</strong>) ⭐
+          🏅 ${unit} เข้าร่วมครบ จำนวน ${joined} คน (100%) ⭐
         </div>
       `;
     } else {
@@ -321,19 +322,7 @@ window.loadSummary = function(data) {
     container.appendChild(div);
   });
 
-  const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
-  totals.innerHTML = `
-    <div>ยอดรวม: ${grandTotal} คน</div>
-    <div>เข้าร่วม: ${grandJoin} คน</div>
-    <div>คิดเป็น: ${grandPercent}%</div>
-  `;
-  const color = getSummaryBorderColor(grandPercent);
-  [...totals.children].forEach(el => {
-    el.style.border = `4px solid ${color}`;
-  });
-};
-
-  const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
+  const grandPercent = parseFloat(((grandJoin / grandTotal) * 100).toFixed(1));
   totals.innerHTML = `
     <div>ยอดรวม: ${grandTotal} คน</div>
     <div>เข้าร่วม: ${grandJoin} คน</div>
