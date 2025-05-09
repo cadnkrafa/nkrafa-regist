@@ -201,12 +201,8 @@
 <script>
 let unitList = [];
 
-function getGradient(percent) {
-  if (percent == 100) return '#2ecc71';
-  if (percent < 25) return 'linear-gradient(to right, #e74c3c, #ff9c00)';
-  if (percent < 50) return 'linear-gradient(to right, #ff9c00, #f1c40f)';
-  if (percent < 75) return 'linear-gradient(to right, #f1c40f, #a8cc2e)';
-  return 'linear-gradient(to right, #a8cc2e, #2ecc71)';
+function getGradientBar() {
+  return 'linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71)';
 }
 
 function getSummaryBorderColor(percent) {
@@ -276,7 +272,7 @@ window.loadSummary = function(data) {
         <span>${joined} จาก ${total}</span>
       </div>
       <div class="progress-wrapper">
-        <div class="progress-fill" style="width:${percent}%; background: ${getGradient(percent)}"></div>
+        <div class="progress-fill" style="width:${percent}%; background:${getGradientBar()}"></div>
         <div class="progress-percent">${percent}%</div>
       </div>
     `;
