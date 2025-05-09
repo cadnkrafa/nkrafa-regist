@@ -286,32 +286,36 @@ async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
   const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
 
-  // แสดง overlay ป้องกันการคลิก
+  // แสดง overlay ป้องกันคลิก
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex';
 
-  // ปิดทุก interaction
   masterCheckbox.disabled = true;
   checkboxes.forEach(cb => cb.disabled = true);
 
   const updatePromises = [];
 
-  checkboxes.forEach(cb => {
+  for (const cb of checkboxes) {
     const rtafId = cb.getAttribute('data-rtafId');
     const currentChecked = cb.checked;
 
     if (currentChecked !== checked) {
       cb.checked = checked;
-      updatePromises.push(updateCheckbox(rtafId, 'list', checked));
+      // ❗รอคำตอบจาก fetch และผลลัพธ์จาก .text()
+      const promise = fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`)
+        .then(res => res.text())
+        .then(result => {
+          console.log(`📌 ${rtafId} = ${checked} >> ${result}`);
+        });
+      updatePromises.push(promise);
     }
-  });
+  }
 
   await Promise.all(updatePromises);
 
-  // เปิดใช้งานกลับ
+  overlay.style.display = 'none';
   masterCheckbox.disabled = false;
   checkboxes.forEach(cb => cb.disabled = false);
-  overlay.style.display = 'none';
 
   alert('✅ บันทึกสำเร็จ');
 }
