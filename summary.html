@@ -165,6 +165,20 @@
       transition: border 0.3s ease;
       border: 2px solid transparent; /* default border */
     }
+    .progress-gradient {
+      background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      background-color: white;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
     ul {
       list-style: none;
       padding-left: 0;
@@ -201,10 +215,6 @@
 <script>
 let unitList = [];
 
-function getGradientBar() {
-  return 'linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71)';
-}
-
 function getSummaryBorderColor(percent) {
   if (percent == 100) return '#2ecc71';
   if (percent < 25) return '#e74c3c';
@@ -214,7 +224,7 @@ function getSummaryBorderColor(percent) {
 }
 
 function normalize(text) {
-  return text?.trim().replace(/\u200B/g, '') || '';
+  return text?.trim().replace(/​/g, '') || '';
 }
 
 async function loadUnitListThenSummary() {
@@ -224,7 +234,7 @@ async function loadUnitListThenSummary() {
     unitList = raw.map(row => normalize(row[1]));
   } catch (err) {
     console.warn('⚠️ โหลด unitList ไม่ได้:', err);
-    unitList = []; // fallback
+    unitList = [];
   }
   fetchData();
   setInterval(fetchData, 15000);
@@ -256,7 +266,7 @@ window.loadSummary = function(data) {
 
   orderedUnits.forEach(unit => {
     const people = grouped[unit];
-    if (!people || people.length === 0) return; // ข้ามถ้าไม่มีข้อมูล
+    if (!people || people.length === 0) return;
     const total = people.length;
     const joined = people.filter(p => registMap.has(p.RTAF_ID)).length;
     const percent = ((joined / total) * 100).toFixed(1);
@@ -272,7 +282,9 @@ window.loadSummary = function(data) {
         <span>${joined} จาก ${total}</span>
       </div>
       <div class="progress-wrapper">
-        <div class="progress-fill" style="width:${percent}%; background:${getGradientBar()}"></div>
+        <div class="progress-gradient">
+          <div class="progress-fill" style="width:${percent}%"></div>
+        </div>
         <div class="progress-percent">${percent}%</div>
       </div>
     `;
