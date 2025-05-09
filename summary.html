@@ -157,12 +157,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e, #2ecc71);
+  background: linear-gradient(to right, #e74c3c, #ff9c00, #f1c40f, #a8cc2e);
   z-index: 1;
 }
 .progress-clip {
   height: 100%;
-  background-color: white;
+  background-color: #e0e0e0; /* ✅ เปลี่ยนจาก white */
   position: absolute;
   right: 0;
   top: 0;
@@ -177,6 +177,22 @@
   font-size: 13px;
   font-weight: bold;
   z-index: 3;
+}
+.progress-percent-white {
+  color: white;
+}
+.full-success {
+  background-color: #08b425;
+  color: white;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-weight: bold;
+  font-size: 13px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 20px;
+  border-radius: 10px;
+  padding: 0 10px;
 }
     ul {
       list-style: none;
@@ -215,7 +231,7 @@
 let unitList = [];
 
 function getSummaryBorderColor(percent) {
-  if (percent == 100) return '#2ecc71';
+  if (percent == 100) return '#08b425';
   if (percent < 25) return '#e74c3c';
   if (percent < 50) return '#ff9c00';
   if (percent < 75) return '#f1c40f';
@@ -280,12 +296,24 @@ window.loadSummary = function(data) {
         <span>${unit}</span>
         <span>${joined} จาก ${total}</span>
       </div>
-<div class="progress-wrapper">
-  <div class="progress-gradient">
-    <div class="progress-clip" style="width: ${100 - percent}%"></div>
-  </div>
-  <div class="progress-percent">${percent}%</div>
-</div>
+      if (percent == 100) {
+        div.innerHTML = `
+          <div class="bar-label">
+            <span>${unit}</span>
+            <span>${joined} จาก ${total}</span>
+          </div>
+          <div class="progress-wrapper full-success">
+            <div class="progress-percent-white">100.0%</div>
+          </div>
+        `;
+      } else {
+        <div class="progress-wrapper">
+          <div class="progress-gradient">
+            <div class="progress-clip" style="width: ${100 - percent}%"></div>
+          </div>
+          <div class="progress-percent">${percent}%</div>
+        </div>
+      }
     `;
     div.onclick = () => showPopup(unit, people, registMap);
     container.appendChild(div);
