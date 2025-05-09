@@ -173,6 +173,7 @@
 <script>
 let personnelData = [];
 let unitList = [];
+let rankList = [];
 let visibleRows = [];
 
 async function initLiffAndCheckAdmin() {
@@ -192,6 +193,7 @@ async function initLiffAndCheckAdmin() {
   }
 
   await loadUnitList();
+  await loadRankList();
   loadPersonnelData();
 }
 
@@ -208,11 +210,76 @@ async function loadUnitList() {
   unitList = list.map(row => row[1]);
 }
 
+async function loadRankList() {
+  const res = await fetch(`${SCRIPT_URL}?getRankList=1`);
+  const list = await res.json();
+  rankList = list.map(row => row[1]); // column 2 = ชื่อยศ
+}
+
 async function loadPersonnelData() {
   const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
   const data = await res.json();
   personnelData = data;
   renderPersonnelTable(data);
+}
+
+function addNewRow() {
+  const tbody = document.getElementById('data-table-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" id="new-rtafId" style="width: 100%"></td>
+    <td>
+      <select id="new-rank" style="width: 100%">
+        ${rankList.map(rank => `<option value="${rank}">${rank}</option>`).join('')}
+      </select>
+    </td>
+    <td><input type="text" id="new-name" style="width: 100%"></td>
+    <td><input type="text" id="new-position" style="width: 100%"></td>
+    <td>
+      <select id="new-unit" style="width: 100%">
+        ${unitList.map(unit => `<option value="${unit}">${unit}</option>`).join('')}
+      </select>
+    </td>
+    <td colspan="4">
+      <button onclick="submitNewRow()" style="margin-right: 8px; background: #2ecc71; color: white; border: none; padding: 5px 10px;">✅ บันทึก</button>
+      <button onclick="renderPersonnelTable(personnelData)" style="background: #e74c3c; color: white; border: none; padding: 5px 10px;">❌ ยกเลิก</button>
+    </td>
+  `;
+  tbody.prepend(tr);
+}
+
+function submitNewRow() {
+  const newData = {
+    rtafId: document.getElementById('new-rtafId').value.trim(),
+    rank: document.getElementById('new-rank').value.trim(),
+    name: document.getElementById('new-name').value.trim(),
+    position: document.getElementById('new-position').value.trim(),
+    unit: document.getElementById('new-unit').value
+  };
+
+  if (!newData.rtafId || !newData.rank || !newData.name || !newData.unit) {
+    alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
+    return;
+  }
+
+  fetch(`${SCRIPT_URL}?addPersonnel=1`, {
+    method: 'POST',
+    body: JSON.stringify(newData),
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then(res => res.text())
+    .then(txt => {
+      if (txt.includes("success")) {
+        alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว");
+        loadPersonnelData();
+      } else {
+        alert("❌ ไม่สามารถเพิ่มข้อมูลได้");
+      }
+    })
+    .catch(err => {
+      console.error("❌ Add error:", err);
+      alert("❌ เกิดข้อผิดพลาด");
+    });
 }
 
 function renderPersonnelTable(data) {
@@ -287,6 +354,7 @@ function updateCheckAllListStatus() {
   const allChecked = visibleRows.every(row => row.list === true);
   master.checked = allChecked;
 }
+
 
 async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
