@@ -286,7 +286,6 @@ async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
   const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
 
-  // แสดง overlay ป้องกันคลิก
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex';
 
@@ -301,23 +300,34 @@ async function toggleAllList(masterCheckbox) {
 
     if (currentChecked !== checked) {
       cb.checked = checked;
-      // ❗รอคำตอบจาก fetch และผลลัพธ์จาก .text()
-      const promise = fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`)
+
+      const promise = fetchWithTimeout(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`, { timeout: 5000 })
         .then(res => res.text())
-        .then(result => {
-          console.log(`📌 ${rtafId} = ${checked} >> ${result}`);
-        });
+        .then(txt => console.log(`✅ ${rtafId}: ${txt}`))
+        .catch(err => console.warn(`❌ ${rtafId} error:`, err.message));
+
       updatePromises.push(promise);
     }
   }
 
-  await Promise.all(updatePromises);
+  await Promise.allSettled(updatePromises);
 
   overlay.style.display = 'none';
   masterCheckbox.disabled = false;
   checkboxes.forEach(cb => cb.disabled = false);
 
   alert('✅ บันทึกสำเร็จ');
+}
+
+function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  return fetch(resource, {
+    ...options,
+    signal: controller.signal
+  }).finally(() => clearTimeout(id));
 }
 
 document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
