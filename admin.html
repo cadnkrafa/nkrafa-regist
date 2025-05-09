@@ -143,7 +143,7 @@
           <th style="width:10%">หน่วย</th>
           <th style="width:10%">แก้ไข/ลบ</th>
           <th style="width:8%">สถานะผูกบัญชีไลน์</th>
-          <th style="width:8%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this.checked)">
+          <th style="width:8%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this)">
           </th>
           <th style="width:8%">ผู้จับรางวัล</th>
         </tr>
@@ -241,8 +241,19 @@ function renderPersonnelTable(data) {
       </td>
     `;
     tbody.appendChild(tr);
-  });
-  lucide.createIcons();
+    // ตรวจว่าทุกแถวถูกติ๊กหรือไม่
+    const allChecked = data
+      .filter(row =>
+        (!unitFilter || row.unit === unitFilter) &&
+        (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+      )
+      .every(row => row.list === true);
+
+    // อัปเดต checkbox หัวตาราง
+    const master = document.getElementById('checkAllList');
+    if (master) master.checked = allChecked;
+      });
+   lucide.createIcons();
 }
 
 function updateCheckbox(rtafId, field, value) {
@@ -256,17 +267,34 @@ function updateCheckbox(rtafId, field, value) {
     .catch(err => console.error('❌ error:', err));
 }
 
-function toggleAllList(masterCheckbox) {
+async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
   const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
 
+  // ปิด interaction ชั่วคราว
+  masterCheckbox.disabled = true;
+  checkboxes.forEach(cb => cb.disabled = true);
+
+  const updatePromises = [];
+
   checkboxes.forEach(cb => {
-    if (cb.checked !== checked) {
+    const rtafId = cb.getAttribute('data-rtafId');
+    const currentChecked = cb.checked;
+
+    // อัปเดตเฉพาะที่ต่างจาก masterCheckbox
+    if (currentChecked !== checked) {
       cb.checked = checked;
-      const rtafId = cb.getAttribute('data-rtafId');
-      updateCheckbox(rtafId, 'list', checked);
+      updatePromises.push(updateCheckbox(rtafId, 'list', checked));
     }
   });
+
+  await Promise.all(updatePromises);
+
+  // เปิด interaction กลับ
+  masterCheckbox.disabled = false;
+  checkboxes.forEach(cb => cb.disabled = false);
+
+  console.log('✅ อัปเดต checkbox ทั้งหมดเสร็จแล้ว');
 }
 
 document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
