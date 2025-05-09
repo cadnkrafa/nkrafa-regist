@@ -281,41 +281,37 @@ function updateCheckbox(rtafId, field, value) {
 
 async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
-
   const overlay = document.getElementById('overlay');
   overlay.style.display = 'flex';
+
   masterCheckbox.disabled = true;
-
-  const updatePromises = [];
-
-  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list"]');
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list\"]');
   checkboxes.forEach(cb => cb.disabled = true);
 
-  visibleRows.forEach(row => {
+  for (const row of visibleRows) {
     const rtafId = row.rtafId;
     if (row.list !== checked) {
       row.list = checked;
-      const checkbox = document.querySelector(`#data-table-body input[data-rtafId="${rtafId}"]`);
+
+      const checkbox = document.querySelector(`#data-table-body input[data-rtafId=\"${rtafId}\"]`);
       if (checkbox) checkbox.checked = checked;
 
-      const promise = fetchWithTimeout(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`, { timeout: 5000 })
-        .then(res => res.text())
-        .then(txt => console.log(`✅ ${rtafId}: ${txt}`))
-        .catch(err => console.warn(`❌ ${rtafId} error:`, err.message));
-
-      updatePromises.push(promise);
+      try {
+        const res = await fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`);
+        const text = await res.text();
+        console.log(`✅ ${rtafId}: ${text}`);
+      } catch (err) {
+        console.warn(`❌ ${rtafId}:`, err);
+      }
     }
-  });
+  }
 
-  await Promise.allSettled(updatePromises);
-
-  masterCheckbox.disabled = false;
   checkboxes.forEach(cb => cb.disabled = false);
+  masterCheckbox.disabled = false;
   overlay.style.display = 'none';
 
   alert('✅ บันทึกสำเร็จ');
 }
-
 
 function fetchWithTimeout(resource, options = {}) {
   const { timeout = 8000 } = options;
