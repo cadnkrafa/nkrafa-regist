@@ -50,11 +50,14 @@
       gap: 15px 40px;
     }
     .bar-container {
-      background: #fff;
-      border-radius: 10px;
-      padding: 12px 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-      cursor: pointer;
+      border-radius: 12px;
+      padding: 6px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      background-color: white;
+    }
+    .bar-container.full {
+      background-color: #08b425;
     }
     .bar-label {
       display: flex;
@@ -291,12 +294,12 @@ window.loadSummary = function(data) {
     grandJoin += joined;
 
     const div = document.createElement('div');
-    div.className = 'bar-container';
+    div.className = 'bar-container' + (percent == 100 ? ' full' : '');
 
     if (percent == 100) {
       div.innerHTML = `
         <div class="full-success-label">
-          🏅 ${unit} มาครบ จำนวน ${joined} คน (100%) ⭐
+          🏅⭐ ${unit} มาครบ จำนวน <strong>${joined}</strong> คน (<strong>100%</strong>) ⭐
         </div>
       `;
     } else {
@@ -317,6 +320,18 @@ window.loadSummary = function(data) {
     div.onclick = () => showPopup(unit, people, registMap);
     container.appendChild(div);
   });
+
+  const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
+  totals.innerHTML = `
+    <div>ยอดรวม: ${grandTotal} คน</div>
+    <div>เข้าร่วม: ${grandJoin} คน</div>
+    <div>คิดเป็น: ${grandPercent}%</div>
+  `;
+  const color = getSummaryBorderColor(grandPercent);
+  [...totals.children].forEach(el => {
+    el.style.border = `4px solid ${color}`;
+  });
+};
 
   const grandPercent = ((grandJoin / grandTotal) * 100).toFixed(1);
   totals.innerHTML = `
