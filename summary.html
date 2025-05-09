@@ -178,19 +178,21 @@
   font-weight: bold;
   z-index: 3;
 }
-.full-success {
+.full-success-label {
   background-color: #08b425;
   color: white;
   font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 15px;
+  font-weight: normal;
+  padding: 10px 16px;
+  border-radius: 12px;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+.full-success-label strong {
   font-weight: bold;
-  font-size: 13px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 20px;
-  border-radius: 10px;
-  padding: 0 10px;
-  margin-bottom: 5px;
 }
     ul {
       list-style: none;
@@ -292,12 +294,8 @@ window.loadSummary = function(data) {
 
     if (percent == 100) {
       div.innerHTML = `
-        <div class="bar-label">
-          <span>${unit}</span>
-          <span>${joined} จาก ${total}</span>
-        </div>
-        <div class="progress-wrapper full-success">
-          100.0%
+        <div class="full-success-label">
+          🏅⭐ ${unit} มาครบ จำนวน <strong>${joined}</strong> คน (<strong>100%</strong>)
         </div>
       `;
     } else {
