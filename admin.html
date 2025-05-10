@@ -463,12 +463,12 @@ function editRow(rtafId) {
   tr.innerHTML = `
     <td>${rtafId}</td>
     <td>
-      <select id="edit-rank-${rtafId}" style="width:100%;">${rankList.map(rank => `<option value="${rank}" ${rank === person.rank ? 'selected' : ''}>${rank}</option>`).join('')}</select>
+      <select id="edit-rank-${rtafId}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">${rankList.map(rank => `<option value="${rank}" ${rank === person.rank ? 'selected' : ''}>${rank}</option>`).join('')}</select>
     </td>
-    <td><input type="text" id="edit-name-${rtafId}" value="${person.name}" style="width:100%;"></td>
-    <td><input type="text" id="edit-position-${rtafId}" value="${person.position}" style="width:100%;"></td>
+    <td><input type="text" id="edit-name-${rtafId}" value="${person.name}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;""></td>
+    <td><input type="text" id="edit-position-${rtafId}" value="${person.position}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
     <td>
-      <select id="edit-unit-${rtafId}" style="width:100%;">${unitList.map(unit => `<option value="${unit}" ${unit === person.unit ? 'selected' : ''}>${unit}</option>`).join('')}</select>
+      <select id="edit-unit-${rtafId}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">${unitList.map(unit => `<option value="${unit}" ${unit === person.unit ? 'selected' : ''}>${unit}</option>`).join('')}</select>
     </td>
     <td colspan="4">
       <div class="flex items-center gap-2">
