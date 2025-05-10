@@ -257,6 +257,7 @@ function addNewRow() {
 
 function submitNewRow() {
   const newData = {
+    action: 'addPersonnel',
     rtafId: document.getElementById('new-rtafId').value.trim(),
     rank: document.getElementById('new-rank').value.trim(),
     name: document.getElementById('new-name').value.trim(),
@@ -269,11 +270,11 @@ function submitNewRow() {
     return;
   }
 
-  fetch(`${SCRIPT_URL}?addPersonnel=true`, {
-    method: 'POST',
-    body: JSON.stringify(newData),
-    headers: { 'Content-Type': 'application/json' }
-  })
+fetch(SCRIPT_URL, {
+  method: 'POST',
+  body: JSON.stringify(newData),
+  headers: { 'Content-Type': 'application/json' }
+})
     .then(res => res.text())
     .then(txt => {
       if (txt.includes("success")) {
