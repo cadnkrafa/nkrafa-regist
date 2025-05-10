@@ -223,12 +223,12 @@ function logout() {
 
 document.getElementById('searchInput').addEventListener('input', () => {
   showOverlay("loading");
-  setTimeout(() => renderTable(adminList), 10);
+  setTimeout(() => renderTable(currentData), 10);
 });
 
 document.getElementById('unitFilter').addEventListener('change', () => {
   showOverlay("loading");
-  setTimeout(() => renderTable(adminList), 100);
+  setTimeout(() => renderTable(currentData), 100);
 });
     
 let sortState = { column: null, asc: true };
