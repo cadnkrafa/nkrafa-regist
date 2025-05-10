@@ -153,7 +153,7 @@ async function loadAdminList() {
   renderTable(currentData);
 }
 
-function renderAdminTable(data) {
+function renderTable(data) {
   const table = document.getElementById('adminTable');
   table.innerHTML = '';
 
@@ -223,12 +223,12 @@ function logout() {
 
 document.getElementById('searchInput').addEventListener('input', () => {
   showOverlay("loading");
-  setTimeout(() => renderAdminTable(adminList), 10);
+  setTimeout(() => renderTable(adminList), 10);
 });
 
 document.getElementById('unitFilter').addEventListener('change', () => {
   showOverlay("loading");
-  setTimeout(() => renderAdminTable(adminList), 10);
+  setTimeout(() => renderTable(adminList), 100);
 });
     
 let sortState = { column: null, asc: true };
