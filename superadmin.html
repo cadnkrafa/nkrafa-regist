@@ -186,6 +186,7 @@ function renderTable(data) {
         </td>
       </tr>
     `).join('');
+    hideOverlay();
   };
 
   document.getElementById('searchInput').oninput = filterAndRender;
