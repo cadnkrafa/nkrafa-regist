@@ -240,7 +240,6 @@ async function loadPersonnelData() {
 }
   
 function renderPersonnelTable(data) {
-  showOverlay("loading");
   const tbody = document.getElementById('data-table-body');
   tbody.innerHTML = '';
 
@@ -449,17 +448,11 @@ function submitNewRow() {
 
 document.getElementById('searchInput').addEventListener('input', () => {
   showOverlay("loading");
-  setTimeout(() => {
-    renderPersonnelTable(personnelData);
-    hideOverlay();
-  }, 10); // หน่วงเล็กน้อยให้ overlay มีเวลาแสดง
+  renderPersonnelTable(personnelData);
 });
 document.getElementById('unitFilter').addEventListener('change', () => {
   showOverlay("loading");
-  setTimeout(() => {
-    renderPersonnelTable(personnelData);
-    hideOverlay();
-  }, 100);
+  renderPersonnelTable(personnelData);
 });
 document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
 </script>
