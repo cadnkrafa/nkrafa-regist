@@ -382,7 +382,7 @@ function addNewRow() {
           <button onclick="submitNewRow()" class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="บันทึก">
             <i data-lucide="save"></i>
           </button>
-          <button onclick="renderPersonnelTable(personnelData)" class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ยกเลิก">
+          <button onclick="loadPersonnelData()" class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ยกเลิก">
             <i data-lucide="x"></i>
           </button>
         </div>
@@ -447,8 +447,20 @@ function submitNewRow() {
   document.body.appendChild(script);
 }
 
-document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
-document.getElementById('unitFilter').addEventListener('change', () => renderPersonnelTable(personnelData));
+document.getElementById('searchInput').addEventListener('input', () => {
+  showOverlay("loading");
+  setTimeout(() => {
+    renderPersonnelTable(personnelData);
+    hideOverlay();
+  }, 100); // หน่วงเล็กน้อยให้ overlay มีเวลาแสดง
+});
+document.getElementById('unitFilter').addEventListener('change', () => {
+  showOverlay("loading");
+  setTimeout(() => {
+    renderPersonnelTable(personnelData);
+    hideOverlay();
+  }, 100);
+});
 document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
 </script>
 
