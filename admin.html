@@ -229,14 +229,14 @@ function addNewRow() {
   tr.innerHTML = `
     <td><input type="text" id="new-rtafId" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
     <td>
-      <select id="new-rank" style="width: 100%">
+      <select id="new-rank" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">
         ${rankList.map(rank => `<option value="${rank}">${rank}</option>`).join('')}
       </select>
     </td>
-    <td><input type="text" id="new-name" style="width: 100%"></td>
-    <td><input type="text" id="new-position" style="width: 100%"></td>
+    <td><input type="text" id="new-name" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
+    <td><input type="text" id="new-position" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
     <td>
-      <select id="new-unit" style="width: 100%">
+      <select id="new-unit" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">
         ${unitList.map(unit => `<option value="${unit}">${unit}</option>`).join('')}
       </select>
     </td>
