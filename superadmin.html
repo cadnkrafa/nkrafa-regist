@@ -188,10 +188,10 @@ function renderTable(data) {
 }
 
 function updateRole(rtafId, field, value) {
+  showOverlay("saving");
   fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
     .then(res => res.text())
     .then(msg => {
-      showOverlay("saving");
       console.log("📝 updated:", msg);
       const target = currentData.find(row => row.rtafId === rtafId);
       if (target) target[field] = value === true || value === 'true';
