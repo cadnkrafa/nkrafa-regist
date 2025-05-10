@@ -257,7 +257,6 @@ function addNewRow() {
 
 function submitNewRow() {
   const newData = {
-    action: 'addPersonnel',
     rtafId: document.getElementById('new-rtafId').value.trim(),
     rank: document.getElementById('new-rank').value.trim(),
     name: document.getElementById('new-name').value.trim(),
@@ -270,26 +269,30 @@ function submitNewRow() {
     return;
   }
 
-fetch(SCRIPT_URL, {
-  method: 'POST',
-  body: JSON.stringify(newData),
-  headers: { 'Content-Type': 'application/json' }
-})
-    .then(res => res.text())
-    .then(txt => {
-      if (txt.includes("success")) {
-        alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว");
-        loadPersonnelData();
-      } else if (txt.includes("duplicate")) {
-        alert("⚠️ มีเลขประจำตัวนี้ในระบบแล้ว");
-      } else {
-        alert("❌ ไม่สามารถเพิ่มข้อมูลได้");
-      }
-    })
-    .catch(err => {
-      console.error("❌ Add error:", err);
-      alert("❌ เกิดข้อผิดพลาด");
-    });
+  const query = new URLSearchParams({
+    addPersonnel: '1',
+    rtafId: newData.rtafId,
+    rank: newData.rank,
+    name: newData.name,
+    position: newData.position,
+    unit: newData.unit
+  });
+
+  const url = `${SCRIPT_URL}?${query.toString()}&callback=handleAddResponse`;
+  const script = document.createElement('script');
+  script.src = url;
+  document.body.appendChild(script);
+}
+
+function handleAddResponse(response) {
+  if (response === 'success') {
+    alert('✅ เพิ่มข้อมูลเรียบร้อยแล้ว');
+    loadPersonnelData();
+  } else if (response === 'duplicate') {
+    alert('⚠️ มีเลขประจำตัวนี้ในระบบแล้ว');
+  } else {
+    alert('❌ ไม่สามารถเพิ่มข้อมูลได้');
+  }
 }
 
 function renderPersonnelTable(data) {
