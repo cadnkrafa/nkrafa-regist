@@ -216,11 +216,142 @@ async function loadRankList() {
   rankList = list.map(row => row[1]); // column 2 = ชื่อยศ
 }
 
+function showLoading(message = "⏳ กำลังโหลดข้อมูล...") {
+  const overlay = document.getElementById('overlay');
+  overlay.innerText = message;
+  overlay.style.display = 'flex';
+}
+
+function hideLoading() {
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'none';
+}
+
 async function loadPersonnelData() {
+  showLoading("⏳ กำลังโหลดข้อมูล...");
   const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
   const data = await res.json();
   personnelData = data;
-  renderPersonnelTable(data);
+  renderPersonnelTable(data);  // 🔁 overlay จะถูกปิดในฟังก์ชันนี้
+}
+  
+function renderPersonnelTable(data) {
+  const tbody = document.getElementById('data-table-body');
+  tbody.innerHTML = '';
+
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const unitFilter = document.getElementById('unitFilter').value;
+  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))].sort();
+  document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+  document.getElementById('unitFilter').value = unitFilter;
+
+  visibleRows = data.filter(row =>
+    (!unitFilter || row.unit === unitFilter) &&
+    (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+  );
+
+  visibleRows.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row.rtafId}</td>
+      <td>${row.rank}</td>
+      <td>${row.name}</td>
+      <td>${row.position}</td>
+      <td>${row.unit}</td>
+      <td>
+        <div class="flex items-center gap-2">
+          <button class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="แก้ไข">
+            <i data-lucide="edit"></i>
+          </button>
+          <button class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ลบ">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      </td>
+      <td>${row.linked ? '✅' : ''}</td>
+      <td class="checkbox-cell text-center">
+        <input type="checkbox" ${row.list ? 'checked' : ''} data-field="list" data-rtafId="${row.rtafId}"
+          onchange="updateCheckbox('${row.rtafId}', 'list', this.checked)">
+      </td>
+      <td class="checkbox-cell text-center">
+        <input type="checkbox" ${row.drawer ? 'checked' : ''}
+          onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const allChecked = visibleRows.every(row => row.list === true);
+  const master = document.getElementById('checkAllList');
+  if (master) master.checked = allChecked;
+
+  lucide.createIcons();
+  hideLoading(); // ✅ ปิด overlay ท้ายสุด
+}
+
+function updateCheckbox(rtafId, field, value) {
+  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+    .then(res => res.text())
+    .then(txt => {
+      console.log('✅ updated', rtafId, field, value);
+      const person = personnelData.find(p => p.rtafId === rtafId);
+      if (person) person[field] = value;
+
+      // ✅ ตรวจสถานะ master checkbox ใหม่
+      if (field === 'list') updateCheckAllListStatus();
+    })
+    .catch(err => console.error('❌ error:', err));
+}
+
+function updateCheckAllListStatus() {
+  const master = document.getElementById('checkAllList');
+  const allChecked = visibleRows.every(row => row.list === true);
+  master.checked = allChecked;
+}
+
+async function toggleAllList(masterCheckbox) {
+  const checked = masterCheckbox.checked;
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
+
+  masterCheckbox.disabled = true;
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list\"]');
+  checkboxes.forEach(cb => cb.disabled = true);
+
+  for (const row of visibleRows) {
+    const rtafId = row.rtafId;
+    if (row.list !== checked) {
+      row.list = checked;
+
+      const checkbox = document.querySelector(`#data-table-body input[data-rtafId=\"${rtafId}\"]`);
+      if (checkbox) checkbox.checked = checked;
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`);
+        const text = await res.text();
+        console.log(`✅ ${rtafId}: ${text}`);
+      } catch (err) {
+        console.warn(`❌ ${rtafId}:`, err);
+      }
+    }
+  }
+
+  checkboxes.forEach(cb => cb.disabled = false);
+  masterCheckbox.disabled = false;
+  overlay.style.display = 'none';
+
+  alert('✅ บันทึกสำเร็จ');
+}
+
+function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  return fetch(resource, {
+    ...options,
+    signal: controller.signal
+  }).finally(() => clearTimeout(id));
 }
 
 function addNewRow() {
@@ -304,130 +435,6 @@ function submitNewRow() {
 
   script.src = `${SCRIPT_URL}?${params.toString()}`;
   document.body.appendChild(script);
-}
-
-function renderPersonnelTable(data) {
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = 'flex'; // ✅ บล็อกหน้าจอก่อนเริ่ม
-
-  const tbody = document.getElementById('data-table-body');
-  tbody.innerHTML = '';
-
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const unitFilter = document.getElementById('unitFilter').value;
-  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))].sort();
-  document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
-  document.getElementById('unitFilter').value = unitFilter;
-
-  visibleRows = data.filter(row =>
-    (!unitFilter || row.unit === unitFilter) &&
-    (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
-  );
-
-  visibleRows.forEach(row => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${row.rtafId}</td>
-      <td>${row.rank}</td>
-      <td>${row.name}</td>
-      <td>${row.position}</td>
-      <td>${row.unit}</td>
-      <td>
-        <div class="flex items-center gap-2">
-          <button class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="แก้ไข">
-            <i data-lucide="edit"></i>
-          </button>
-          <button class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ลบ">
-            <i data-lucide="trash-2"></i>
-          </button>
-        </div>
-      </td>
-      <td>${row.linked ? '✅' : ''}</td>
-      <td class="checkbox-cell text-center">
-        <input type="checkbox" ${row.list ? 'checked' : ''} data-field="list" data-rtafId="${row.rtafId}"
-          onchange="updateCheckbox('${row.rtafId}', 'list', this.checked)">
-      </td>
-      <td class="checkbox-cell text-center">
-        <input type="checkbox" ${row.drawer ? 'checked' : ''}
-          onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  const allChecked = visibleRows.every(row => row.list === true);
-  const master = document.getElementById('checkAllList');
-  if (master) master.checked = allChecked;
-
-  lucide.createIcons();
-
-  overlay.style.display = 'none'; // ✅ ปลดบล็อกเมื่อเรนเดอร์เสร็จ
-}
-
-function updateCheckbox(rtafId, field, value) {
-  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
-    .then(res => res.text())
-    .then(txt => {
-      console.log('✅ updated', rtafId, field, value);
-      const person = personnelData.find(p => p.rtafId === rtafId);
-      if (person) person[field] = value;
-
-      // ✅ ตรวจสถานะ master checkbox ใหม่
-      if (field === 'list') updateCheckAllListStatus();
-    })
-    .catch(err => console.error('❌ error:', err));
-}
-
-function updateCheckAllListStatus() {
-  const master = document.getElementById('checkAllList');
-  const allChecked = visibleRows.every(row => row.list === true);
-  master.checked = allChecked;
-}
-
-
-async function toggleAllList(masterCheckbox) {
-  const checked = masterCheckbox.checked;
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = 'flex';
-
-  masterCheckbox.disabled = true;
-  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list\"]');
-  checkboxes.forEach(cb => cb.disabled = true);
-
-  for (const row of visibleRows) {
-    const rtafId = row.rtafId;
-    if (row.list !== checked) {
-      row.list = checked;
-
-      const checkbox = document.querySelector(`#data-table-body input[data-rtafId=\"${rtafId}\"]`);
-      if (checkbox) checkbox.checked = checked;
-
-      try {
-        const res = await fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`);
-        const text = await res.text();
-        console.log(`✅ ${rtafId}: ${text}`);
-      } catch (err) {
-        console.warn(`❌ ${rtafId}:`, err);
-      }
-    }
-  }
-
-  checkboxes.forEach(cb => cb.disabled = false);
-  masterCheckbox.disabled = false;
-  overlay.style.display = 'none';
-
-  alert('✅ บันทึกสำเร็จ');
-}
-
-function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 8000 } = options;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  return fetch(resource, {
-    ...options,
-    signal: controller.signal
-  }).finally(() => clearTimeout(id));
 }
 
 document.getElementById('searchInput').addEventListener('input', () => renderPersonnelTable(personnelData));
