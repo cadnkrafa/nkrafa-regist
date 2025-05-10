@@ -227,7 +227,8 @@ function addNewRow() {
   const tbody = document.getElementById('data-table-body');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="text" id="new-rtafId" style="width: 100%"></td>
+    <td><input type="text" id="new-rtafId" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; padding: 8px 10px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; 
+      flex-grow: 1;"></td>
     <td>
       <select id="new-rank" style="width: 100%">
         ${rankList.map(rank => `<option value="${rank}">${rank}</option>`).join('')}
