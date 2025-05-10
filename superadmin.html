@@ -153,71 +153,38 @@ async function loadAdminList() {
   renderTable(currentData);
 }
 
-function renderTable(data) {
+function renderAdminTable(data) {
   const table = document.getElementById('adminTable');
   table.innerHTML = '';
 
-  const unitFilter = document.getElementById('unitFilter');
-  const selectedUnit = unitFilter.value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const unitFilter = document.getElementById('unitFilter').value;
 
-  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))];
-  unitFilter.innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
-  unitFilter.value = selectedUnit;
+  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))].sort();
+  document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+  document.getElementById('unitFilter').value = unitFilter;
 
-  const filterAndRender = () => {
-    showOverlay("loading"); // 🟡 แสดง overlay ขณะกรอง
+  const filtered = data.filter(row =>
+    (!unitFilter || row.unit === unitFilter) &&
+    (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+  );
 
-    setTimeout(() => { // ✅ ให้ browser แสดง overlay ก่อน render
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const unit = unitFilter.value;
-      const filtered = data.filter(row =>
-        (!unit || row.unit === unit) &&
-        (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
-      );
-      table.innerHTML = filtered.map(row => `
-        <tr>
-          <td>${row.rtafId}</td>
-          <td>${row.rank}</td>
-          <td>${row.name}</td>
-          <td>${row.unit}</td>
-          <td class="text-center">
-            <input type="checkbox" ${row.admin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
-          </td>
-          <td class="text-center">
-            <input type="checkbox" ${row.superadmin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
-          </td>
-        </tr>
-      `).join('');
+  table.innerHTML = filtered.map(row => `
+    <tr>
+      <td>${row.rtafId}</td>
+      <td>${row.rank}</td>
+      <td>${row.name}</td>
+      <td>${row.unit}</td>
+      <td class="text-center">
+        <input type="checkbox" ${row.admin ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
+      </td>
+      <td class="text-center">
+        <input type="checkbox" ${row.superadmin ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
+      </td>
+    </tr>
+  `).join('');
 
-      hideOverlay(); // 🔵 ซ่อน overlay หลังจาก render เสร็จ
-    }, 10); // ✅ ให้ time เล็กน้อยเพื่อให้ overlay แสดงจริง
-  };
-
-  document.getElementById('searchInput').oninput = filterAndRender;
-  document.getElementById('unitFilter').onchange = filterAndRender;
-
-  filterAndRender();
-
-  const headers = document.querySelectorAll("th");
-  headers.forEach((th, index) => {
-    th.style.cursor = "pointer";
-    th.onclick = () => {
-      const rows = Array.from(table.querySelectorAll("tr"));
-      const getText = row => row.children[index].textContent.trim().toLowerCase();
-      const isBool = index >= 4;
-      rows.sort((a, b) => {
-        let valA = getText(a), valB = getText(b);
-        if (isBool) {
-          valA = valA === 'true';
-          valB = valB === 'true';
-        }
-        return (valA > valB ? 1 : valA < valB ? -1 : 0) * (sortState.asc ? 1 : -1);
-      });
-      sortState.asc = sortState.column === index ? !sortState.asc : true;
-      sortState.column = index;
-      rows.forEach(row => table.appendChild(row));
-    };
-  });
+  hideOverlay();
 }
 
 function updateRole(rtafId, field, value) {
@@ -254,6 +221,16 @@ function logout() {
   location.reload();
 }
 
+document.getElementById('searchInput').addEventListener('input', () => {
+  showOverlay("loading");
+  setTimeout(() => renderAdminTable(adminList), 10);
+});
+
+document.getElementById('unitFilter').addEventListener('change', () => {
+  showOverlay("loading");
+  setTimeout(() => renderAdminTable(adminList), 10);
+});
+    
 let sortState = { column: null, asc: true };
 main();
 lucide.createIcons();
