@@ -165,32 +165,37 @@ function renderTable(data) {
   unitFilter.value = selectedUnit;
 
   const filterAndRender = () => {
-    showOverlay("loading");
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const unit = unitFilter.value;
-    const filtered = data.filter(row =>
-      (!unit || row.unit === unit) &&
-      (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
-    );
-    table.innerHTML = filtered.map(row => `
-      <tr>
-        <td>${row.rtafId}</td>
-        <td>${row.rank}</td>
-        <td>${row.name}</td>
-        <td>${row.unit}</td>
-        <td class="text-center">
-          <input type="checkbox" ${row.admin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
-        </td>
-        <td class="text-center">
-          <input type="checkbox" ${row.superadmin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
-        </td>
-      </tr>
-    `).join('');
-    hideOverlay();
+    showOverlay("loading"); // 🟡 แสดง overlay ขณะกรอง
+
+    setTimeout(() => { // ✅ ให้ browser แสดง overlay ก่อน render
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const unit = unitFilter.value;
+      const filtered = data.filter(row =>
+        (!unit || row.unit === unit) &&
+        (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+      );
+      table.innerHTML = filtered.map(row => `
+        <tr>
+          <td>${row.rtafId}</td>
+          <td>${row.rank}</td>
+          <td>${row.name}</td>
+          <td>${row.unit}</td>
+          <td class="text-center">
+            <input type="checkbox" ${row.admin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'admin', this.checked)">
+          </td>
+          <td class="text-center">
+            <input type="checkbox" ${row.superadmin === true ? 'checked' : ''} onchange="updateRole('${row.rtafId}', 'superadmin', this.checked)">
+          </td>
+        </tr>
+      `).join('');
+
+      hideOverlay(); // 🔵 ซ่อน overlay หลังจาก render เสร็จ
+    }, 10); // ✅ ให้ time เล็กน้อยเพื่อให้ overlay แสดงจริง
   };
 
   document.getElementById('searchInput').oninput = filterAndRender;
   document.getElementById('unitFilter').onchange = filterAndRender;
+
   filterAndRender();
 
   const headers = document.querySelectorAll("th");
@@ -217,10 +222,10 @@ function renderTable(data) {
 }
 
 function updateRole(rtafId, field, value) {
-  showOverlay("saving");
   fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
     .then(res => res.text())
     .then(msg => {
+      showOverlay("saving");
       console.log("📝 updated:", msg);
       const target = currentData.find(row => row.rtafId === rtafId);
       if (target) target[field] = value === true || value === 'true';
@@ -236,7 +241,6 @@ async function resetRoles() {
     const res = await fetch(`${SCRIPT_URL}?resetRoles=1`);
     const msg = await res.text();
     console.log("🔁 resetRoles:", msg);
-    
     alert("✅ รีเซ็ตสำเร็จ");
     await new Promise(resolve => setTimeout(resolve, 500));
     loadAdminList();
