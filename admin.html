@@ -111,17 +111,17 @@
       display: none;
       justify-content: center;
       align-items: center;
+      display: flex; /* สำคัญมาก */
     }
     #overlay .overlay-box {
-      background: rgba(255, 255, 255, 0.85);
-      color: #000;
-      font-size: 24px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 20px;
       font-weight: bold;
       font-family: 'Noto Sans Thai', sans-serif;
-      padding: 20px 30px;
-      border-radius: 12px;
+      color: #000;
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      text-align: center;
     }
     .tab-content { padding: 0 20px; }
     .hidden { display: none; }
@@ -228,7 +228,7 @@ function showOverlay(mode = "loading") {
   const overlay = document.getElementById("overlay");
   const box = overlay.querySelector(".overlay-box");
   overlay.setAttribute("data-mode", mode);
-  overlay.innerText = mode === "saving" ? "💾 กำลังบันทึกข้อมูล..." : "⏳ กำลังโหลดข้อมูล...";
+  box.innerText = mode === "saving" ? "💾 กำลังบันทึกข้อมูล..." : "⏳ กำลังโหลดข้อมูล...";
   overlay.style.display = "flex";
 }
 
