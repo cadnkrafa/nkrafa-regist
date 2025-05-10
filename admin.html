@@ -111,21 +111,23 @@
 <body>
   <header>
     <h1><i data-lucide="settings"></i> Admin Panel</h1>
-    <div id="overlay" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.2);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
-  color: #000;
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-weight: bold;
-">
-  ⏳ กำลังบันทึกข้อมูล...
-</div>
+
+    <div id="overlay" data-mode="" style="
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.2);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      color: #000;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-weight: bold;
+    ">
+    ⏳ โปรดรอสักครู่...
+    </div>
+
     <div class="action-buttons">
       <button class="btn btn-reset" onclick="resetSheet('tokens')"><i data-lucide="rotate-ccw"></i> Reset Tokens</button>
       <button class="btn btn-reset" onclick="resetSheet('regist')"><i data-lucide="rotate-ccw"></i> Reset Regist</button>
@@ -216,23 +218,25 @@ async function loadRankList() {
   rankList = list.map(row => row[1]); // column 2 = ชื่อยศ
 }
 
-function showLoading(message = "⏳ กำลังโหลดข้อมูล...") {
-  const overlay = document.getElementById('overlay');
-  overlay.innerText = message;
-  overlay.style.display = 'flex';
+function showOverlay(mode = "loading") {
+  const overlay = document.getElementById("overlay");
+  overlay.setAttribute("data-mode", mode);
+  overlay.innerText = mode === "saving" ? "💾 กำลังบันทึกข้อมูล..." : "⏳ กำลังโหลดข้อมูล...";
+  overlay.style.display = "flex";
 }
 
-function hideLoading() {
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = 'none';
+function hideOverlay() {
+  const overlay = document.getElementById("overlay");
+  overlay.style.display = "none";
+  overlay.setAttribute("data-mode", "");
 }
 
 async function loadPersonnelData() {
-  showLoading("⏳ กำลังโหลดข้อมูล...");
+  showOverlay("loading");
   const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
   const data = await res.json();
   personnelData = data;
-  renderPersonnelTable(data);  // 🔁 overlay จะถูกปิดในฟังก์ชันนี้
+  renderPersonnelTable(data);
 }
   
 function renderPersonnelTable(data) {
@@ -290,6 +294,8 @@ function renderPersonnelTable(data) {
 }
 
 function updateCheckbox(rtafId, field, value) {
+  showOverlay("saving");
+
   fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
     .then(res => res.text())
     .then(txt => {
@@ -297,10 +303,10 @@ function updateCheckbox(rtafId, field, value) {
       const person = personnelData.find(p => p.rtafId === rtafId);
       if (person) person[field] = value;
 
-      // ✅ ตรวจสถานะ master checkbox ใหม่
       if (field === 'list') updateCheckAllListStatus();
     })
-    .catch(err => console.error('❌ error:', err));
+    .catch(err => console.error('❌ error:', err))
+    .finally(() => hideOverlay());
 }
 
 function updateCheckAllListStatus() {
@@ -311,11 +317,10 @@ function updateCheckAllListStatus() {
 
 async function toggleAllList(masterCheckbox) {
   const checked = masterCheckbox.checked;
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = 'flex';
+  showOverlay("saving");
 
   masterCheckbox.disabled = true;
-  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox\"][data-field="list\"]');
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
   checkboxes.forEach(cb => cb.disabled = true);
 
   for (const row of visibleRows) {
@@ -323,7 +328,7 @@ async function toggleAllList(masterCheckbox) {
     if (row.list !== checked) {
       row.list = checked;
 
-      const checkbox = document.querySelector(`#data-table-body input[data-rtafId=\"${rtafId}\"]`);
+      const checkbox = document.querySelector(`#data-table-body input[data-rtafId="${rtafId}"]`);
       if (checkbox) checkbox.checked = checked;
 
       try {
@@ -338,8 +343,8 @@ async function toggleAllList(masterCheckbox) {
 
   checkboxes.forEach(cb => cb.disabled = false);
   masterCheckbox.disabled = false;
-  overlay.style.display = 'none';
 
+  hideOverlay();
   alert('✅ บันทึกสำเร็จ');
 }
 
@@ -387,8 +392,7 @@ function addNewRow() {
 }
 
 function submitNewRow() {
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = 'flex';
+  showOverlay("saving");
 
   const rtafId = document.getElementById('new-rtafId').value.trim();
   const rank = document.getElementById('new-rank').value.trim();
@@ -398,27 +402,32 @@ function submitNewRow() {
 
   if (!/^\d{10}$/.test(rtafId)) {
     alert('⚠️ กรุณากรอกเลขประจำตัวข้าราชการให้ครบ 10 หลัก');
-    overlay.style.display = 'none';
+    hideOverlay();
     return;
   }
+
   if (!rank || !name || !position || !unit) {
     alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
-    overlay.style.display = 'none';
+    hideOverlay();
     return;
   }
 
   const script = document.createElement('script');
   const callbackName = 'jsonpCallback_' + Date.now();
+
   window[callbackName] = function(response) {
-    overlay.style.display = 'none';
     if (response === 'success') {
       alert('✅ เพิ่มข้อมูลเรียบร้อยแล้ว');
-      loadPersonnelData();
+      showOverlay("loading");
+      loadPersonnelData(); // hideOverlay() จะถูกเรียกใน loadPersonnelData
     } else if (response === 'duplicate') {
       alert('⚠️ มีเลขประจำตัวนี้ในระบบแล้ว');
+      hideOverlay();
     } else {
       alert('❌ ไม่สามารถเพิ่มข้อมูลได้');
+      hideOverlay();
     }
+
     delete window[callbackName];
     script.remove();
   };
