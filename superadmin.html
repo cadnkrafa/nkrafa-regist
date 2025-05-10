@@ -215,6 +215,7 @@ function renderTable(data) {
 }
 
 function updateRole(rtafId, field, value) {
+  showOverlay("saving");
   fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
     .then(res => res.text())
     .then(msg => {
@@ -227,11 +228,13 @@ function updateRole(rtafId, field, value) {
 }
 
 async function resetRoles() {
-  if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ทั้งหมด?")) return;
+  if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตสิทธิ์ Admin ทั้งหมด?")) return;
   try {
+    showOverlay("saving");
     const res = await fetch(`${SCRIPT_URL}?resetRoles=1`);
     const msg = await res.text();
     console.log("🔁 resetRoles:", msg);
+    
     alert("✅ รีเซ็ตสำเร็จ");
     await new Promise(resolve => setTimeout(resolve, 500));
     loadAdminList();
@@ -253,4 +256,3 @@ lucide.createIcons();
 
 </body>
 </html>
-
