@@ -103,6 +103,25 @@
       background: #dceeff;
       font-weight: bold;
     }
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+    #overlay .overlay-box {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 20px 30px;
+      font-size: 20px;
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
     .tab-content { padding: 0 20px; }
     .hidden { display: none; }
     .checkbox-cell input { transform: scale(1.2); }
@@ -112,20 +131,8 @@
   <header>
     <h1><i data-lucide="settings"></i> Admin Panel</h1>
 
-    <div id="overlay" data-mode="" style="
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.2);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      font-size: 20px;
-      color: #000;
-      font-family: 'Noto Sans Thai', sans-serif;
-      font-weight: bold;
-    ">
-    ⏳ โปรดรอสักครู่...
+    <div id="overlay">
+      <div class="overlay-box" id="overlay-message">⏳ กำลังโหลดข้อมูล...</div>
     </div>
 
     <div class="action-buttons">
@@ -448,12 +455,20 @@ function submitNewRow() {
 
 document.getElementById('searchInput').addEventListener('input', () => {
   showOverlay("loading");
-  renderPersonnelTable(personnelData);
+  setTimeout(() => {
+    renderPersonnelTable(personnelData);
+    hideOverlay();
+  }, 10); // หน่วงเล็กน้อยให้ overlay มีเวลาแสดง
 });
+
 document.getElementById('unitFilter').addEventListener('change', () => {
   showOverlay("loading");
-  renderPersonnelTable(personnelData);
+  setTimeout(() => {
+    renderPersonnelTable(personnelData);
+    hideOverlay();
+  }, 100);
 });
+  
 document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
 </script>
 
