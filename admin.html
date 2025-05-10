@@ -104,23 +104,23 @@
       font-weight: bold;
     }
     #overlay {
-      display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.3);
       z-index: 9999;
+      display: none;
       justify-content: center;
       align-items: center;
-      font-family: 'Noto Sans Thai', sans-serif;
     }
-    .overlay-box {
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 16px;
-      padding: 24px 40px;
-      font-size: 24px;
+    #overlay .overlay-box {
+      background: rgba(255, 255, 255, 0.85);
       color: #000;
+      font-size: 24px;
       font-weight: bold;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      font-family: 'Noto Sans Thai', sans-serif;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       text-align: center;
     }
     .tab-content { padding: 0 20px; }
@@ -129,8 +129,8 @@
   </style>
 </head>
 <body>
-  <div id="overlay">
-    <div class="overlay-box" id="overlay-message">⏳ กำลังโหลดข้อมูล...</div>
+  <div id="overlay" data-mode="" style="display: none;">
+    <div class="overlay-box">⏳ กำลังโหลดข้อมูล...</div>
   </div>
   <header>
     <h1><i data-lucide="settings"></i> Admin Panel</h1>
@@ -226,6 +226,7 @@ async function loadRankList() {
 
 function showOverlay(mode = "loading") {
   const overlay = document.getElementById("overlay");
+  const box = overlay.querySelector(".overlay-box");
   overlay.setAttribute("data-mode", mode);
   overlay.innerText = mode === "saving" ? "💾 กำลังบันทึกข้อมูล..." : "⏳ กำลังโหลดข้อมูล...";
   overlay.style.display = "flex";
