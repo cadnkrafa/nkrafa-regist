@@ -129,13 +129,11 @@
   </style>
 </head>
 <body>
+  <div id="overlay">
+    <div class="overlay-box" id="overlay-message">⏳ กำลังโหลดข้อมูล...</div>
+  </div>
   <header>
     <h1><i data-lucide="settings"></i> Admin Panel</h1>
-
-    <div id="overlay">
-      <div class="overlay-box" id="overlay-message">⏳ กำลังโหลดข้อมูล...</div>
-    </div>
-
     <div class="action-buttons">
       <button class="btn btn-reset" onclick="resetSheet('tokens')"><i data-lucide="rotate-ccw"></i> Reset Tokens</button>
       <button class="btn btn-reset" onclick="resetSheet('regist')"><i data-lucide="rotate-ccw"></i> Reset Regist</button>
