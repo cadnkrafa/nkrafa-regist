@@ -166,7 +166,7 @@ function renderTable(data) {
 
   const filtered = data.filter(row =>
     (!unitFilter || row.unit === unitFilter) &&
-    (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+    (row.name.toLowerCase().includes(search) || String(row.rtafId).toLowerCase().includes(search))
   );
 
   table.innerHTML = filtered.map(row => `
