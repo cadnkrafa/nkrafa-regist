@@ -240,6 +240,7 @@ async function loadPersonnelData() {
 }
   
 function renderPersonnelTable(data) {
+  showOverlay("loading");
   const tbody = document.getElementById('data-table-body');
   tbody.innerHTML = '';
 
