@@ -33,6 +33,26 @@
       vertical-align: middle;
       font-size: 0.95em;
     }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      display: flex; /* สำคัญมาก */
+    }
+    #overlay .overlay-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: bold;
+      font-family: 'Noto Sans Thai', sans-serif;
+      color: #000;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
     th:nth-child(1) { width: 110px; }
     th:nth-child(2) { width: 80px; }
     th:nth-child(3) { width: 160px; }
@@ -41,6 +61,9 @@
   </style>
 </head>
 <body>
+  <div id="overlay" data-mode="" style="display: none;">
+    <div class="overlay-box">⏳ กำลังโหลดข้อมูล...</div>
+  </div>
   <button onclick="resetRoles()" class="btn btn-reset"><i data-lucide="rotate-ccw"></i> รีเซ็ตสิทธิ์ Admin</button>
   <button onclick="logout()" class="btn btn-logout"><i data-lucide="log-out"></i> Logout</button>
 
@@ -108,7 +131,22 @@ async function loadUnitList() {
   unitList = list.map(row => row[1]);
 }
 
+function showOverlay(mode = "loading") {
+  const overlay = document.getElementById("overlay");
+  const box = overlay.querySelector(".overlay-box");
+  overlay.setAttribute("data-mode", mode);
+  box.innerText = mode === "saving" ? "💾 กำลังบันทึกข้อมูล..." : "⏳ กำลังโหลดข้อมูล...";
+  overlay.style.display = "flex";
+}
+
+function hideOverlay() {
+  const overlay = document.getElementById("overlay");
+  overlay.style.display = "none";
+  overlay.setAttribute("data-mode", "");
+}
+
 async function loadAdminList() {
+  showOverlay("loading");
   const res = await fetch(`${SCRIPT_URL}?getAdminList=1`);
   const list = await res.json();
   currentData = list;
@@ -173,6 +211,7 @@ function renderTable(data) {
       rows.forEach(row => table.appendChild(row));
     };
   });
+  hideOverlay();
 }
 
 function updateRole(rtafId, field, value) {
