@@ -256,46 +256,57 @@ function addNewRow() {
 }
 
 function submitNewRow() {
+  const newId = document.getElementById('new-rtafId').value.trim();
+  if (!/^\d{10}$/.test(newId)) {
+    alert('⚠️ RTAF ID ต้องเป็นตัวเลข 10 หลัก');
+    return;
+  }
+
   const newData = {
-    rtafId: document.getElementById('new-rtafId').value.trim(),
+    action: 'addPersonnel',
+    rtafId: newId,
     rank: document.getElementById('new-rank').value.trim(),
     name: document.getElementById('new-name').value.trim(),
     position: document.getElementById('new-position').value.trim(),
     unit: document.getElementById('new-unit').value.trim()
   };
 
-  if (!newData.rtafId || !newData.rank || !newData.name || !newData.position || !newData.unit) {
+  if (!newData.rank || !newData.name || !newData.position || !newData.unit) {
     alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
     return;
   }
 
-  const query = new URLSearchParams({
-    addPersonnel: '1',
-    rtafId: newData.rtafId,
-    rank: newData.rank,
-    name: newData.name,
-    position: newData.position,
-    unit: newData.unit
-  });
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
 
-  const url = `${SCRIPT_URL}?${query.toString()}&callback=handleAddResponse`;
-  const script = document.createElement('script');
-  script.src = url;
-  document.body.appendChild(script);
-}
-
-function handleAddResponse(response) {
-  if (response === 'success') {
-    alert('✅ เพิ่มข้อมูลเรียบร้อยแล้ว');
-    loadPersonnelData();
-  } else if (response === 'duplicate') {
-    alert('⚠️ มีเลขประจำตัวนี้ในระบบแล้ว');
-  } else {
-    alert('❌ ไม่สามารถเพิ่มข้อมูลได้');
-  }
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(newData),
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then(res => res.text())
+    .then(txt => {
+      overlay.style.display = 'none';
+      if (txt.includes("success")) {
+        alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว");
+        loadPersonnelData();
+      } else if (txt.includes("duplicate")) {
+        alert("⚠️ มีเลขประจำตัวนี้ในระบบแล้ว");
+      } else {
+        alert("❌ ไม่สามารถเพิ่มข้อมูลได้");
+      }
+    })
+    .catch(err => {
+      overlay.style.display = 'none';
+      console.error("❌ Add error:", err);
+      alert("❌ เกิดข้อผิดพลาด");
+    });
 }
 
 function renderPersonnelTable(data) {
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex'; // 🔒 ล็อคหน้าจอระหว่างโหลด
+
   const tbody = document.getElementById('data-table-body');
   tbody.innerHTML = '';
 
@@ -346,6 +357,7 @@ function renderPersonnelTable(data) {
   if (master) master.checked = allChecked;
 
   lucide.createIcons();
+  overlay.style.display = 'none'; // 🔓 ปลดล็อกเมื่อโหลดเสร็จ
 }
 
 function updateCheckbox(rtafId, field, value) {
