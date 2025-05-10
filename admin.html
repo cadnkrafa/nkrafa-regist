@@ -255,52 +255,48 @@ function addNewRow() {
   lucide.createIcons();
 }
 
-function submitNewRow() {
-  const newId = document.getElementById('new-rtafId').value.trim();
-  if (!/^\d{10}$/.test(newId)) {
-    alert('⚠️ RTAF ID ต้องเป็นตัวเลข 10 หลัก');
-    return;
-  }
+async function submitNewRow() {
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
+
+  await new Promise(resolve => requestAnimationFrame(resolve)); // 🔧 ให้ DOM วาด overlay ก่อน
 
   const newData = {
     action: 'addPersonnel',
-    rtafId: newId,
+    rtafId: document.getElementById('new-rtafId').value.trim(),
     rank: document.getElementById('new-rank').value.trim(),
     name: document.getElementById('new-name').value.trim(),
     position: document.getElementById('new-position').value.trim(),
     unit: document.getElementById('new-unit').value.trim()
   };
 
-  if (!newData.rank || !newData.name || !newData.position || !newData.unit) {
-    alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
+  if (!/^\d{10}$/.test(newData.rtafId)) {
+    alert('⚠️ RTAF ID ต้องเป็นตัวเลข 10 หลัก');
+    overlay.style.display = 'none';
     return;
   }
 
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = 'flex';
-
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(newData),
-    headers: { 'Content-Type': 'application/json' }
-  })
-    .then(res => res.text())
-    .then(txt => {
-      overlay.style.display = 'none';
-      if (txt.includes("success")) {
-        alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว");
-        loadPersonnelData();
-      } else if (txt.includes("duplicate")) {
-        alert("⚠️ มีเลขประจำตัวนี้ในระบบแล้ว");
-      } else {
-        alert("❌ ไม่สามารถเพิ่มข้อมูลได้");
-      }
-    })
-    .catch(err => {
-      overlay.style.display = 'none';
-      console.error("❌ Add error:", err);
-      alert("❌ เกิดข้อผิดพลาด");
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(newData),
+      headers: { 'Content-Type': 'application/json' }
     });
+    const txt = await res.text();
+    if (txt.includes("success")) {
+      alert("✅ เพิ่มข้อมูลเรียบร้อยแล้ว");
+      await loadPersonnelData();
+    } else if (txt.includes("duplicate")) {
+      alert("⚠️ มีเลขประจำตัวนี้ในระบบแล้ว");
+    } else {
+      alert("❌ ไม่สามารถเพิ่มข้อมูลได้");
+    }
+  } catch (err) {
+    console.error("❌ Add error:", err);
+    alert("❌ เกิดข้อผิดพลาด");
+  } finally {
+    overlay.style.display = 'none';
+  }
 }
 
 function renderPersonnelTable(data) {
