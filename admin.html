@@ -452,7 +452,7 @@ document.getElementById('searchInput').addEventListener('input', () => {
   setTimeout(() => {
     renderPersonnelTable(personnelData);
     hideOverlay();
-  }, 100); // หน่วงเล็กน้อยให้ overlay มีเวลาแสดง
+  }, 10); // หน่วงเล็กน้อยให้ overlay มีเวลาแสดง
 });
 document.getElementById('unitFilter').addEventListener('change', () => {
   showOverlay("loading");
