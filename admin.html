@@ -308,7 +308,7 @@ function submitNewRow() {
 
 function renderPersonnelTable(data) {
   const overlay = document.getElementById('overlay');
-  overlay.style.display = 'flex'; // 🔒 ล็อคหน้าจอระหว่างโหลด
+  overlay.style.display = 'flex'; // ✅ บล็อกหน้าจอก่อนเริ่ม
 
   const tbody = document.getElementById('data-table-body');
   tbody.innerHTML = '';
@@ -360,7 +360,8 @@ function renderPersonnelTable(data) {
   if (master) master.checked = allChecked;
 
   lucide.createIcons();
-  overlay.style.display = 'none'; // 🔓 ปลดล็อกเมื่อโหลดเสร็จ
+
+  overlay.style.display = 'none'; // ✅ ปลดบล็อกเมื่อเรนเดอร์เสร็จ
 }
 
 function updateCheckbox(rtafId, field, value) {
