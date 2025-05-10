@@ -165,6 +165,7 @@ function renderTable(data) {
   unitFilter.value = selectedUnit;
 
   const filterAndRender = () => {
+    showOverlay("loading");
     const search = document.getElementById('searchInput').value.toLowerCase();
     const unit = unitFilter.value;
     const filtered = data.filter(row =>
